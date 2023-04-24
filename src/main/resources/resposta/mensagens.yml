@@ -1,0 +1,137 @@
+# [PLACEHOLDERS]
+#   A placeholder é uma seção dentro de uma mensagem a ser reemprazada por
+#   informação sobre o ocorrido. A mensagem pode ter varias delas.
+#   A convenção na WorldPlugins é que cada placeholder inicia com uma '@'.
+#   Exemplo: 'O jogador @jogador (...)'
+#
+# [TIPOS]
+#   As mensagens podem ser catalogadas em 2 grupos:
+#   - Diretas: Mensagens enviadas diretamente pro jogador em questão.
+#   - Globais: Mensagens enviadas globalmente, pro servidor inteiro.
+#
+#   ~ DIRETAS ~
+#
+#   [Uma linha] - Mensagem no chat de uma linha pro jogador
+#     Chave: 'Mensagem'
+#
+#   [Varias linhas] - Mensagem no chat de varias linhas pro jogador
+#     Chave:
+#       - 'A'
+#       - 'Mensagem'
+#
+#   [Actionbar] - Actionbar pro jogador
+#     Chave:
+#       Actionbar: 'Mensagem'
+#
+#   [Title] - Title pro jogador
+#     Chave:
+#       Titulo: 'O titulo'
+#       Subtitulo: 'O subtitulo'
+#
+#   ~ GLOBAIS ~
+#
+#   [Broadcast] - Broadcast no server
+#     Chave:
+#       Broadcast:
+#           - 'A'
+#           - 'Mensagem'
+#
+#   [Server ActionBar] - Actionbar para todos os jogadores online
+#     Chave:
+#        Server-actionbar: 'Mensagem'
+#
+#   [Server Title] - Title para todos os jogadores online
+#     Chave:
+#       Server-title:
+#         Titulo: 'O titulo'
+#         Subtitulo: 'O subtitulo'
+#
+#   [Json] - Uma mensagem em JSON pro jogador
+#     Chave:
+#       Json:
+#         Mensagem: 'Essa mensagem contem um @Json(var)!'
+#         Variaveis:
+#           var:
+#             Display: 'JSON' * Obrigatorio
+#             Hover: 'Olá, sou um JSON' * Pode ser nulo/não existir
+#             Click: # opções (coloque apenas 1) * Pode ser nulo/não existir
+#               Executar-comando: '/comando'
+#               Sugerir-comando: '/comando'
+#               Abrir-url: 'https://worldplugins.com'
+#
+#
+#   Caso quiser enviar varios tipos de mensagens por chave, pode utilizar o tipo
+#   @Lista para enviar um grupo de mensagens. Cada chave dentro da seção @Lista
+#   representa um tipo de mensagem.
+#   OBS: Uma seção @Lista não executa outros tipos @Lista dentro dela. Caso existir,
+#   irão ser ignorados.
+#
+#   [Lista de mensagens] - Uma grupo de mensagens de qualquer tipo
+#     Chave:
+#       @Lista:
+#         Mensagem-1: 'Mensagem de uma linha'
+#         Mensagem-2:
+#           - 'Mensagem...'
+#           - '... de varias linhas!'
+#         Mensagem-3:
+#           Server-actionbar: 'Actionbar global, dentro de uma lista'
+#
+#
+# * As mensagens são recarregadas por completo no reload.
+# * Pode mudar os tipos a vontade.
+# * O valor da placeholder não é afetado pelo tipo de mensagem. Pode utilizar qual você quiser.
+Ajuda:
+  - ''
+  - '          &6&lVIP'
+  - '    &fLista de comandos'
+  - ''
+  - '&6/vip &7- &fMostrar o plugin'
+  - '&6/vip ajuda &7- &fMostrar a lista de comandos'
+  - ''
+Ajuda-staff:
+  - ''
+  - '           &6&lVIP'
+  - '  &fLista de comandos &c&oSTAFF'
+  - ''
+  - '&6/vip &7- &fMostrar o plugin'
+  - '&6/vip reload &7- &fRecarregar configurações'
+  - '&6/vip ajuda &7- &fMostrar a lista de comandos'
+  - ''
+
+Vip-inexistente: "&cO vip '@nome' não existe. Utilize: @vips"
+Tipo-vip-inexistente: "&cO tipo '@nome' não existe. Utilize: @tipos"
+Key-duracao-invalida:
+  - "&cO formato da duração '@valor' não é válido."
+  - "Utilize o formato 's', 'm', 'h' ou 'd' no final do valor para indiciar a unidade de tempo certa."
+Key-usos-invalidos: "&cO formato de usos '@valor' não é válido. Utilize valores numéricos"
+Key-gerada:
+  Json:
+    Mensagem:
+      - "&6Uma key &f'@key' &6com &e@usos &fusos foi gerada com sucesso!"
+      - '&6Clique @Json(var)&f para preparar a ativação!'
+    Variaveis:
+      var:
+        Display: '&f&nAQUI'
+        Hover: '&e[Preparar ativação]'
+        Click:
+          Sugerir-comando: '/ativarkey @key'
+
+Remover-key-inexistente: "&cA key '@key' não existe."
+Key-removida: '&aKey removida com sucesso.'
+
+Jogador-sem-keys: '&cO jogador @jogador não possui nenhuma key.'
+Ver-keys-vazio: '&cVocê não possui nenhuma key.'
+Jogador-keys:
+  - '&6Lista de keys do jogador &n@jogador&6:'
+  - '@@keys'
+Lista-keys:
+  - '&6Lista de keys que você possui:'
+  - '@@keys'
+
+Key-inexistente: "&cA key '@key' não existe."
+Vip-ativado:
+  _@Lista:
+    m1:
+      Broadcast:
+        - ''
+Vip-salvo: '&'

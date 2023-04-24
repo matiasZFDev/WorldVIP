@@ -1,0 +1,25 @@
+vip1:
+  Id: 0
+  Nome: 'vip1'
+  Display: '&e[VIP]'
+  Grupo: 'vip1'
+vip2:
+  Id: 1
+  Nome: 'vip2'
+  Display: '&6[VIP&f+&6]'
+  Grupo: 'vip2'
+vip3:
+  Id: 2
+  Nome: 'vip3'
+  Display: '&a[MVP]'
+  Grupo: 'vip3'
+vip4:
+  Id: 3
+  Nome: 'vip4'
+  Display: '&b[MVP&6+&b]'
+  Grupo: 'vip4'
+vip5:
+  Id: 4
+  Nome: 'vip5'
+  Display: '&b[MVP&6++&b]'
+  Grupo: 'vip5'

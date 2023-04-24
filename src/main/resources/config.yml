@@ -1,0 +1,23 @@
+Database:
+  # [MySQL]
+  # Tipo: MySQL
+  # Url:       <Url do banco de dados>
+  # Database:  <Nome do banco de dados>
+  # Usuario:   <Nome de usuario>
+  # Senha:     <Senha do usuario>
+  #
+  # [MySQL + Connection pool (HikariCP)]
+  # Tipo: MySQL-pooling
+  # Url:       <Url do banco de dados>
+  # Database:  <Nome do banco de dados>
+  # Usuario:   <Nome de usuario>
+  # Senha:     <Senha do usuario>
+  #
+  # [SQLite]
+  # Tipo: SQLite
+  # Path:      <Path do arquivo. Ex.: database.sql>
+  Tipo: SQLite
+  Path: database.sql
+
+# Formato utilizado na mensagem do comando /verkeys
+Formato-key: ' &7- &e@key &7: @vip&f @tipo &7@duracao &f&n@usos&r'

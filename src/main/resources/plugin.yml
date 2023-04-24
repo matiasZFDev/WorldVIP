@@ -1,0 +1,14 @@
+name: WorldVIP
+main: com.worldplugins.vip.WorldVIP
+version: 1.0
+authors: [PostDev]
+api-version: 1.8
+commands:
+  gerarkey:
+    description: Gera um key aleatoria
+  removerkey:
+    description: Remover uma key (invalidar)
+  verkeys:
+    description: Mostrar a lista de keys
+  usarkey:
+    description: Usar uma key. Ativa um vip
