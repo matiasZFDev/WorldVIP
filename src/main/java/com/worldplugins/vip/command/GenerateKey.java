@@ -49,7 +49,7 @@ public class GenerateKey implements CommandModule {
             @ArgsChecker(size = 2, check = ArgsCheck.GREATER_SIZE),
             @ArgsChecker(size = 5, check = ArgsCheck.LOWER_SIZE)
         },
-        usage = "&cArgumentos invalidos. Digite /gerarkey <vip> <tipo> <tempo> [usos]"
+        usage = "&cArgumentos invalidos. Digite /gerarkey <vip> <tipo> [tempo] [usos]"
     )
     @Override
     public void execute(@NonNull CommandSender sender, @NonNull String[] args) {
@@ -74,25 +74,37 @@ public class GenerateKey implements CommandModule {
             return;
         }
 
-        final Integer duration = TimeParser.parseTime(args[2]);
+        final String durationFormat;
+        final Integer duration;
+        final int argsLength;
 
-        if (duration == null) {
-            sender.respond("Key-duracao-invalida", message -> message.replace(
-                "@valor".to(args[3])
-            ));
-            return;
+        if (vipType != VipType.PERMANENT) {
+            durationFormat = args[2];
+            duration = TimeParser.parseTime(durationFormat);
+            argsLength = 2;
+
+            if (duration == null) {
+                sender.respond("Key-duracao-invalida", message -> message.replace(
+                    "@valor".to(durationFormat)
+                ));
+                return;
+            }
+        } else {
+            durationFormat = "∞";
+            duration = -1;
+            argsLength = 3;
         }
 
         final short usages;
 
-        if (args.length == 3) {
+        if (args.length == argsLength) {
             usages = 1;
         } else {
-            final Short usageCheck = args[3].toShortOrNull();
+            final Short usageCheck = args[argsLength].toShortOrNull();
 
             if (usageCheck == null) {
                 sender.respond("Key-usos-invalidos", message -> message.replace(
-                    "@valor".to(args[3])
+                    "@valor".to(args[argsLength])
                 ));
                 return;
             }
@@ -122,7 +134,10 @@ public class GenerateKey implements CommandModule {
                 keyStorageHandler.store(validKey);
                 sender.respond("Key-gerada", message -> message.replace(
                     "@key".to(keyCode.get()),
-                    "@usos".to(String.valueOf(usages))
+                    "@vip".to(configVip.getDisplay()),
+                    "@usos".to(String.valueOf(usages)),
+                    "@tipo".to(vipType.getName().toUpperCase()),
+                    "@tempo".to(durationFormat)
                 ));
             }).run();
         });

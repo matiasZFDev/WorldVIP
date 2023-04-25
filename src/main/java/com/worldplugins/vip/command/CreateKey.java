@@ -46,7 +46,7 @@ public class CreateKey implements CommandModule {
             @ArgsChecker(size = 3, check = ArgsCheck.GREATER_SIZE),
             @ArgsChecker(size = 6, check = ArgsCheck.LOWER_SIZE)
         },
-        usage = "&cArgumentos invalidos. Digite /criarkey <codigo> <vip> <tipo> <tempo> [usos]"
+        usage = "&cArgumentos invalidos. Digite /criarkey <codigo> <vip> <tipo> [tempo] [usos]"
     )
     @Override
     public void execute(@NonNull CommandSender sender, @NonNull String[] args) {
@@ -87,18 +87,18 @@ public class CreateKey implements CommandModule {
         if (vipType != VipType.PERMANENT) {
             durationFormat = args[3];
             duration = TimeParser.parseTime(durationFormat);
-            argsLength = 4;
+            argsLength = 3;
 
             if (duration == null) {
                 sender.respond("Key-duracao-invalida", message -> message.replace(
-                    "@valor".to(args[4])
+                    "@valor".to(durationFormat)
                 ));
                 return;
             }
         } else {
             durationFormat = "∞";
             duration = -1;
-            argsLength = 3;
+            argsLength = 4;
         }
 
         final short usages;
