@@ -131,7 +131,7 @@ Key-criada:
           Sugerir-comando: '/usarkey @key'
 
 Remover-key-inexistente: "&cA key '@key' não existe."
-Key-removida: '&aKey removida com sucesso.'
+Key-removida: "&aKey &f'@key' &aremovida com sucesso."
 
 Jogador-sem-keys: '&cO jogador @jogador não possui nenhuma key.'
 Ver-keys-vazio: '&cVocê não possui nenhuma key.'

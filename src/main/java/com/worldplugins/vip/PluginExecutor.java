@@ -21,7 +21,7 @@ import com.worldplugins.lib.manager.view.ViewManagerImpl;
 import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.init.DatabaseInitializer;
 import com.worldplugins.vip.key.ConfigKeyGenerator;
-import com.worldplugins.vip.key.KeyStorageHandler;
+import com.worldplugins.vip.key.KeyStorageManager;
 import com.worldplugins.vip.key.VipKeyGenerator;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -87,7 +87,7 @@ public class PluginExecutor {
 
     private void registerCommands() {
         final CommandRegistry registry = new CommandRegistry(plugin);
-        final KeyStorageHandler keyStorageHandler = new KeyStorageHandler(
+        final KeyStorageManager keyStorageManager = new KeyStorageManager(
             databaseAccessor.getPlayerService(), databaseAccessor.getValidKeyRepository(), scheduler
         );
         final VipKeyGenerator keyGenerator = new ConfigKeyGenerator(config(MainConfig.class));
@@ -96,12 +96,13 @@ public class PluginExecutor {
             new Help(),
             new GenerateKey(
                 config(VipConfig.class), databaseAccessor.getValidKeyRepository(), keyGenerator,
-                scheduler, keyStorageHandler
+                scheduler, keyStorageManager
             ),
             new CreateKey(
                 config(VipConfig.class), databaseAccessor.getValidKeyRepository(), scheduler,
-                keyStorageHandler
-            )
+                keyStorageManager
+            ),
+            new RemoveKey(keyStorageManager, scheduler)
         );
         registry.registerAll();
     }
