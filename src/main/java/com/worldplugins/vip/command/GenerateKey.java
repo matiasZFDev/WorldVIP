@@ -26,7 +26,6 @@ import org.bukkit.entity.Player;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 @ExtensionMethod({
     ResponseExtensions.class,
@@ -113,27 +112,32 @@ public class GenerateKey implements CommandModule {
         }
 
         final UUID generatorId = sender instanceof Player ? ((Player) sender).getUniqueId() : null;
-        final AtomicReference<String> keyCode = new AtomicReference<>(keyGenerator.generate());
+        final String keyCode = keyGenerator.generate();
 
-        if (keyCode.get().length() > GlobalValues.MAX_KEY_LENGTH) {
+        if (keyCode.length() > GlobalValues.MAX_KEY_LENGTH) {
             sender.respond("Key-tamanho-maximo", message -> message.replace(
                 "@maximo".to(String.valueOf(GlobalValues.MAX_KEY_LENGTH))
             ));
             return;
         }
 
-        validKeyRepository.getKeyByCode(keyCode.get()).thenAccept(key -> {
-            while (key != null && keyCode.get().equals(key.getCode())) {
-                keyCode.set(keyGenerator.generate());
+        validKeyRepository.getKeyByCode(keyCode).thenAccept(key -> {
+            if (key != null) {
+                scheduler.newTask(() ->
+                    sender.respond("Key-gerada-duplicada", message -> message.replace(
+                        "@key".to(keyCode)
+                    ))
+                ).run();
+                return;
             }
 
             scheduler.newTask(() -> {
                 final ValidVipKey validKey = new ValidVipKey(
-                    generatorId, keyCode.get(), configVip.getId(), vipType, duration, usages
+                    generatorId, keyCode, configVip.getId(), vipType, duration, usages
                 );
                 keyStorageHandler.store(validKey);
                 sender.respond("Key-gerada", message -> message.replace(
-                    "@key".to(keyCode.get()),
+                    "@key".to(keyCode),
                     "@vip".to(configVip.getDisplay()),
                     "@usos".to(String.valueOf(usages)),
                     "@tipo".to(vipType.getName().toUpperCase()),

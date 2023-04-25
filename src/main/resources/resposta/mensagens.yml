@@ -105,6 +105,7 @@ Key-duracao-invalida:
   - "Utilize o formato 's', 'm', 'h' ou 'd' no final do valor para indiciar a unidade de tempo certa."
 Key-usos-invalidos: "&cO formato de usos '@valor' não é válido. Utilize valores numéricos"
 Key-tamanho-maximo: '&cA key não pode ultrapassar o @maximo de largura.'
+Key-gerada-duplicada: '&cHouve uma duplicação no momento da geração. Tente novamente.'
 Key-duplicada: '&cA key @key ja existe.'
 Key-gerada:
   Json:
