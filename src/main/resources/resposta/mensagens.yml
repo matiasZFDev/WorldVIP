@@ -104,6 +104,7 @@ Key-duracao-invalida:
   - "&cO formato da duração '@valor' não é válido."
   - "Utilize o formato 's', 'm', 'h' ou 'd' no final do valor para indiciar a unidade de tempo certa."
 Key-usos-invalidos: "&cO formato de usos '@valor' não é válido. Utilize valores numéricos"
+Key-tamanho-maximo: '&cA key não pode ultrapassar o @maximo de largura.'
 Key-gerada:
   Json:
     Mensagem:

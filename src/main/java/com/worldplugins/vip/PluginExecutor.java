@@ -7,6 +7,9 @@ import com.worldplugins.lib.config.cache.impl.SoundsConfig;
 import com.worldplugins.lib.registry.CommandRegistry;
 import com.worldplugins.lib.registry.ViewRegistry;
 import com.worldplugins.vip.command.*;
+import com.worldplugins.vip.config.MainConfig;
+import com.worldplugins.vip.config.VipConfig;
+import com.worldplugins.vip.database.DatabaseAccessor;
 import com.worldplugins.vip.init.ConfigCacheInitializer;
 import com.worldplugins.lib.manager.config.ConfigCacheManager;
 import com.worldplugins.lib.manager.config.ConfigManager;
@@ -16,6 +19,10 @@ import com.worldplugins.lib.manager.view.MenuContainerManagerImpl;
 import com.worldplugins.lib.manager.view.ViewManager;
 import com.worldplugins.lib.manager.view.ViewManagerImpl;
 import com.worldplugins.lib.util.SchedulerBuilder;
+import com.worldplugins.vip.init.DatabaseInitializer;
+import com.worldplugins.vip.key.ConfigKeyGenerator;
+import com.worldplugins.vip.key.KeyStorageHandler;
+import com.worldplugins.vip.key.VipKeyGenerator;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Listener;
@@ -31,6 +38,8 @@ public class PluginExecutor {
     private final @NonNull MenuContainerManager menuContainerManager;
     private final @NonNull ViewManager viewManager;
 
+    private final @NonNull DatabaseAccessor databaseAccessor;
+
     public PluginExecutor(@NonNull JavaPlugin plugin) {
         this.plugin = plugin;
         scheduler = new SchedulerBuilder(plugin);
@@ -38,6 +47,8 @@ public class PluginExecutor {
         configCacheManager = new ConfigCacheInitializer(configManager).init();
         menuContainerManager = new MenuContainerManagerImpl();
         viewManager = new ViewManagerImpl();
+
+        databaseAccessor = new DatabaseInitializer(configManager, plugin, scheduler).init();
     }
 
     /**
@@ -76,8 +87,17 @@ public class PluginExecutor {
 
     private void registerCommands() {
         final CommandRegistry registry = new CommandRegistry(plugin);
+        final KeyStorageHandler keyStorageHandler = new KeyStorageHandler(
+            databaseAccessor.getPlayerService(), databaseAccessor.getValidKeyRepository(), scheduler
+        );
+        final VipKeyGenerator keyGenerator = new ConfigKeyGenerator(config(MainConfig.class));
+
         registry.command(
-            new Help()
+            new Help(),
+            new GenerateKey(
+                config(VipConfig.class), databaseAccessor.getValidKeyRepository(), keyGenerator,
+                scheduler, keyStorageHandler
+            )
         );
         registry.registerAll();
     }

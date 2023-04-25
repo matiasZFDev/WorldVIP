@@ -19,5 +19,9 @@ Database:
   Tipo: SQLite
   Path: database.sql
 
+Geracao-key:
+  Numeros: true
+  Letras-minusculas: true
+  Letras-maiusculas: true
 # Formato utilizado na mensagem do comando /verkeys
 Formato-key: ' &7- &e@key &7: @vip&f @tipo &7@duracao &f&n@usos&r'
