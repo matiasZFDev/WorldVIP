@@ -97,6 +97,10 @@ public class PluginExecutor {
             new GenerateKey(
                 config(VipConfig.class), databaseAccessor.getValidKeyRepository(), keyGenerator,
                 scheduler, keyStorageHandler
+            ),
+            new CreateKey(
+                config(VipConfig.class), databaseAccessor.getValidKeyRepository(), scheduler,
+                keyStorageHandler
             )
         );
         registry.registerAll();

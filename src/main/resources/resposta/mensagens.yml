@@ -105,17 +105,29 @@ Key-duracao-invalida:
   - "Utilize o formato 's', 'm', 'h' ou 'd' no final do valor para indiciar a unidade de tempo certa."
 Key-usos-invalidos: "&cO formato de usos '@valor' não é válido. Utilize valores numéricos"
 Key-tamanho-maximo: '&cA key não pode ultrapassar o @maximo de largura.'
+Key-duplicada: '&cA key @key ja existe.'
 Key-gerada:
   Json:
     Mensagem:
-      - "&6Uma key &f'@key' &6com &e@usos &fusos foi gerada com sucesso!"
+      - "&6Key &f'@key' &6: @vip &e&n@tipo&f @tempo &7(@usos usos) &6foi gerada com sucesso!"
       - '&6Clique @Json(var)&f para preparar a ativação!'
     Variaveis:
       var:
         Display: '&f&nAQUI'
         Hover: '&e[Preparar ativação]'
         Click:
-          Sugerir-comando: '/ativarkey @key'
+          Sugerir-comando: '/usarkey @key'
+Key-criada:
+  Json:
+    Mensagem:
+      - "&6Key &f'@key' &6: @vip &e&n@tipo&f @tempo &7(@usos usos) &6foi criada com sucesso!"
+      - '&6Clique @Json(var)&f para preparar a ativação!'
+    Variaveis:
+      var:
+        Display: '&f&nAQUI'
+        Hover: '&e[Preparar ativação]'
+        Click:
+          Sugerir-comando: '/usarkey @key'
 
 Remover-key-inexistente: "&cA key '@key' não existe."
 Key-removida: '&aKey removida com sucesso.'

@@ -8,6 +8,8 @@ import com.worldplugins.lib.manager.config.ConfigCacheManager;
 import com.worldplugins.lib.manager.config.ConfigCacheManagerImpl;
 import com.worldplugins.lib.manager.config.ConfigManager;
 import com.worldplugins.lib.registry.ConfigCacheRegistry;
+import com.worldplugins.vip.config.MainConfig;
+import com.worldplugins.vip.config.VipConfig;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +24,9 @@ public class ConfigCacheInitializer implements Initializer<ConfigCacheManager> {
         registry.register(
             MessagesConfig.class,
             SoundsConfig.class,
-            EffectsConfig.class
+            EffectsConfig.class,
+            MainConfig.class,
+            VipConfig.class
         );
         cacheManager.update();
         return cacheManager;
