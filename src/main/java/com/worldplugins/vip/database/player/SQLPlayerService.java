@@ -7,7 +7,6 @@ import com.worldplugins.vip.database.items.VipItemsRepository;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.player.model.*;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 
 import java.util.*;
@@ -19,13 +18,6 @@ import java.util.concurrent.Executor;
 })
 
 public class SQLPlayerService implements PlayerService {
-    @RequiredArgsConstructor
-
-    private static final class VipUser {
-        private final @NonNull UUID playerId;
-        private final @NonNull VIP activeVip;
-    }
-
     private final @NonNull Executor executor;
     private final @NonNull SQLExecutor sqlExecutor;
     private final @NonNull Cache<UUID, VipPlayer> players;
@@ -76,31 +68,31 @@ public class SQLPlayerService implements PlayerService {
             return CompletableFuture.completedFuture(players.get(playerId));
         }
 
-        return getVipUser(playerId).thenCompose(vipUser ->
+        return getActiveVip(playerId).thenCompose(activeVip ->
             getOwningVips(playerId).thenCompose(owningVips ->
                 validKeyRepository.getKeys(playerId).thenApply(PlayerKeys::new).thenCompose(playerKeys ->
                     vipItemsRepository.getItems(playerId).thenApply(PlayerItems::new).thenApply(playerItems ->
-                        new VipPlayer(
-                            vipUser.playerId, vipUser.activeVip, owningVips, playerKeys,playerItems
-                        )
+                        activeVip == null &&
+                        owningVips.getVips().isEmpty() &&
+                        playerKeys.all().isEmpty() &&
+                        playerItems.all().isEmpty()
+                            ? null
+                            : new VipPlayer(playerId, activeVip, owningVips, playerKeys, playerItems)
                     )
                 )
             )
         ).whenComplete((vipPlayer, t) -> players.set(playerId, vipPlayer));
     }
 
-    private @NonNull CompletableFuture<VipUser> getVipUser(@NonNull UUID playerId) {
+    private @NonNull CompletableFuture<VIP> getActiveVip(@NonNull UUID playerId) {
         return CompletableFuture.supplyAsync(() -> sqlExecutor.executeQuery(
-            "SELECT * FROM " + PLAYER_TABLE + " WHERE player_id=?",
+            "SELECT vip_id, vip_type, vip_duration FROM " + PLAYER_TABLE + " WHERE player_id=?",
             statement -> statement.set(1, playerId.getBytes()),
             result -> result.next()
-                ? new VipUser(
-                    ((byte[]) result.get("player_id")).toUUID(),
-                    new VIP(
-                        result.get("vip_id"),
-                        VipType.fromId(result.get("vip_type")),
-                        result.get("vip_duration")
-                    )
+                ? new VIP(
+                    result.get("vip_id"),
+                    VipType.fromId(result.get("vip_type")),
+                    result.get("vip_duration")
                 )
                 : null
         ), executor);
