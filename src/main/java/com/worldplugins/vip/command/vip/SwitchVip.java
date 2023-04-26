@@ -64,6 +64,8 @@ public class SwitchVip implements CommandModule {
                 player.respond("Trocar-vip-delay");
                 return;
             }
+
+            onDelay.remove(player.getUniqueId());
         }
 
         final VipData.VIP configVip = vipConfig.data().getByName(args[0]);
