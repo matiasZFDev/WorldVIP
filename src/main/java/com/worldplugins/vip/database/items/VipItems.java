@@ -1,13 +1,10 @@
 package com.worldplugins.vip.database.items;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Getter
 public class VipItems {
     private final @NonNull UUID playerId;

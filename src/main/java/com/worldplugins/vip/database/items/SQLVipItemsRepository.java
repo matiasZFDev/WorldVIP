@@ -59,7 +59,7 @@ public class SQLVipItemsRepository implements VipItemsRepository {
     }
 
     @Override
-    public void addItems(@NonNull UUID playerId, @NonNull VipItems items) {
+    public void addItems(@NonNull VipItems items) {
         CompletableFuture.runAsync(() -> sqlExecutor.update(
             "INSERT INTO " + ITEMS_TABLE + "(player_id, vip_id, amount) VALUES(?,?,?)",
             statement -> {

@@ -11,6 +11,7 @@ import com.worldplugins.vip.config.MainConfig;
 import com.worldplugins.vip.config.VipConfig;
 import com.worldplugins.vip.config.VipItemsConfig;
 import com.worldplugins.vip.database.DatabaseAccessor;
+import com.worldplugins.vip.handler.VipActivationHandler;
 import com.worldplugins.vip.init.ConfigCacheInitializer;
 import com.worldplugins.lib.manager.config.ConfigCacheManager;
 import com.worldplugins.lib.manager.config.ConfigManager;
@@ -21,9 +22,11 @@ import com.worldplugins.lib.manager.view.ViewManager;
 import com.worldplugins.lib.manager.view.ViewManagerImpl;
 import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.init.DatabaseInitializer;
+import com.worldplugins.vip.init.PermissionManagerInitializer;
 import com.worldplugins.vip.key.ConfigKeyGenerator;
 import com.worldplugins.vip.key.KeyStorageManager;
 import com.worldplugins.vip.key.VipKeyGenerator;
+import com.worldplugins.vip.manager.PermissionManager;
 import com.worldplugins.vip.view.VipItemsEditView;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +44,8 @@ public class PluginExecutor {
     private final @NonNull ViewManager viewManager;
 
     private final @NonNull DatabaseAccessor databaseAccessor;
+    private final @NonNull PermissionManager permissionManager;
+    private final @NonNull VipActivationHandler activationHandler;
 
     public PluginExecutor(@NonNull JavaPlugin plugin) {
         this.plugin = plugin;
@@ -51,6 +56,12 @@ public class PluginExecutor {
         viewManager = new ViewManagerImpl();
 
         databaseAccessor = new DatabaseInitializer(configManager, plugin, scheduler).init();
+        permissionManager = new PermissionManagerInitializer().init();
+        activationHandler = new VipActivationHandler(
+            databaseAccessor.getPlayerService(), databaseAccessor.getVipItemsRepository(),
+            scheduler, permissionManager, config(VipConfig.class), config(MainConfig.class),
+            config(VipItemsConfig.class)
+        );
     }
 
     /**
@@ -109,7 +120,8 @@ public class PluginExecutor {
                 databaseAccessor.getPlayerService(), scheduler, config(VipConfig.class),
                 config(MainConfig.class)
             ),
-            new VipDurationLeft(databaseAccessor.getPlayerService(), scheduler)
+            new VipDurationLeft(databaseAccessor.getPlayerService(), scheduler),
+            new UseKey(databaseAccessor.getValidKeyRepository(), scheduler, activationHandler)
         );
         registry.registerAll();
     }

@@ -110,7 +110,7 @@ public class SQLPlayerService implements PlayerService {
                 vip,
                 new OwningVIPs(new ArrayList<>(0)),
                 new PlayerKeys(new ArrayList<>(0)),
-                new PlayerItems(new ArrayList<>(1))
+                new PlayerItems(new ArrayList<>(0))
             );
             players.set(playerId, vipPlayer);
         }

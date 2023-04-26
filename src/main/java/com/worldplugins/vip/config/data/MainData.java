@@ -31,5 +31,8 @@ public class MainData {
 
     private final @NonNull KeyGenOptions keyGen;
     private final @NonNull KeyListingOptions keyListing;
+    @Accessors(fluent = true)
     private final boolean stackVips;
+    @Accessors(fluent = true)
+    private final boolean storeItems;
 }

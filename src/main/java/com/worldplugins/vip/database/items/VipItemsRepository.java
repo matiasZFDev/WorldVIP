@@ -8,6 +8,6 @@ import java.util.concurrent.CompletableFuture;
 
 public interface VipItemsRepository {
     @NonNull CompletableFuture<Collection<VipItems>> getItems(@NonNull UUID playerId);
-    void addItems(@NonNull UUID playerId, @NonNull VipItems items);
+    void addItems(@NonNull VipItems items);
     void removeItems(@NonNull UUID playerId, byte vipId, short amount);
 }

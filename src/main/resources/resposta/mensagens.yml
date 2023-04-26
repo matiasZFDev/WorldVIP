@@ -152,4 +152,9 @@ Vip-ativado:
     m1:
       Broadcast:
         - ''
-Vip-salvo: '&'
+        - '&6  [&lVIP&6] &fO Jogador &6@jogador &fativou:'
+        - '             &fPlano: @vip&f!'
+        - ''
+        - '&f  Confira preços em: &6WorldPlugins.com'
+        - ''
+    m2: '&6VIP @vip &f@tipo de &f@tempo &6ativado com sucesso! Agradecemos a preferencia.'
