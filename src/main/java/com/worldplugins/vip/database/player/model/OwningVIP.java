@@ -1,15 +1,10 @@
 package com.worldplugins.vip.database.player.model;
 
-import lombok.Getter;
 import lombok.NonNull;
 
 public class OwningVIP extends VIP {
-    @Getter
-    private final short owningId;
-
-    public OwningVIP(byte id, @NonNull VipType type, int duration, short owningId) {
+    public OwningVIP(byte id, @NonNull VipType type, int duration) {
         super(id, type, duration);
-        this.owningId = owningId;
     }
 
     @Override
@@ -17,6 +12,6 @@ public class OwningVIP extends VIP {
         if (!(other instanceof OwningVIP))
             return false;
 
-        return owningId == ((OwningVIP) other).owningId;
+        return getId() == ((OwningVIP) other).getId() && getType() == ((OwningVIP) other).getType();
     }
 }
