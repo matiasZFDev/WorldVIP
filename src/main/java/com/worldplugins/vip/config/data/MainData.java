@@ -31,4 +31,5 @@ public class MainData {
 
     private final @NonNull KeyGenOptions keyGen;
     private final @NonNull KeyListingOptions keyListing;
+    private final boolean stackVips;
 }

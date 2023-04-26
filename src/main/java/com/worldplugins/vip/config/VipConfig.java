@@ -19,7 +19,8 @@ public class VipConfig implements InjectedConfigCache<VipData> {
             section.getByte("Id"),
             section.getString("Nome"),
             section.getString("Display"),
-            section.getString("Grupo")
+            section.getString("Grupo"),
+            section.getStringList("Comandos-ativacao")
         )));
     }
 }

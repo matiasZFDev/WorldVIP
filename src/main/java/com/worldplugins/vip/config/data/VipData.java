@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Predicate;
 
 @ExtensionMethod({
@@ -22,12 +23,13 @@ public class VipData {
         private final @NonNull String name;
         private final @NonNull String display;
         private final @NonNull String group;
+        private final @NonNull List<String> activationCommands;
     }
 
     private final @NonNull Collection<VIP> vips;
 
     public @NonNull Collection<VIP> all() {
-        return vips.immutable();
+        return vips;
     }
 
     public VIP getById(byte id) {

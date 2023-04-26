@@ -9,6 +9,7 @@ import com.worldplugins.lib.registry.ViewRegistry;
 import com.worldplugins.vip.command.*;
 import com.worldplugins.vip.config.MainConfig;
 import com.worldplugins.vip.config.VipConfig;
+import com.worldplugins.vip.config.VipItemsConfig;
 import com.worldplugins.vip.database.DatabaseAccessor;
 import com.worldplugins.vip.init.ConfigCacheInitializer;
 import com.worldplugins.lib.manager.config.ConfigCacheManager;
@@ -23,6 +24,7 @@ import com.worldplugins.vip.init.DatabaseInitializer;
 import com.worldplugins.vip.key.ConfigKeyGenerator;
 import com.worldplugins.vip.key.KeyStorageManager;
 import com.worldplugins.vip.key.VipKeyGenerator;
+import com.worldplugins.vip.view.VipItemsEditView;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Listener;
@@ -114,7 +116,9 @@ public class PluginExecutor {
 
     private void registerViews() {
         final ViewRegistry registry = new ViewRegistry(viewManager, menuContainerManager, configManager);
-        registry.register();
+        registry.register(
+            new VipItemsEditView(config(VipItemsConfig.class))
+        );
     }
 
     private void scheduleTasks() {

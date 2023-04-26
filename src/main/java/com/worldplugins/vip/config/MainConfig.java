@@ -7,6 +7,7 @@ import com.worldplugins.lib.extension.bukkit.ConfigurationExtensions;
 import com.worldplugins.vip.config.data.MainData;
 import lombok.NonNull;
 import lombok.experimental.ExtensionMethod;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 @ExtensionMethod({
@@ -29,7 +30,8 @@ public class MainConfig implements InjectedConfigCache<MainData> {
                 config.getStringList("Ver-keys.Mensagem-pessoal"),
                 config.getString("Formato-key"),
                 config.getString("Mensagem-hover").color()
-            )
+            ),
+            config.getOrDefault("Stackar-vips", ConfigurationSection::getBoolean, false)
         );
     }
 }

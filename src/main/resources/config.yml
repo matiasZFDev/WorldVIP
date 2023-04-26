@@ -19,11 +19,13 @@ Database:
   Tipo: SQLite
   Path: database.sql
 
+# Opções de geração de key do comando /gerarkey.
 Geracao-key:
   Numeros: true
   Letras-minusculas: true
   Letras-maiusculas: true
-# Opções do comando /verkeys
+
+# Opções do comando /verkeys.
 Ver-keys:
   Mensagem-jogador:
     - '&fLista de keys do jogador &6@jogador:'
@@ -34,3 +36,17 @@ Ver-keys:
     - '@@keys'
     - ''
   Formato-key: ' &7- &e@key &7: @vip&f @tipo &7@duracao &f&n@usos&r'
+
+# Stackar (true) ou não (false) os grupos dos vips quando serem ativados.
+# [OBS]
+#   * Modificação não recomendada durante o andamento do servidor, caso
+#   * a intenção seja alterar as permissões dos vips existentes.
+#   * A opção é válida apenas pros vips ativados depois da modificação.
+Stackar-vips: false
+
+# Guardar (true) ou givar (false) os itens de ativação.
+# Os itens irão ser salvos na base de dados, para logo serem colhidos
+# pelo jogador pela aba de "Itens" do menu VIP (/vip).
+# Caso não quiser guardar os itens, existe a opção pode apagar o iten
+# do menu "vip.yml" para não gerar confusões.
+Coleta-de-itens: true

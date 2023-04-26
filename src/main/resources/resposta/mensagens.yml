@@ -145,6 +145,8 @@ Tempo-vip-jogador: '&6O jogador &f@jogador &6tem &f@tempo &6de VIP!'
 Tempo-sem-vip: '&cVocê não possui um VIP ativo.'
 Tempo-vip: '&6Você tem &f@tempo &6de VIP!'
 
+Itens-vip-salvos: '&aOs itens do vip &f@vip &aforam salvos com sucesso.'
+
 Vip-ativado:
   _@Lista:
     m1:

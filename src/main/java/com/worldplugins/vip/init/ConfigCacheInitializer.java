@@ -10,6 +10,7 @@ import com.worldplugins.lib.manager.config.ConfigManager;
 import com.worldplugins.lib.registry.ConfigCacheRegistry;
 import com.worldplugins.vip.config.MainConfig;
 import com.worldplugins.vip.config.VipConfig;
+import com.worldplugins.vip.config.VipItemsConfig;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -26,7 +27,8 @@ public class ConfigCacheInitializer implements Initializer<ConfigCacheManager> {
             SoundsConfig.class,
             EffectsConfig.class,
             MainConfig.class,
-            VipConfig.class
+            VipConfig.class,
+            VipItemsConfig.class
         );
         cacheManager.update();
         return cacheManager;
