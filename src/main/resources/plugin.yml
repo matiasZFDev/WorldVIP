@@ -14,3 +14,7 @@ commands:
     description: Usar uma key. Ativa um vip
   tempovip:
     description: Mostrar o tempo vip do jogador ou de alguem mais
+  darvip:
+    description: Giva um vip para um jogador
+  setarvip:
+    description: Seta o vip de um jogador

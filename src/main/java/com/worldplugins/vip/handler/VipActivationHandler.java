@@ -41,7 +41,7 @@ public class VipActivationHandler {
     private final @NonNull ConfigCache<MainData> mainConfig;
     private final @NonNull ConfigCache<VipItemsData> vipItemsConfig;
 
-    public void activate(@NonNull Player player, @NonNull VIP vip, boolean benefits) {
+    public void activate(@NonNull Player player, @NonNull VIP vip, boolean announceAndBenefits) {
         playerService.getById(player.getUniqueId()).thenAccept(vipPlayer -> {
             if (vipPlayer == null) {
                 final VipPlayer newVipPlayer = new VipPlayer(
@@ -51,12 +51,12 @@ public class VipActivationHandler {
                     new PlayerKeys(new ArrayList<>(0)),
                     new PlayerItems(new ArrayList<>(0))
                 );
-                scheduler.newTask(() -> setVip(player, newVipPlayer, vip, benefits)).run();
+                scheduler.newTask(() -> setVip(player, newVipPlayer, vip, announceAndBenefits)).run();
                 return;
             }
 
             if (vipPlayer.getActiveVip() == null) {
-                scheduler.newTask(() -> setVip(player, vipPlayer, vip, benefits)).run();
+                scheduler.newTask(() -> setVip(player, vipPlayer, vip, announceAndBenefits)).run();
                 return;
             }
 
@@ -64,13 +64,13 @@ public class VipActivationHandler {
         });
     }
 
-    private void setVip(@NonNull Player player, VipPlayer vipPlayer, @NonNull VIP vip, boolean benefits) {
+    private void setVip(@NonNull Player player, VipPlayer vipPlayer, @NonNull VIP vip, boolean announceAndBenefits) {
         final VIP oldVip = vipPlayer.getActiveVip();
         playerService.setVip(vipPlayer.getId(), vip);
         setGroup(player, oldVip, vip);
-        announce(player, vip);
 
-        if (benefits) {
+        if (announceAndBenefits) {
+            announce(player, vip);
             giveBenefits(player, vipPlayer);
         }
     }

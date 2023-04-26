@@ -26,7 +26,8 @@ public class SQLPendingVipRepository implements PendingVipRepository {
             "CREATE TABLE IF NOT EXISTS " + PENDINGS_TABLE + "(" +
                 "player_name VARCHAR(16) NOT NULL, " +
                 "vip_id TINYINT NOT NULL, " +
-                "vip_type TINYINT NOT NULL" +
+                "vip_type TINYINT NOT NULL, " +
+                "vip_duration INT NOT NULL" +
             ")"
         );
     }
@@ -34,7 +35,7 @@ public class SQLPendingVipRepository implements PendingVipRepository {
     @Override
     public @NonNull CompletableFuture<Collection<PendingVIP>> getPendingVips(@NonNull String playerName) {
         return CompletableFuture.supplyAsync(() -> sqlExecutor.executeQuery(
-            "SELECT * FROM " + PENDINGS_TABLE + " WHERE player_name=?",
+            "SELECT vip_id, vip_type, duration FROM " + PENDINGS_TABLE + " WHERE player_name=?",
             statement -> statement.set(1, playerName),
             result -> {
                 final Collection<PendingVIP> pendings = new ArrayList<>();
@@ -43,7 +44,8 @@ public class SQLPendingVipRepository implements PendingVipRepository {
                     pendings.add(new PendingVIP(
                         playerName,
                         result.get("vip_id"),
-                        VipType.fromId(result.get("vip_type"))
+                        VipType.fromId(result.get("vip_type")),
+                        result.get("vip_duration")
                     ));
                 }
 
@@ -55,11 +57,13 @@ public class SQLPendingVipRepository implements PendingVipRepository {
     @Override
     public void addPending(@NonNull PendingVIP vip) {
         CompletableFuture.runAsync(() -> sqlExecutor.update(
-            "INSERT INTO " + PENDINGS_TABLE + "(player_name, vip_id, vip_type) VALUES(?,?,?)",
+            "INSERT INTO " + PENDINGS_TABLE + "(player_name, vip_id, vip_type, vip_duration) " +
+                "VALUES(?,?,?,?)",
             statement -> {
                 statement.set(1, vip.getPlayerName());
                 statement.set(2, vip.getId());
                 statement.set(3, vip.getType());
+                statement.set(4, vip.getDuration());
             }
         ), executor);
     }

@@ -11,4 +11,5 @@ public class PendingVIP {
     private final @NonNull String playerName;
     private final byte id;
     private final @NonNull VipType type;
+    private final int duration;
 }

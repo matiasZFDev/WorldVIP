@@ -90,7 +90,7 @@ public class CreateKey implements CommandModule {
             argsLength = 3;
 
             if (duration == null) {
-                sender.respond("Key-duracao-invalida", message -> message.replace(
+                sender.respond("Vip-duracao-invalida", message -> message.replace(
                     "@valor".to(durationFormat)
                 ));
                 return;

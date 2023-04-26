@@ -7,6 +7,8 @@ import com.worldplugins.lib.config.cache.impl.SoundsConfig;
 import com.worldplugins.lib.registry.CommandRegistry;
 import com.worldplugins.lib.registry.ViewRegistry;
 import com.worldplugins.vip.command.*;
+import com.worldplugins.vip.command.vip.GiveVip;
+import com.worldplugins.vip.command.vip.SetVip;
 import com.worldplugins.vip.config.MainConfig;
 import com.worldplugins.vip.config.VipConfig;
 import com.worldplugins.vip.config.VipItemsConfig;
@@ -121,7 +123,12 @@ public class PluginExecutor {
                 config(MainConfig.class)
             ),
             new VipDurationLeft(databaseAccessor.getPlayerService(), scheduler),
-            new UseKey(databaseAccessor.getValidKeyRepository(), scheduler, activationHandler)
+            new UseKey(databaseAccessor.getValidKeyRepository(), scheduler, activationHandler),
+            new GiveVip(databaseAccessor.getPendingVipRepository(), activationHandler, config(VipConfig.class)),
+            new SetVip(activationHandler, config(VipConfig.class))
+        );
+        registry.autoTabCompleter(
+            "gerarkey", "removerkey", "verkeys", "usarkey", "tempovip", "darvip", "setarvip"
         );
         registry.registerAll();
     }

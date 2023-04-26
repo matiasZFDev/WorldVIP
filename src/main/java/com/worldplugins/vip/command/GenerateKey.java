@@ -83,7 +83,7 @@ public class GenerateKey implements CommandModule {
             argsLength = 2;
 
             if (duration == null) {
-                sender.respond("Key-duracao-invalida", message -> message.replace(
+                sender.respond("Vip-duracao-invalida", message -> message.replace(
                     "@valor".to(durationFormat)
                 ));
                 return;
