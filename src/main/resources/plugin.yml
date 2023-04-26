@@ -9,12 +9,14 @@ commands:
   removerkey:
     description: Remover uma key (invalidar)
   verkeys:
-    description: Mostrar a lista de keys
+    description: Mostrar a lista de keys do jogador ou de alguem mais (online)
   usarkey:
     description: Usar uma key. Ativa um vip
   tempovip:
-    description: Mostrar o tempo vip do jogador ou de alguem mais
+    description: Mostrar o tempo vip do jogador ou de alguem mais (online)
   darvip:
     description: Giva um vip para um jogador
   setarvip:
-    description: Seta o vip de um jogador
+    description: Setar o vip de um jogador online
+  removervip:
+    description: Remover vip/s de um jogador online

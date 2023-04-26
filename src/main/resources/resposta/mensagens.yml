@@ -162,3 +162,8 @@ Vip-ativado:
 Vip-givado-pendente: '&6Um VIP @vip &f@tipo de &7@tempo &6foi adicionado como &npendente&6 ao jogador &f@jogador&6.'
 Vip-givado: '&6Um VIP @vip &f@tipo de &7@tempo &6foi ativado para o jogador &f@jogador&6!'
 Vip-setado: '&6Um VIP @vip &f@tipo de &7@tempo &6foi setado para o jogador &f@jogador&6!'
+
+Remover-vip-inexistente: '&cO jogador @jogador não possui um VIP ativo.'
+Vip-removidos-nenhum: '&eO jogador &f@jogador &enão possui nenhum VIP @vip &f@tipo&e.'
+Vip-primario-removido: '&6O VIP primario do jogador &f@jogador &6foi removido.'
+Vip-secundarios-removidos: '&6Foram removidos &7@removidos &6VIPs @vip &f@tipo &6do jogador &f@jogador&6.'
