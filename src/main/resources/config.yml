@@ -23,5 +23,14 @@ Geracao-key:
   Numeros: true
   Letras-minusculas: true
   Letras-maiusculas: true
-# Formato utilizado na mensagem do comando /verkeys
-Formato-key: ' &7- &e@key &7: @vip&f @tipo &7@duracao &f&n@usos&r'
+# Opções do comando /verkeys
+Ver-keys:
+  Mensagem-jogador:
+    - '&fLista de keys do jogador &6@jogador:'
+    - '@@keys'
+    - ''
+  Mensagem-pessoal:
+    - '&fLista de keys que &6você &fpossui:'
+    - '@@keys'
+    - ''
+  Formato-key: ' &7- &e@key &7: @vip&f @tipo &7@duracao &f&n@usos&r'

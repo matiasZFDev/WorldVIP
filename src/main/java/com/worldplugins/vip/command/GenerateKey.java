@@ -89,7 +89,7 @@ public class GenerateKey implements CommandModule {
                 return;
             }
         } else {
-            durationFormat = "∞";
+            durationFormat = GlobalValues.PERMANENT_DURATION;
             duration = -1;
             argsLength = 3;
         }

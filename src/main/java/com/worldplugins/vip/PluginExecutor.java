@@ -102,7 +102,11 @@ public class PluginExecutor {
                 config(VipConfig.class), databaseAccessor.getValidKeyRepository(), scheduler,
                 keyStorageManager
             ),
-            new RemoveKey(keyStorageManager, scheduler)
+            new RemoveKey(keyStorageManager, scheduler),
+            new SeeKeys(
+                databaseAccessor.getPlayerService(), scheduler, config(VipConfig.class),
+                config(MainConfig.class)
+            )
         );
         registry.registerAll();
     }

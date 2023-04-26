@@ -5,6 +5,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Getter
 public class MainData {
@@ -18,6 +20,15 @@ public class MainData {
         private final boolean upercaseLetters;
     }
 
-    private final @NonNull String keyFormat;
+    @RequiredArgsConstructor
+    @Getter
+    public static class KeyListingOptions {
+        private final @NonNull List<String> playerKeysMessage;
+        private final @NonNull List<String> ownKeysMessages;
+        private final @NonNull String keyFormat;
+        private final @NonNull String hoverMessage;
+    }
+
     private final @NonNull KeyGenOptions keyGen;
+    private final @NonNull KeyListingOptions keyListing;
 }

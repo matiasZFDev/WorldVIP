@@ -16,8 +16,6 @@ public class ValidVipKey {
     @Setter
     private short usages;
 
-    public static final int MAX_CODE_LENGTH = 20;
-
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof ValidVipKey))
