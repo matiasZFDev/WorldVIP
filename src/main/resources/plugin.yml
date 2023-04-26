@@ -12,3 +12,5 @@ commands:
     description: Mostrar a lista de keys
   usarkey:
     description: Usar uma key. Ativa um vip
+  tempovip:
+    description: Mostrar o tempo vip do jogador ou de alguem mais

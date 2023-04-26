@@ -106,7 +106,8 @@ public class PluginExecutor {
             new SeeKeys(
                 databaseAccessor.getPlayerService(), scheduler, config(VipConfig.class),
                 config(MainConfig.class)
-            )
+            ),
+            new VipDurationLeft(databaseAccessor.getPlayerService(), scheduler)
         );
         registry.registerAll();
     }

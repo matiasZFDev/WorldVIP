@@ -98,8 +98,10 @@ Ajuda-staff:
   - '&6/vip ajuda &7- &fMostrar a lista de comandos'
   - ''
 
+Jogador-offline: '&cO jogador @jogador se encontra offline.'
 Vip-inexistente: "&cO vip '@nome' não existe. Utilize: @vips"
 Tipo-vip-inexistente: "&cO tipo '@nome' não existe. Utilize: @tipos"
+Permissoes-comando: '&cVocê não pode executar esse comando.'
 Key-duracao-invalida:
   - "&cO formato da duração '@valor' não é válido."
   - "Utilize o formato 's', 'm', 'h' ou 'd' no final do valor para indiciar a unidade de tempo certa."
@@ -135,14 +137,14 @@ Key-removida: "&aKey &f'@key' &aremovida com sucesso."
 
 Jogador-sem-keys: '&cO jogador @jogador não possui nenhuma key.'
 Ver-keys-vazio: '&cVocê não possui nenhuma key.'
-Jogador-keys:
-  - '&6Lista de keys do jogador &n@jogador&6:'
-  - '@@keys'
-Lista-keys:
-  - '&6Lista de keys que você possui:'
-  - '@@keys'
-
 Key-inexistente: "&cA key '@key' não existe."
+
+Tempo-vip-permissoes: '&cVocê não tem permissões para ver o tempo dos outros.'
+Tempo-jogador-sem-vip: '&cO jogador @jogador não possui um VIP ativo.'
+Tempo-vip-jogador: '&6O jogador &f@jogador &6tem &f@tempo &6de VIP!'
+Tempo-sem-vip: '&cVocê não possui um VIP ativo.'
+Tempo-vip: '&6Você tem &f@tempo &6de VIP!'
+
 Vip-ativado:
   _@Lista:
     m1:
