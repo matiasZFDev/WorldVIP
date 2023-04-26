@@ -1,4 +1,4 @@
-package com.worldplugins.vip.command;
+package com.worldplugins.vip.command.key;
 
 import com.worldplugins.lib.command.ArgsCheck;
 import com.worldplugins.lib.command.CommandModule;

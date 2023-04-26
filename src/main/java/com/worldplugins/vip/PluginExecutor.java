@@ -7,6 +7,7 @@ import com.worldplugins.lib.config.cache.impl.SoundsConfig;
 import com.worldplugins.lib.registry.CommandRegistry;
 import com.worldplugins.lib.registry.ViewRegistry;
 import com.worldplugins.vip.command.*;
+import com.worldplugins.vip.command.key.*;
 import com.worldplugins.vip.command.vip.GiveVip;
 import com.worldplugins.vip.command.vip.SetVip;
 import com.worldplugins.vip.config.MainConfig;
