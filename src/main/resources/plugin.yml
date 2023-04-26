@@ -20,3 +20,5 @@ commands:
     description: Setar o vip de um jogador online
   removervip:
     description: Remover vip/s de um jogador online
+  trocarvip:
+    description: Trocar o vip ativo por outro secondario

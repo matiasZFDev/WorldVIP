@@ -1,6 +1,7 @@
 package com.worldplugins.vip.handler;
 
 import com.worldplugins.lib.config.cache.ConfigCache;
+import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.player.PlayerService;
 import com.worldplugins.vip.database.player.model.OwningVIP;
@@ -16,6 +17,7 @@ public class VipRemovalHandler {
     private final @NonNull VipActivationHandler activationHandler;
     private final @NonNull PermissionManager permissionManager;
     private final @NonNull ConfigCache<VipData> vipConfig;
+    private final @NonNull ConfigCache<MainData> mainConfig;
 
     public void removePrimary(@NonNull Player player, @NonNull VipPlayer vipPlayer) {
         final VipData.VIP configVip = vipConfig.data().getById(vipPlayer.getActiveVip().getId());
@@ -45,6 +47,10 @@ public class VipRemovalHandler {
         @NonNull OwningVIP owningVip
     ) {
         playerService.removeOwningVip(player.getUniqueId(), owningVip);
+
+        if (!mainConfig.data().stackVips()) {
+            return;
+        }
 
         final boolean existingSameVipCategory = vipPlayer.getOwningVips().getVips()
             .stream()

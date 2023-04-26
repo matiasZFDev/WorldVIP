@@ -12,13 +12,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Getter
 public enum VipType {
-    BASIC((byte) 0, "basico"),
-    ONLINE((byte) 1, "online"),
-    SERVER((byte) 2, "server"),
-    PERMANENT((byte) 3, "permanente");
+    BASIC((byte) 0, "basico", (byte) 1),
+    ONLINE((byte) 1, "online", (byte) 2),
+    SERVER((byte) 2, "server", (byte) 3),
+    PERMANENT((byte) 3, "permanente", (byte) 4);
 
     private final byte id;
     private final @NonNull String name;
+    private final byte priority;
 
     private static final @NonNull Map<Byte, VipType> idMap = Arrays.stream(values()).collect(Collectors.toMap(
         VipType::getId, Function.identity()

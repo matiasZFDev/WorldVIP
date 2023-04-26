@@ -50,3 +50,7 @@ Stackar-vips: false
 # Caso não quiser guardar os itens, existe a opção pode apagar o iten
 # do menu "vip.yml" para não gerar confusões.
 Coleta-de-itens: true
+
+# Delay em segundos para executar o comando /trocarvip.
+# Utilizado para evitar a abuso de consultas.
+Delay-trocar-vip: 10

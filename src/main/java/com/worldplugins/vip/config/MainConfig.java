@@ -32,7 +32,8 @@ public class MainConfig implements InjectedConfigCache<MainData> {
                 config.getString("Mensagem-hover").color()
             ),
             config.getOrDefault("Stackar-vips", ConfigurationSection::getBoolean, false),
-            config.getOrDefault("Coleta-de-itens", ConfigurationSection::getBoolean, false)
+            config.getOrDefault("Coleta-de-itens", ConfigurationSection::getBoolean, false),
+            config.getInt("Delay-trocar-vip")
         );
     }
 }

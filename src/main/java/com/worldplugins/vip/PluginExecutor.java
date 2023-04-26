@@ -11,6 +11,7 @@ import com.worldplugins.vip.command.key.*;
 import com.worldplugins.vip.command.vip.GiveVip;
 import com.worldplugins.vip.command.vip.RemoveVip;
 import com.worldplugins.vip.command.vip.SetVip;
+import com.worldplugins.vip.command.vip.SwitchVip;
 import com.worldplugins.vip.config.MainConfig;
 import com.worldplugins.vip.config.VipConfig;
 import com.worldplugins.vip.config.VipItemsConfig;
@@ -70,7 +71,7 @@ public class PluginExecutor {
         );
         vipRemovalHandler = new VipRemovalHandler(
             databaseAccessor.getPlayerService(), vipActivationHandler, permissionManager,
-            config(VipConfig.class)
+            config(VipConfig.class), config(MainConfig.class)
         );
     }
 
@@ -136,11 +137,15 @@ public class PluginExecutor {
             new SetVip(vipActivationHandler, config(VipConfig.class)),
             new RemoveVip(
                 config(VipConfig.class), databaseAccessor.getPlayerService(), scheduler, vipRemovalHandler
+            ),
+            new SwitchVip(
+                databaseAccessor.getPlayerService(), databaseAccessor.getPlayerCache(),
+                config(MainConfig.class), config(VipConfig.class), vipRemovalHandler, vipActivationHandler
             )
         );
         registry.autoTabCompleter(
             "gerarkey", "removerkey", "verkeys", "usarkey", "tempovip", "darvip", "setarvip",
-            "removervip"
+            "removervip", "trocarvip"
         );
         registry.registerAll();
     }

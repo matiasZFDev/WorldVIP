@@ -124,8 +124,12 @@ public class VipActivationHandler {
 
     private void switchVips(@NonNull Player player, @NonNull VipPlayer vipPlayer, @NonNull VIP vip) {
         final VIP currentActiveVip = vipPlayer.getActiveVip();
+        final VipData.VIP owningConfigVIp = vipConfig.data().getById(currentActiveVip.getId());
         setVip(player, vipPlayer, vip, true);
-        vipPlayer.getOwningVips().add(currentActiveVip);
         playerService.addOwningVip(vipPlayer.getId(), currentActiveVip);
+
+        if (!mainConfig.data().stackVips()) {
+            permissionManager.removeGroup(player, owningConfigVIp.getGroup());
+        }
     }
 }

@@ -35,4 +35,5 @@ public class MainData {
     private final boolean stackVips;
     @Accessors(fluent = true)
     private final boolean storeItems;
+    private final int switchVipDelay;
 }
