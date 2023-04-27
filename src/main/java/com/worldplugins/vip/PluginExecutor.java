@@ -15,7 +15,9 @@ import com.worldplugins.vip.command.vip.SwitchVip;
 import com.worldplugins.vip.config.MainConfig;
 import com.worldplugins.vip.config.VipConfig;
 import com.worldplugins.vip.config.VipItemsConfig;
+import com.worldplugins.vip.database.CacheUnloader;
 import com.worldplugins.vip.database.DatabaseAccessor;
+import com.worldplugins.vip.database.PlayerCacheUnload;
 import com.worldplugins.vip.handler.VipHandler;
 import com.worldplugins.vip.handler.OwningVipHandler;
 import com.worldplugins.vip.init.ConfigCacheInitializer;
@@ -32,6 +34,8 @@ import com.worldplugins.vip.init.PermissionManagerInitializer;
 import com.worldplugins.vip.key.ConfigKeyGenerator;
 import com.worldplugins.vip.key.KeyStorageManager;
 import com.worldplugins.vip.key.VipKeyGenerator;
+import com.worldplugins.vip.listener.PlayerJoinListener;
+import com.worldplugins.vip.listener.PlayerQuitListener;
 import com.worldplugins.vip.manager.PermissionManager;
 import com.worldplugins.vip.view.VipItemsEditView;
 import lombok.NonNull;
@@ -39,6 +43,8 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class PluginExecutor {
@@ -53,6 +59,7 @@ public class PluginExecutor {
     private final @NonNull PermissionManager permissionManager;
     private final @NonNull VipHandler vipHandler;
     private final @NonNull OwningVipHandler owningVipHandler;
+    private final @NonNull CacheUnloader<UUID> cacheUnloader;
 
     public PluginExecutor(@NonNull JavaPlugin plugin) {
         this.plugin = plugin;
@@ -72,6 +79,9 @@ public class PluginExecutor {
             databaseAccessor.getPlayerService(), databaseAccessor.getVipItemsRepository(),
             scheduler, permissionManager, owningVipHandler, config(VipConfig.class),
             config(MainConfig.class), config(VipItemsConfig.class)
+        );
+        cacheUnloader = new PlayerCacheUnload(
+            scheduler, databaseAccessor.getPlayerCache(), databaseAccessor.getPlayerService()
         );
     }
 
@@ -106,7 +116,10 @@ public class PluginExecutor {
     }
 
     private void registerListeners() {
-
+        regListeners(
+            new PlayerJoinListener(cacheUnloader),
+            new PlayerQuitListener(databaseAccessor.getPlayerCache(), cacheUnloader)
+        );
     }
 
     private void registerCommands() {
