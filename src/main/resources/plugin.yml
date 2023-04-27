@@ -4,6 +4,8 @@ version: 1.0
 authors: [PostDev]
 api-version: 1.8
 commands:
+  vip:
+    description: Comando para operações gerais. Abre um GUI de gerenciamento caso executar sem argumentos
   gerarkey:
     description: Gera um key aleatoria
   removerkey:

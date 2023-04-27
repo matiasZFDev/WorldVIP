@@ -8,10 +8,7 @@ import com.worldplugins.lib.registry.CommandRegistry;
 import com.worldplugins.lib.registry.ViewRegistry;
 import com.worldplugins.vip.command.*;
 import com.worldplugins.vip.command.key.*;
-import com.worldplugins.vip.command.vip.GiveVip;
-import com.worldplugins.vip.command.vip.RemoveVip;
-import com.worldplugins.vip.command.vip.SetVip;
-import com.worldplugins.vip.command.vip.SwitchVip;
+import com.worldplugins.vip.command.vip.*;
 import com.worldplugins.vip.config.MainConfig;
 import com.worldplugins.vip.config.VipConfig;
 import com.worldplugins.vip.config.VipItemsConfig;
@@ -155,11 +152,12 @@ public class PluginExecutor {
             new SwitchVip(
                 databaseAccessor.getPlayerService(), databaseAccessor.getPlayerCache(),
                 config(MainConfig.class), config(VipConfig.class), owningVipHandler, vipHandler
-            )
+            ),
+            new RemovePendingVips(databaseAccessor.getPendingVipRepository())
         );
         registry.autoTabCompleter(
             "gerarkey", "removerkey", "verkeys", "usarkey", "tempovip", "darvip", "setarvip",
-            "removervip", "trocarvip"
+            "removervip", "trocarvip", "vip"
         );
         registry.registerAll();
     }

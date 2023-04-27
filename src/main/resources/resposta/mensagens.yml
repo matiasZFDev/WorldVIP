@@ -171,3 +171,5 @@ Vip-secundarios-removidos: '&6Foram removidos &7@removidos &6VIPs @vip &f@tipo &
 Trocar-vip-inexistente: '&cVocê não possui vips ativos.'
 Trocar-vip-sem-vips: '&cVocê não possui vips @vip &cpara serem trocados.'
 Vip-trocado: '&6Seu vip @atual-vip &f@atual-tipo foi trocado pelo vip @novo-vip &f@novo-tipo&6.'
+
+Vip-pendentes-removidos: '&6Todos os vips pendentes do jogador &f@jogador &6foram removidos.'
