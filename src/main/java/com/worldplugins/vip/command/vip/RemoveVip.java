@@ -11,7 +11,8 @@ import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.player.PlayerService;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.extension.ResponseExtensions;
-import com.worldplugins.vip.handler.VipRemovalHandler;
+import com.worldplugins.vip.handler.OwningVipHandler;
+import com.worldplugins.vip.handler.VipHandler;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
@@ -34,7 +35,8 @@ public class RemoveVip implements CommandModule {
     private final @NonNull ConfigCache<VipData> vipConfig;
     private final @NonNull PlayerService playerService;
     private final @NonNull SchedulerBuilder scheduler;
-    private final @NonNull VipRemovalHandler vipRemovalHandler;
+    private final @NonNull VipHandler vipHandler;
+    private final @NonNull OwningVipHandler owningVipHandler;
 
     @Command(
         name = "removervip",
@@ -67,7 +69,7 @@ public class RemoveVip implements CommandModule {
                         return;
                     }
 
-                    vipRemovalHandler.removePrimary(player, vipPlayer);
+                    vipHandler.remove(player, vipPlayer);
                 }).run()
             );
             return;
@@ -122,7 +124,7 @@ public class RemoveVip implements CommandModule {
                         owningVip.getId() == configVip.getId() &&
                         (type == null ||  owningVip.getType() == type)
                     ) {
-                        vipRemovalHandler.removeOwningVip(player, vipPlayer, owningVip);
+                        owningVipHandler.remove(player, vipPlayer, owningVip);
                         owningVipRemoveCount.incrementAndGet();
                     }
                 });
@@ -136,7 +138,7 @@ public class RemoveVip implements CommandModule {
                     : type.getName().toUpperCase();
 
                 if (removePrimaryVip) {
-                    vipRemovalHandler.removePrimary(player, vipPlayer);
+                    vipHandler.remove(player, vipPlayer);
                     sender.respond("Vip-primario-removido");
 
                     if (owningVipRemoveCount.get() > 0) {

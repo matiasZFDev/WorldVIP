@@ -13,7 +13,7 @@ import com.worldplugins.vip.database.pending.PendingVipRepository;
 import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.extension.ResponseExtensions;
-import com.worldplugins.vip.handler.VipActivationHandler;
+import com.worldplugins.vip.handler.VipHandler;
 import com.worldplugins.vip.util.TimeParser;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GiveVip implements CommandModule {
     private final @NonNull PendingVipRepository pendingVipRepository;
-    private final @NonNull VipActivationHandler activationHandler;
+    private final @NonNull VipHandler activationHandler;
     private final @NonNull ConfigCache<VipData> vipConfig;
 
     @Command(

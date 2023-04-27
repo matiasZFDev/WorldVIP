@@ -9,7 +9,7 @@ import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.extension.ResponseExtensions;
-import com.worldplugins.vip.handler.VipActivationHandler;
+import com.worldplugins.vip.handler.VipHandler;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
@@ -25,7 +25,7 @@ import org.bukkit.entity.Player;
 public class UseKey implements CommandModule {
     private final @NonNull ValidKeyRepository validKeyRepository;
     private final @NonNull SchedulerBuilder scheduler;
-    private final @NonNull VipActivationHandler activationHandler;
+    private final @NonNull VipHandler activationHandler;
 
     @Command(
         name = "usarkey",

@@ -51,7 +51,8 @@ public class DatabaseInitializer implements Initializer<DatabaseAccessor> {
             new SQLPendingVipRepository(executor, sqlExecutor),
             validKeyRepository,
             vipItemsRepository,
-            sellingKeyRepository
+            sellingKeyRepository,
+            playerCache
         );
     }
 

@@ -16,8 +16,8 @@ import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipPlayer;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.extension.ResponseExtensions;
-import com.worldplugins.vip.handler.VipActivationHandler;
-import com.worldplugins.vip.handler.VipRemovalHandler;
+import com.worldplugins.vip.handler.VipHandler;
+import com.worldplugins.vip.handler.OwningVipHandler;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
@@ -38,8 +38,8 @@ public class SwitchVip implements CommandModule {
     private final @NonNull Cache<UUID, VipPlayer> cache;
     private final @NonNull ConfigCache<MainData> mainConfig;
     private final @NonNull ConfigCache<VipData> vipConfig;
-    private final @NonNull VipRemovalHandler vipRemovalHandler;
-    private final @NonNull VipActivationHandler vipActivationHandler;
+    private final @NonNull OwningVipHandler owningVipHandler;
+    private final @NonNull VipHandler vipHandler;
 
     private final @NonNull Map<UUID, Long> onDelay = new HashMap<>();
 
@@ -123,8 +123,8 @@ public class SwitchVip implements CommandModule {
             playerService.setVip(player.getUniqueId(), newPrimaryVip);
             playerService.addOwningVip(player.getUniqueId(), newOwningVip);
         } else {
-            vipRemovalHandler.removeOwningVip(player, vipPlayer, newPrimaryVip);
-            vipActivationHandler.activate(player, newPrimaryVip, false);
+            owningVipHandler.remove(player, vipPlayer, newPrimaryVip);
+            vipHandler.activate(player, newPrimaryVip, false);
         }
 
         player.respond("Vip-trocado", message -> message.replace(

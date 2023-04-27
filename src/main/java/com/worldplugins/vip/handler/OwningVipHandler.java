@@ -12,40 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 
 @RequiredArgsConstructor
-public class VipRemovalHandler {
+public class OwningVipHandler {
     private final @NonNull PlayerService playerService;
-    private final @NonNull VipActivationHandler activationHandler;
     private final @NonNull PermissionManager permissionManager;
     private final @NonNull ConfigCache<VipData> vipConfig;
     private final @NonNull ConfigCache<MainData> mainConfig;
 
-    public void removePrimary(@NonNull Player player, @NonNull VipPlayer vipPlayer) {
-        final VipData.VIP configVip = vipConfig.data().getById(vipPlayer.getActiveVip().getId());
-
-        permissionManager.removeGroup(player, configVip.getGroup());
-        playerService.removeVip(player.getUniqueId());
-
-        final OwningVIP primaryReplace = pickPrimaryReplacement(vipPlayer);
-
-        if (primaryReplace == null) {
-            return;
-        }
-
-        activationHandler.activate(player, primaryReplace, false);
-        playerService.removeOwningVip(player.getUniqueId(), primaryReplace);
-    }
-
-    private OwningVIP pickPrimaryReplacement(@NonNull VipPlayer vipPlayer) {
-        return vipPlayer.getOwningVips().getVips().stream()
-            .findAny()
-            .orElse(null);
-    }
-
-    public void removeOwningVip(
-        @NonNull Player player,
-        @NonNull VipPlayer vipPlayer,
-        @NonNull OwningVIP owningVip
-    ) {
+    public void remove(@NonNull Player player, @NonNull VipPlayer vipPlayer, @NonNull OwningVIP owningVip) {
         playerService.removeOwningVip(player.getUniqueId(), owningVip);
 
         if (!mainConfig.data().stackVips()) {

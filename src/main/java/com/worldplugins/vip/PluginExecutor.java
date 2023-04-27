@@ -16,8 +16,8 @@ import com.worldplugins.vip.config.MainConfig;
 import com.worldplugins.vip.config.VipConfig;
 import com.worldplugins.vip.config.VipItemsConfig;
 import com.worldplugins.vip.database.DatabaseAccessor;
-import com.worldplugins.vip.handler.VipActivationHandler;
-import com.worldplugins.vip.handler.VipRemovalHandler;
+import com.worldplugins.vip.handler.VipHandler;
+import com.worldplugins.vip.handler.OwningVipHandler;
 import com.worldplugins.vip.init.ConfigCacheInitializer;
 import com.worldplugins.lib.manager.config.ConfigCacheManager;
 import com.worldplugins.lib.manager.config.ConfigManager;
@@ -51,8 +51,8 @@ public class PluginExecutor {
 
     private final @NonNull DatabaseAccessor databaseAccessor;
     private final @NonNull PermissionManager permissionManager;
-    private final @NonNull VipActivationHandler vipActivationHandler;
-    private final @NonNull VipRemovalHandler vipRemovalHandler;
+    private final @NonNull VipHandler vipHandler;
+    private final @NonNull OwningVipHandler owningVipHandler;
 
     public PluginExecutor(@NonNull JavaPlugin plugin) {
         this.plugin = plugin;
@@ -64,14 +64,14 @@ public class PluginExecutor {
 
         databaseAccessor = new DatabaseInitializer(configManager, plugin, scheduler).init();
         permissionManager = new PermissionManagerInitializer().init();
-        vipActivationHandler = new VipActivationHandler(
-            databaseAccessor.getPlayerService(), databaseAccessor.getVipItemsRepository(),
-            scheduler, permissionManager, config(VipConfig.class), config(MainConfig.class),
-            config(VipItemsConfig.class)
+        owningVipHandler = new OwningVipHandler(
+            databaseAccessor.getPlayerService(), permissionManager, config(VipConfig.class),
+            config(MainConfig.class)
         );
-        vipRemovalHandler = new VipRemovalHandler(
-            databaseAccessor.getPlayerService(), vipActivationHandler, permissionManager,
-            config(VipConfig.class), config(MainConfig.class)
+        vipHandler = new VipHandler(
+            databaseAccessor.getPlayerService(), databaseAccessor.getVipItemsRepository(),
+            scheduler, permissionManager, owningVipHandler, config(VipConfig.class),
+            config(MainConfig.class), config(VipItemsConfig.class)
         );
     }
 
@@ -132,15 +132,16 @@ public class PluginExecutor {
                 config(MainConfig.class)
             ),
             new VipDurationLeft(databaseAccessor.getPlayerService(), scheduler),
-            new UseKey(databaseAccessor.getValidKeyRepository(), scheduler, vipActivationHandler),
-            new GiveVip(databaseAccessor.getPendingVipRepository(), vipActivationHandler, config(VipConfig.class)),
-            new SetVip(vipActivationHandler, config(VipConfig.class)),
+            new UseKey(databaseAccessor.getValidKeyRepository(), scheduler, vipHandler),
+            new GiveVip(databaseAccessor.getPendingVipRepository(), vipHandler, config(VipConfig.class)),
+            new SetVip(vipHandler, config(VipConfig.class)),
             new RemoveVip(
-                config(VipConfig.class), databaseAccessor.getPlayerService(), scheduler, vipRemovalHandler
+                config(VipConfig.class), databaseAccessor.getPlayerService(), scheduler, vipHandler,
+                owningVipHandler
             ),
             new SwitchVip(
                 databaseAccessor.getPlayerService(), databaseAccessor.getPlayerCache(),
-                config(MainConfig.class), config(VipConfig.class), vipRemovalHandler, vipActivationHandler
+                config(MainConfig.class), config(VipConfig.class), owningVipHandler, vipHandler
             )
         );
         registry.autoTabCompleter(
