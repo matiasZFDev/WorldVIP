@@ -8,6 +8,8 @@ import com.worldplugins.lib.config.cache.ConfigCache;
 import com.worldplugins.lib.extension.GenericExtensions;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.extension.ResponseExtensions;
+import com.worldplugins.vip.extension.ViewExtensions;
+import com.worldplugins.vip.view.VipItemsEditView;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
@@ -19,7 +21,8 @@ import java.util.stream.Collectors;
 
 @ExtensionMethod({
     ResponseExtensions.class,
-    GenericExtensions.class
+    GenericExtensions.class,
+    ViewExtensions.class
 })
 
 @RequiredArgsConstructor
@@ -49,6 +52,6 @@ public class SetVipItems implements CommandModule {
             return;
         }
 
-
+        player.openView(VipItemsEditView.class, new VipItemsEditView.Context(vipName));
     }
 }
