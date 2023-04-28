@@ -1,0 +1,54 @@
+Nome: 'Menu VIP'
+Linhas: 5
+Data:
+  Formato-vip-ativo: '@vip &f@tipo &7@tempo'
+  Formato-vip-inativo: '&cNenhum'
+Conteudo:
+  Perfil:
+    Skull-url: '@Dinamico' # Caveça do jogador
+    Nome: '&6&lP&6erfil'
+    Lore:
+      - '&fVIP: @estado-vip'
+      - '&fGasto: &b@gasto'
+  Coletar-itens: # Apagar caso não estiver habilitado
+    Material: CHEST
+    Nome: '&aColetar itens'
+    Lore:
+      - '&7Seus itens de ativação.'
+      - ''
+      - '&aClique para resgatar'
+  Vips-secondarios:
+    Id: 342
+    Nome: '&aSeus VIPs'
+    Lore:
+      - '&7Os VIPs que você'
+      - '&7possui. Troque em'
+      - '&7qualquer momento.'
+      - ''
+      - '&aClique para visualizar'
+  Keys:
+    Id: 131
+    Nome: '&aKeys'
+    Lore:
+      - '&7As chaves que estão'
+      - '&7baixo seu nome.'
+      - '&8Relacionados: /verkeys'
+      - ''
+      - '&aClique para gerenciar'
+  Top-vip:
+    Material: EMERALD
+    Nome: '&bTop VIP'
+    Lore:
+      - '&7As pessoas que mais'
+      - '&7gastaram em VIPs!'
+      - ''
+      - '&bClique para visualizar'
+  Mercado-vip:
+    Material: ENDER_PORTAL_FRAME
+    Nome: '&bMercado VIP'
+    Lore:
+      - '&7Compre e venda keys'
+      - '&7que estão baixo'
+      - '&7seu nome!'
+      - ''
+      - '&bClique para ver'

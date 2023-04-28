@@ -12,6 +12,7 @@ import com.worldplugins.lib.view.MenuDataView;
 import com.worldplugins.lib.view.ViewContext;
 import com.worldplugins.lib.view.annotation.ViewSpec;
 import com.worldplugins.vip.config.menu.VipTopMenuContainer;
+import com.worldplugins.vip.extension.ViewExtensions;
 import com.worldplugins.vip.manager.VipTopManager;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,8 @@ import java.util.List;
     CollectionExtensions.class,
     ItemExtensions.class,
     GenericExtensions.class,
-    NumberExtensions.class
+    NumberExtensions.class,
+    ViewExtensions.class
 })
 
 @RequiredArgsConstructor
@@ -59,7 +61,7 @@ public class VipTopView extends MenuDataView<ViewContext> {
     @Override
     public void onClick(@NonNull Player player, @NonNull MenuItem menuItem, @NonNull InventoryClickEvent inventoryClickEvent) {
         if (menuItem.getId().equals("Voltar")) {
-            // Back to main menu
+            player.openView(VipMenuView.class);
         }
     }
 }

@@ -39,6 +39,7 @@ import com.worldplugins.vip.listener.PlayerQuitListener;
 import com.worldplugins.vip.manager.PermissionManager;
 import com.worldplugins.vip.manager.VipTopManager;
 import com.worldplugins.vip.view.VipItemsEditView;
+import com.worldplugins.vip.view.VipMenuView;
 import com.worldplugins.vip.view.VipTopView;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -195,7 +196,8 @@ public class PluginExecutor {
                 config(MainConfig.class), config(VipConfig.class), owningVipHandler, vipHandler
             ),
             new RemovePendingVips(databaseAccessor.getPendingVipRepository()),
-            new VipTop()
+            new VipTop(),
+            new VipMenu()
         );
         registry.autoTabCompleter(
             "criarkey", "removerkey", "verkeys", "usarkey", "tempovip", "darvip", "setarvip",
@@ -208,7 +210,10 @@ public class PluginExecutor {
         final ViewRegistry registry = new ViewRegistry(viewManager, menuContainerManager, configManager);
         registry.register(
             new VipItemsEditView(config(VipItemsConfig.class)),
-            new VipTopView(topManager)
+            new VipTopView(topManager),
+            new VipMenuView(
+                databaseAccessor.getPlayerService(), config(VipConfig.class), config(MainConfig.class)
+            )
         );
     }
 
