@@ -14,7 +14,6 @@ import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.extension.ResponseExtensions;
-import com.worldplugins.vip.key.KeyStorageManager;
 import com.worldplugins.vip.key.VipKeyGenerator;
 import com.worldplugins.vip.util.TimeParser;
 import lombok.NonNull;
@@ -39,7 +38,6 @@ public class GenerateKey implements CommandModule {
     private final @NonNull ValidKeyRepository validKeyRepository;
     private final @NonNull VipKeyGenerator keyGenerator;
     private final @NonNull SchedulerBuilder scheduler;
-    private final @NonNull KeyStorageManager keyStorageManager;
 
     @Command(
         name = "gerarkey",
@@ -135,7 +133,7 @@ public class GenerateKey implements CommandModule {
                 final ValidVipKey validKey = new ValidVipKey(
                     generatorId, keyCode, configVip.getId(), vipType, duration, usages
                 );
-                keyStorageManager.store(validKey);
+                validKeyRepository.addKey(validKey);
                 sender.respond("Key-gerada", message -> message.replace(
                     "@key".to(keyCode),
                     "@vip".to(configVip.getDisplay()),

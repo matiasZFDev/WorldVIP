@@ -33,7 +33,8 @@ public class MainConfig implements InjectedConfigCache<MainData> {
             ),
             config.getOrDefault("Stackar-vips", ConfigurationSection::getBoolean, false),
             config.getOrDefault("Coleta-de-itens", ConfigurationSection::getBoolean, false),
-            config.getInt("Delay-trocar-vip")
+            config.getInt("Delay-trocar-vip"),
+            config.getOrDefault("Reducao-simultanea", ConfigurationSection::getBoolean, false)
         );
     }
 }

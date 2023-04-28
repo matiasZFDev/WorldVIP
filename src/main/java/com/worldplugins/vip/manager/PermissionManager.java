@@ -1,9 +1,10 @@
 package com.worldplugins.vip.manager;
 
 import lombok.NonNull;
-import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public interface PermissionManager {
-    void addGroup(@NonNull Player player, @NonNull String group);
-    void removeGroup(@NonNull Player player, @NonNull String group);
+    void addGroup(@NonNull UUID playerId, @NonNull String group);
+    void removeGroup(@NonNull UUID playerId, @NonNull String group);
 }

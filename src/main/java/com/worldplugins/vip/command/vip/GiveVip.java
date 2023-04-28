@@ -111,7 +111,7 @@ public class GiveVip implements CommandModule {
         }
 
         final VIP vip = new VIP(configVip.getId(), vipType, duration);
-        activationHandler.activate(player, vip, true);
+        activationHandler.activate(player.getUniqueId(), vip, true);
         sender.respond("Vip-givado", message -> message.replace(
             "@jogador".to(player.getName()),
             "@vip".to(configVip.getDisplay()),

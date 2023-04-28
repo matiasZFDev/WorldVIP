@@ -9,7 +9,6 @@ import com.worldplugins.vip.database.player.model.VipPlayer;
 import com.worldplugins.vip.manager.PermissionManager;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.bukkit.entity.Player;
 
 @RequiredArgsConstructor
 public class OwningVipHandler {
@@ -18,8 +17,8 @@ public class OwningVipHandler {
     private final @NonNull ConfigCache<VipData> vipConfig;
     private final @NonNull ConfigCache<MainData> mainConfig;
 
-    public void remove(@NonNull Player player, @NonNull VipPlayer vipPlayer, @NonNull OwningVIP owningVip) {
-        playerService.removeOwningVip(player.getUniqueId(), owningVip);
+    public void remove(@NonNull VipPlayer vipPlayer, @NonNull OwningVIP owningVip) {
+        playerService.removeOwningVip(vipPlayer.getId(), owningVip);
 
         if (!mainConfig.data().stackVips()) {
             return;
@@ -34,6 +33,6 @@ public class OwningVipHandler {
         }
 
         final VipData.VIP configVip = vipConfig.data().getById(owningVip.getId());
-        permissionManager.removeGroup(player, configVip.getGroup());
+        permissionManager.removeGroup(vipPlayer.getId(), configVip.getGroup());
     }
 }

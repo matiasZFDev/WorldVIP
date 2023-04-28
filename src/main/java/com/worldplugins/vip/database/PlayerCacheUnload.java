@@ -30,7 +30,7 @@ public class PlayerCacheUnload implements CacheUnloader<UUID> {
                 cache.remove(playerId);
 
                 if (vipPlayer.getActiveVip() != null && vipPlayer.getActiveVip().updated()) {
-                    playerService.updatePlayers(Collections.singleton(vipPlayer));
+                    playerService.updatePrimaryVip(Collections.singleton(vipPlayer));
                 }
 
                 final Collection<OwningVIP> updatedOwningVips = vipPlayer.getOwningVips().getVips().stream()

@@ -38,7 +38,7 @@ public class UseKey implements CommandModule {
         final Player player = (Player) sender;
         final String code = args[0];
 
-        validKeyRepository.getKeyByCode(code).thenAccept(key -> {
+        validKeyRepository.getKeyByCode(code).thenAccept(key ->
             scheduler.newTask(() -> {
                 if (key == null) {
                     sender.respond("Key-inexistente", message -> message.replace(
@@ -48,14 +48,14 @@ public class UseKey implements CommandModule {
                 }
 
                 final VIP vip = new VIP(key.getVipId(), key.getVipType(), key.getVipDuration());
-                activationHandler.activate(player, vip, true);
+                activationHandler.activate(player.getUniqueId(), vip, true);
 
                 if (key.getUsages() > 1) {
-                    validKeyRepository.consumeKey(code);
+                    validKeyRepository.consumeKey(key);
                 } else {
-                    validKeyRepository.removeKey(code);
+                    validKeyRepository.removeKey(key);
                 }
-            }).run();
-        });
+            }).run()
+        );
     }
 }

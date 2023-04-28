@@ -40,14 +40,14 @@ public class DatabaseInitializer implements Initializer<DatabaseAccessor> {
         final Executor executor = Executors.newSingleThreadExecutor();
         final SQLExecutor sqlExecutor = new SQLExecutor(databaseFactory().create().connect());
         final Cache<UUID, VipPlayer> playerCache = new SimpleCache<>(new HashMap<>());
-        final ValidKeyRepository validKeyRepository = new SQLValidKeyRepository(executor, sqlExecutor);
-        final VipItemsRepository vipItemsRepository = new SQLVipItemsRepository(executor, sqlExecutor);
+        final ValidKeyRepository validKeyRepository = new SQLValidKeyRepository(executor, sqlExecutor, scheduler);
+        final VipItemsRepository vipItemsRepository = new SQLVipItemsRepository(executor, sqlExecutor, scheduler);
         final SellingKeyRepository sellingKeyRepository = new SQLSellingKeyRepository(
             executor, sqlExecutor, scheduler
         );
 
         return new DatabaseAccessor(
-            new SQLPlayerService(executor, sqlExecutor, playerCache, validKeyRepository, vipItemsRepository),
+            new SQLPlayerService(executor, sqlExecutor, playerCache),
             new SQLPendingVipRepository(executor, sqlExecutor),
             validKeyRepository,
             vipItemsRepository,

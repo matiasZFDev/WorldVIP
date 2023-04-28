@@ -14,6 +14,4 @@ public class VipPlayer {
     @Setter
     private VIP activeVip;
     private final @NonNull OwningVIPs owningVips;
-    private final @NonNull PlayerKeys keys;
-    private final @NonNull PlayerItems items;
 }

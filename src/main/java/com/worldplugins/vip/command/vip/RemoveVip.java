@@ -6,9 +6,9 @@ import com.worldplugins.lib.command.annotation.ArgsChecker;
 import com.worldplugins.lib.command.annotation.Command;
 import com.worldplugins.lib.config.cache.ConfigCache;
 import com.worldplugins.lib.extension.GenericExtensions;
-import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.player.PlayerService;
+import com.worldplugins.vip.database.player.model.VipPlayer;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.extension.ResponseExtensions;
 import com.worldplugins.vip.handler.OwningVipHandler;
@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 public class RemoveVip implements CommandModule {
     private final @NonNull ConfigCache<VipData> vipConfig;
     private final @NonNull PlayerService playerService;
-    private final @NonNull SchedulerBuilder scheduler;
     private final @NonNull VipHandler vipHandler;
     private final @NonNull OwningVipHandler owningVipHandler;
 
@@ -60,18 +59,16 @@ public class RemoveVip implements CommandModule {
         }
 
         if (args.length == 1) {
-            playerService.getById(player.getUniqueId()).thenAccept(vipPlayer ->
-                scheduler.newTask(() -> {
-                    if (vipPlayer == null || vipPlayer.getActiveVip() == null) {
-                        sender.respond("Remover-vip-inexistente", message -> message.replace(
-                            "@jogador".to(playerName)
-                        ));
-                        return;
-                    }
+            final VipPlayer vipPlayer = playerService.getById(player.getUniqueId());
 
-                    vipHandler.remove(player, vipPlayer);
-                }).run()
-            );
+            if (vipPlayer == null || vipPlayer.getActiveVip() == null) {
+                sender.respond("Remover-vip-inexistente", message -> message.replace(
+                    "@jogador".to(playerName)
+                ));
+                return;
+            }
+
+            vipHandler.remove(vipPlayer);
             return;
         }
 
@@ -108,62 +105,60 @@ public class RemoveVip implements CommandModule {
             type = null;
         }
 
-        playerService.getById(player.getUniqueId()).thenAccept(vipPlayer ->
-            scheduler.newTask(() -> {
-                if (vipPlayer == null) {
-                    sender.respond("Remover-vip-inexistente", message -> message.replace(
-                        "@jogador".to(playerName)
-                    ));
-                    return;
-                }
+        final VipPlayer vipPlayer = playerService.getById(player.getUniqueId());
 
-                final AtomicInteger owningVipRemoveCount = new AtomicInteger(0);
+        if (vipPlayer == null) {
+            sender.respond("Remover-vip-inexistente", message -> message.replace(
+                "@jogador".to(playerName)
+            ));
+            return;
+        }
 
-                vipPlayer.getOwningVips().getVips().forEach(owningVip -> {
-                    if (
-                        owningVip.getId() == configVip.getId() &&
-                        (type == null ||  owningVip.getType() == type)
-                    ) {
-                        owningVipHandler.remove(player, vipPlayer, owningVip);
-                        owningVipRemoveCount.incrementAndGet();
-                    }
-                });
+        final AtomicInteger owningVipRemoveCount = new AtomicInteger(0);
 
-                final boolean removePrimaryVip =
-                    vipPlayer.getActiveVip() != null &&
-                    vipPlayer.getActiveVip().getId() == configVip.getId() &&
-                    (type == null || vipPlayer.getActiveVip().getType() == type);
-                final String typeFormat = type == null
-                    ? "-/-"
-                    : type.getName().toUpperCase();
+        vipPlayer.getOwningVips().getVips().forEach(owningVip -> {
+            if (
+                owningVip.getId() == configVip.getId() &&
+                (type == null ||  owningVip.getType() == type)
+            ) {
+                owningVipHandler.remove(vipPlayer, owningVip);
+                owningVipRemoveCount.incrementAndGet();
+            }
+        });
 
-                if (removePrimaryVip) {
-                    vipHandler.remove(player, vipPlayer);
-                    sender.respond("Vip-primario-removido");
+        final boolean removePrimaryVip =
+            vipPlayer.getActiveVip() != null &&
+            vipPlayer.getActiveVip().getId() == configVip.getId() &&
+            (type == null || vipPlayer.getActiveVip().getType() == type);
+        final String typeFormat = type == null
+            ? "-/-"
+            : type.getName().toUpperCase();
 
-                    if (owningVipRemoveCount.get() > 0) {
-                        sender.respond("Vip-secundarios-removidos", message -> message.replace(
-                            "@removidos".to(String.valueOf(owningVipRemoveCount.get())),
-                            "@vip".to(configVip.getDisplay()),
-                            "@tipo".to(typeFormat)
-                        ));
-                    }
-                } else {
-                    if (owningVipRemoveCount.get() == 0) {
-                        sender.respond("Vip-removidos-nenhum", message -> message.replace(
-                            "@vip".to(configVip.getDisplay()),
-                            "@tipo".to(typeFormat)
-                        ));
-                        return;
-                    }
+        if (removePrimaryVip) {
+            vipHandler.remove(vipPlayer);
+            sender.respond("Vip-primario-removido");
 
-                    sender.respond("Vip-secundarios-removidos", message -> message.replace(
-                        "@removidos".to(String.valueOf(owningVipRemoveCount.get())),
-                        "@vip".to(configVip.getDisplay()),
-                        "@tipo".to(typeFormat)
-                    ));
-                }
-            }).run()
-        );
+            if (owningVipRemoveCount.get() > 0) {
+                sender.respond("Vip-secundarios-removidos", message -> message.replace(
+                    "@removidos".to(String.valueOf(owningVipRemoveCount.get())),
+                    "@vip".to(configVip.getDisplay()),
+                    "@tipo".to(typeFormat)
+                ));
+            }
+        } else {
+            if (owningVipRemoveCount.get() == 0) {
+                sender.respond("Vip-removidos-nenhum", message -> message.replace(
+                    "@vip".to(configVip.getDisplay()),
+                    "@tipo".to(typeFormat)
+                ));
+                return;
+            }
+
+            sender.respond("Vip-secundarios-removidos", message -> message.replace(
+                "@removidos".to(String.valueOf(owningVipRemoveCount.get())),
+                "@vip".to(configVip.getDisplay()),
+                "@tipo".to(typeFormat)
+            ));
+        }
     }
 }

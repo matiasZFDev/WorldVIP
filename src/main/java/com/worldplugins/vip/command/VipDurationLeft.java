@@ -6,9 +6,9 @@ import com.worldplugins.lib.command.annotation.ArgsChecker;
 import com.worldplugins.lib.command.annotation.Command;
 import com.worldplugins.lib.extension.GenericExtensions;
 import com.worldplugins.lib.extension.TimeExtensions;
-import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.database.player.PlayerService;
+import com.worldplugins.vip.database.player.model.VipPlayer;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.extension.ResponseExtensions;
 import lombok.NonNull;
@@ -27,7 +27,6 @@ import org.bukkit.entity.Player;
 @RequiredArgsConstructor
 public class VipDurationLeft implements CommandModule {
     private final @NonNull PlayerService playerService;
-    private final @NonNull SchedulerBuilder scheduler;
 
     @Command(
         name = "tempovip",
@@ -51,42 +50,37 @@ public class VipDurationLeft implements CommandModule {
                 return;
             }
 
-            playerService.getById(player.getUniqueId()).thenAccept(vipPlayer ->
-                scheduler.newTask(() -> {
-                    if (vipPlayer == null || vipPlayer.getActiveVip() == null) {
-                        sender.respond("Tempo-jogador-sem-vip", message -> message.replace(
-                            "@jogador".to(player.getName())
-                        ));
-                        return;
-                    }
+            final VipPlayer vipPlayer = playerService.getById(player.getUniqueId());
 
-                    final String durationFormat = vipPlayer.getActiveVip().getType() == VipType.PERMANENT
-                        ? GlobalValues.PERMANENT_DURATION
-                        : ((Integer) vipPlayer.getActiveVip().getDuration()).toTime();
-                    sender.respond("Tempo-vip-jogador", message -> message.replace(
-                        "@jogador".to(player.getName()),
-                        "@tempo".to(durationFormat)
-                    ));
-                }).run()
-            );
+            if (vipPlayer == null || vipPlayer.getActiveVip() == null) {
+                sender.respond("Tempo-jogador-sem-vip", message -> message.replace(
+                    "@jogador".to(player.getName())
+                ));
+                return;
+            }
+
+            final String durationFormat = vipPlayer.getActiveVip().getType() == VipType.PERMANENT
+                ? GlobalValues.PERMANENT_DURATION
+                : ((Integer) vipPlayer.getActiveVip().getDuration()).toTime();
+            sender.respond("Tempo-vip-jogador", message -> message.replace(
+                "@jogador".to(player.getName()),
+                "@tempo".to(durationFormat)
+            ));
         }
 
         final Player player = Bukkit.getPlayer(args[0]);
+        final VipPlayer vipPlayer = playerService.getById(player.getUniqueId());
 
-        playerService.getById(player.getUniqueId()).thenAccept(vipPlayer ->
-            scheduler.newTask(() -> {
-                if (vipPlayer == null || vipPlayer.getActiveVip() == null) {
-                    sender.respond("Tempo-sem-vip");
-                    return;
-                }
+        if (vipPlayer == null || vipPlayer.getActiveVip() == null) {
+            sender.respond("Tempo-sem-vip");
+            return;
+        }
 
-                final String durationFormat = vipPlayer.getActiveVip().getType() == VipType.PERMANENT
-                    ? GlobalValues.PERMANENT_DURATION
-                    : ((Integer) vipPlayer.getActiveVip().getDuration()).toTime();
-                sender.respond("Tempo-vip", message -> message.replace(
-                    "@tempo".to((durationFormat)
-                )));
-            }).run()
-        );
+        final String durationFormat = vipPlayer.getActiveVip().getType() == VipType.PERMANENT
+            ? GlobalValues.PERMANENT_DURATION
+            : ((Integer) vipPlayer.getActiveVip().getDuration()).toTime();
+        sender.respond("Tempo-vip", message -> message.replace(
+            "@tempo".to((durationFormat)
+        )));
     }
 }

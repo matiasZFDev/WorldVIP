@@ -123,8 +123,8 @@ public class SwitchVip implements CommandModule {
             playerService.setVip(player.getUniqueId(), newPrimaryVip);
             playerService.addOwningVip(player.getUniqueId(), newOwningVip);
         } else {
-            owningVipHandler.remove(player, vipPlayer, newPrimaryVip);
-            vipHandler.activate(player, newPrimaryVip, false);
+            owningVipHandler.remove(vipPlayer, newPrimaryVip);
+            vipHandler.activate(player.getUniqueId(), newPrimaryVip, false);
         }
 
         player.respond("Vip-trocado", message -> message.replace(

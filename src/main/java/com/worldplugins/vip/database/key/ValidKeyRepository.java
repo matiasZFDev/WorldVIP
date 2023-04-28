@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 public interface ValidKeyRepository {
     @NonNull CompletableFuture<Collection<ValidVipKey>> getKeys(@NonNull UUID generatorId);
     @NonNull CompletableFuture<ValidVipKey> getKeyByCode(@NonNull String code);
-    void consumeKey(@NonNull String code);
+    void consumeKey(@NonNull ValidVipKey key);
     void addKey(@NonNull ValidVipKey key);
-    void removeKey(@NonNull String code);
+    void removeKey(@NonNull ValidVipKey key);
 }

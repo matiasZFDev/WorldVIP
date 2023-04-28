@@ -54,3 +54,8 @@ Coleta-de-itens: true
 # Delay em segundos para executar o comando /trocarvip.
 # Utilizado para evitar a abuso de consultas.
 Delay-trocar-vip: 10
+
+# Reduzir o tempo do vip primario *junto* com os secundarios é dizer,
+# contar o tempo do vip inativos como os inativos.
+# Caso esteja em false, o único vip que ira contar é o primario.
+Reducao-simultanea: false

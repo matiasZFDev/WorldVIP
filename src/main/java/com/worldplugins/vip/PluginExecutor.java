@@ -6,15 +6,19 @@ import com.worldplugins.lib.config.cache.impl.MessagesConfig;
 import com.worldplugins.lib.config.cache.impl.SoundsConfig;
 import com.worldplugins.lib.registry.CommandRegistry;
 import com.worldplugins.lib.registry.ViewRegistry;
+import com.worldplugins.lib.util.ConfigUtils;
 import com.worldplugins.vip.command.*;
 import com.worldplugins.vip.command.key.*;
 import com.worldplugins.vip.command.vip.*;
 import com.worldplugins.vip.config.MainConfig;
+import com.worldplugins.vip.config.ServerConfig;
 import com.worldplugins.vip.config.VipConfig;
 import com.worldplugins.vip.config.VipItemsConfig;
+import com.worldplugins.vip.config.data.ServerData;
 import com.worldplugins.vip.database.CacheUnloader;
 import com.worldplugins.vip.database.DatabaseAccessor;
 import com.worldplugins.vip.database.PlayerCacheUnload;
+import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.handler.VipHandler;
 import com.worldplugins.vip.handler.OwningVipHandler;
 import com.worldplugins.vip.init.ConfigCacheInitializer;
@@ -29,7 +33,6 @@ import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.init.DatabaseInitializer;
 import com.worldplugins.vip.init.PermissionManagerInitializer;
 import com.worldplugins.vip.key.ConfigKeyGenerator;
-import com.worldplugins.vip.key.KeyStorageManager;
 import com.worldplugins.vip.key.VipKeyGenerator;
 import com.worldplugins.vip.listener.PlayerJoinListener;
 import com.worldplugins.vip.listener.PlayerQuitListener;
@@ -74,7 +77,7 @@ public class PluginExecutor {
         );
         vipHandler = new VipHandler(
             databaseAccessor.getPlayerService(), databaseAccessor.getVipItemsRepository(),
-            scheduler, permissionManager, owningVipHandler, config(VipConfig.class),
+            permissionManager, owningVipHandler, config(VipConfig.class),
             config(MainConfig.class), config(VipItemsConfig.class)
         );
         cacheUnloader = new PlayerCacheUnload(
@@ -87,6 +90,7 @@ public class PluginExecutor {
      * */
     public @NonNull Runnable execute() {
         prepareGlobalAccess();
+        checkBasicVips();
         registerListeners();
         registerCommands();
         registerViews();
@@ -99,6 +103,47 @@ public class PluginExecutor {
         GlobalAccess.setSounds(config(SoundsConfig.class));
         GlobalAccess.setEffects(config(EffectsConfig.class));
         GlobalAccess.setViewManager(viewManager);
+    }
+
+    private void checkBasicVips() {
+        final ConfigCache<ServerData> serverConfig = config(ServerConfig.class);
+        final long lastOnlineInstant = serverConfig.data().getLastOnlineInstant();
+
+        if (lastOnlineInstant == 0) {
+            return;
+        }
+
+        final int elapsedSeconds = (int) ((System.nanoTime() - lastOnlineInstant) / 1000);
+
+        databaseAccessor.getPlayerCache().getValues().forEach(vipPlayer -> {
+            vipPlayer.getOwningVips().getVips().forEach(owningVip -> {
+                if (owningVip.getType() != VipType.BASIC) {
+                    return;
+                }
+
+                owningVip.decrementDuration(elapsedSeconds);
+
+                if (owningVip.getDuration() > -1) {
+                    return;
+                }
+
+                owningVipHandler.remove(vipPlayer, owningVip);
+            });
+
+            if (vipPlayer.getActiveVip() != null) {
+                if (vipPlayer.getActiveVip().getType() != VipType.BASIC) {
+                    return;
+                }
+
+                vipPlayer.getActiveVip().decrementDuration(elapsedSeconds);
+
+                if (vipPlayer.getActiveVip().getDuration() > -1) {
+                    return;
+                }
+
+                vipHandler.remove(vipPlayer);
+            }
+        });
     }
 
     private <T> @NonNull T config(@NonNull Class<? extends ConfigCache<?>> clazz) {
@@ -121,32 +166,28 @@ public class PluginExecutor {
 
     private void registerCommands() {
         final CommandRegistry registry = new CommandRegistry(plugin);
-        final KeyStorageManager keyStorageManager = new KeyStorageManager(
-            databaseAccessor.getPlayerService(), databaseAccessor.getValidKeyRepository(), scheduler
-        );
         final VipKeyGenerator keyGenerator = new ConfigKeyGenerator(config(MainConfig.class));
 
         registry.command(
             new Help(),
             new GenerateKey(
                 config(VipConfig.class), databaseAccessor.getValidKeyRepository(), keyGenerator,
-                scheduler, keyStorageManager
+                scheduler
             ),
             new CreateKey(
-                config(VipConfig.class), databaseAccessor.getValidKeyRepository(), scheduler,
-                keyStorageManager
+                config(VipConfig.class), databaseAccessor.getValidKeyRepository(), scheduler
             ),
-            new RemoveKey(keyStorageManager, scheduler),
+            new RemoveKey(databaseAccessor.getValidKeyRepository(), scheduler),
             new SeeKeys(
-                databaseAccessor.getPlayerService(), scheduler, config(VipConfig.class),
+                scheduler, databaseAccessor.getValidKeyRepository(), config(VipConfig.class),
                 config(MainConfig.class)
             ),
-            new VipDurationLeft(databaseAccessor.getPlayerService(), scheduler),
+            new VipDurationLeft(databaseAccessor.getPlayerService()),
             new UseKey(databaseAccessor.getValidKeyRepository(), scheduler, vipHandler),
             new GiveVip(databaseAccessor.getPendingVipRepository(), vipHandler, config(VipConfig.class)),
             new SetVip(vipHandler, config(VipConfig.class)),
             new RemoveVip(
-                config(VipConfig.class), databaseAccessor.getPlayerService(), scheduler, vipHandler,
+                config(VipConfig.class), databaseAccessor.getPlayerService(), vipHandler,
                 owningVipHandler
             ),
             new SwitchVip(
@@ -170,6 +211,10 @@ public class PluginExecutor {
     }
 
     private void scheduleTasks() {
-
+        scheduler.newTimer(() ->
+            ConfigUtils.update(config(ServerConfig.class), config ->
+                config.set("Ultimo-instante-online", System.nanoTime())
+            )
+        ).delay(0L).period(20L).run();
     }
 }

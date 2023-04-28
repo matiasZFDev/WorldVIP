@@ -102,7 +102,7 @@ public class SetVip implements CommandModule {
         }
 
         final VIP vip = new VIP(configVip.getId(), vipType, duration);
-        activationHandler.activate(player, vip, false);
+        activationHandler.activate(player.getUniqueId(), vip, false);
         sender.respond("Vip-setado", message -> message.replace(
             "@jogador".to(player.getName()),
             "@vip".to(configVip.getDisplay()),

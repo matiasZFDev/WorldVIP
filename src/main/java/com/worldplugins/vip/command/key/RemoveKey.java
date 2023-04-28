@@ -6,15 +6,12 @@ import com.worldplugins.lib.command.annotation.Command;
 import com.worldplugins.lib.extension.GenericExtensions;
 import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.GlobalValues;
+import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.extension.ResponseExtensions;
-import com.worldplugins.vip.key.KeyStorageManager;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
-import java.util.UUID;
 
 @ExtensionMethod({
     ResponseExtensions.class,
@@ -23,7 +20,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class RemoveKey implements CommandModule {
-    private final @NonNull KeyStorageManager keyStorageManager;
+    private final @NonNull ValidKeyRepository validKeyRepository;
     private final @NonNull SchedulerBuilder scheduler;
 
     @Command(
@@ -43,9 +40,7 @@ public class RemoveKey implements CommandModule {
             return;
         }
 
-        final UUID requesterId = sender instanceof Player ? ((Player) sender).getUniqueId() : null;
-
-        keyStorageManager.get(requesterId, code).thenAccept(key -> {
+        validKeyRepository.getKeyByCode(code).thenAccept(key ->
             scheduler.newTask(() -> {
                 if (key == null) {
                     sender.respond("Remover-key-inexistente", message -> message.replace(
@@ -54,11 +49,11 @@ public class RemoveKey implements CommandModule {
                     return;
                 }
 
-                keyStorageManager.remove(key);
+                validKeyRepository.removeKey(key);
                 sender.respond("Key-removida", message -> message.replace(
                     "@key".to(code)
                 ));
-            }).run();
-        });
+            }).run()
+        );
     }
 }

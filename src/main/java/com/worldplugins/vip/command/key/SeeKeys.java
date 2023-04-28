@@ -12,8 +12,8 @@ import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
+import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
-import com.worldplugins.vip.database.player.PlayerService;
 import com.worldplugins.vip.extension.ResponseExtensions;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +37,8 @@ import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public class SeeKeys implements CommandModule {
-    private final @NonNull PlayerService playerService;
     private final @NonNull SchedulerBuilder scheduler;
+    private final @NonNull ValidKeyRepository validKeyRepository;
     private final @NonNull ConfigCache<VipData> vipConfig;
     private final @NonNull ConfigCache<MainData> mainConfig;
 
@@ -64,26 +64,26 @@ public class SeeKeys implements CommandModule {
                 return;
             }
 
-            playerService.getById(keysPlayer.getUniqueId()).thenAccept(vipPlayer -> scheduler.newTask(() -> {
-                if (vipPlayer == null || vipPlayer.getKeys().all().isEmpty()) {
+            validKeyRepository.getKeys(keysPlayer.getUniqueId()).thenAccept(keys -> scheduler.newTask(() -> {
+                if (keys.isEmpty()) {
                     player.respond("Jogador-sem-keys", message -> message.replace(
                         "@jogador".to(player.getName())
                     ));
                     return;
                 }
 
-                messageKeyList(keysPlayer, vipPlayer.getKeys().all(), true);
+                messageKeyList(keysPlayer, keys, true);
             }).run());
             return;
         }
 
-        playerService.getById(player.getUniqueId()).thenAccept(vipPlayer -> scheduler.newTask(() -> {
-            if (vipPlayer == null || vipPlayer.getKeys().all().isEmpty()) {
+        validKeyRepository.getKeys(player.getUniqueId()).thenAccept(keys -> scheduler.newTask(() -> {
+            if (keys.isEmpty()) {
                 sender.respond("Ver-keys-vazio");
                 return;
             }
 
-            messageKeyList(player, vipPlayer.getKeys().all(), false);
+            messageKeyList(player, keys, false);
         }).run());
     }
 

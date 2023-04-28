@@ -2,11 +2,15 @@ package com.worldplugins.vip.database.items;
 
 import com.worldplugins.lib.database.sql.SQLExecutor;
 import com.worldplugins.lib.extension.UUIDExtensions;
+import com.worldplugins.lib.util.SchedulerBuilder;
+import com.worldplugins.lib.util.cache.Cache;
+import com.worldplugins.vip.util.ExpiringMap;
 import lombok.NonNull;
 import lombok.experimental.ExtensionMethod;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -18,12 +22,18 @@ import java.util.concurrent.Executor;
 public class SQLVipItemsRepository implements VipItemsRepository {
     private final @NonNull Executor executor;
     private final @NonNull SQLExecutor sqlExecutor;
+    private final @NonNull Cache<UUID, Collection<VipItems>> cache;
 
     private static final @NonNull String ITEMS_TABLE = "worldvip_itens";
 
-    public SQLVipItemsRepository(@NonNull Executor executor, @NonNull SQLExecutor sqlExecutor) {
+    public SQLVipItemsRepository(
+        @NonNull Executor executor,
+        @NonNull SQLExecutor sqlExecutor,
+        @NonNull SchedulerBuilder scheduler
+    ) {
         this.executor = executor;
         this.sqlExecutor = sqlExecutor;
+        this.cache = new ExpiringMap<>(scheduler, 60 * 15, 60 * 5, true);
         createTable();
     }
 
@@ -39,27 +49,37 @@ public class SQLVipItemsRepository implements VipItemsRepository {
 
     @Override
     public @NonNull CompletableFuture<Collection<VipItems>> getItems(@NonNull UUID playerId) {
-        return CompletableFuture.supplyAsync(() -> sqlExecutor.executeQuery(
-            "SELECT vip_id, amount FROM " + ITEMS_TABLE + "WHERE player_id=?",
-            statement -> statement.set(1, playerId.getBytes()),
-            result -> {
-                final Collection<VipItems> items = new ArrayList<>();
+        return CompletableFuture
+            .supplyAsync(() -> sqlExecutor.executeQuery(
+                "SELECT vip_id, amount FROM " + ITEMS_TABLE + "WHERE player_id=?",
+                statement -> statement.set(1, playerId.getBytes()),
+                result -> {
+                    final Collection<VipItems> items = new ArrayList<>();
 
-                while (result.next()) {
-                    items.add(new VipItems(
-                        playerId,
-                        result.get("vip_id"),
-                        result.get("amount")
-                    ));
+                    while (result.next()) {
+                        items.add(new VipItems(
+                            playerId,
+                            result.get("vip_id"),
+                            result.get("amount")
+                        ));
+                    }
+
+                    return items;
                 }
-
-                return items;
-            }
-        ), executor);
+            ), executor)
+            .whenComplete((itemList, t) ->
+                cache.set(playerId, itemList)
+            );
     }
 
     @Override
     public void addItems(@NonNull VipItems items) {
+        if (!cache.containsKey(items.getPlayerId())) {
+            cache.set(items.getPlayerId(), new ArrayList<>(1));
+        }
+
+        cache.get(items.getPlayerId()).add(items);
+
         CompletableFuture.runAsync(() -> sqlExecutor.update(
             "INSERT INTO " + ITEMS_TABLE + "(player_id, vip_id, amount) VALUES(?,?,?)",
             statement -> {
@@ -72,6 +92,21 @@ public class SQLVipItemsRepository implements VipItemsRepository {
 
     @Override
     public void removeItems(@NonNull UUID playerId, byte vipId, short amount) {
+        if (cache.containsKey(playerId)) {
+            cache.get(playerId).removeIf(items -> {
+                if (items.getVipId() != vipId) {
+                    return false;
+                }
+
+                if (amount == -1) {
+                    return true;
+                }
+
+                items.setAmount((short) (items.getAmount() - amount));
+                return false;
+            });
+        }
+
         if (amount == -1) {
             CompletableFuture.runAsync(() -> sqlExecutor.update(
                 "DELETE FROM " + ITEMS_TABLE + " WHERE player_id=? AND vip_id=?",

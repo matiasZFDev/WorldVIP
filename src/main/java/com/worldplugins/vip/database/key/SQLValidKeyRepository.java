@@ -1,10 +1,11 @@
 package com.worldplugins.vip.database.key;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.worldplugins.lib.database.sql.SQLExecutor;
 import com.worldplugins.lib.extension.UUIDExtensions;
+import com.worldplugins.lib.util.SchedulerBuilder;
+import com.worldplugins.lib.util.cache.Cache;
 import com.worldplugins.vip.database.player.model.VipType;
+import com.worldplugins.vip.util.ExpiringMap;
 import lombok.NonNull;
 import lombok.experimental.ExtensionMethod;
 
@@ -13,7 +14,6 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 
 @ExtensionMethod({
     UUIDExtensions.class
@@ -22,17 +22,20 @@ import java.util.concurrent.TimeUnit;
 public class SQLValidKeyRepository implements ValidKeyRepository {
     private final @NonNull Executor executor;
     private final @NonNull SQLExecutor sqlExecutor;
-    private final @NonNull Cache<String, ValidVipKey> cache;
+    private final @NonNull Cache<String, ValidVipKey> globalCache;
+    private final @NonNull Cache<UUID, Collection<ValidVipKey>> generatorCache;
 
     private static final @NonNull String KEYS_TABLE = "worldvip_keys_validas";
 
-    public SQLValidKeyRepository(@NonNull Executor executor, @NonNull SQLExecutor sqlExecutor) {
+    public SQLValidKeyRepository(
+        @NonNull Executor executor,
+        @NonNull SQLExecutor sqlExecutor,
+        @NonNull SchedulerBuilder scheduler
+    ) {
         this.executor = executor;
         this.sqlExecutor = sqlExecutor;
-        this.cache = CacheBuilder.newBuilder()
-            .expireAfterWrite(1, TimeUnit.MINUTES)
-            .expireAfterAccess(1, TimeUnit.MINUTES)
-            .build();
+        this.globalCache = new ExpiringMap<>(scheduler, 120, 120, true);
+        this.generatorCache = new ExpiringMap<>(scheduler, 60 * 5, 60 * 5, true);
         createTables();
     }
 
@@ -52,24 +55,29 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
 
     @Override
     public @NonNull CompletableFuture<Collection<ValidVipKey>> getKeys(@NonNull UUID generatorId) {
-        return CompletableFuture.supplyAsync(() -> sqlExecutor.executeQuery(
-            "SELECT code, vip_id, vip_type, duration, usages FROM " + KEYS_TABLE
-                + " WHERE generator_id=?",
-            statement -> statement.set(1, generatorId.getBytes()),
-            result -> {
-                final Collection<ValidVipKey> keys = new ArrayList<>();
+        return CompletableFuture
+            .supplyAsync(() -> sqlExecutor.executeQuery(
+                "SELECT code, vip_id, vip_type, duration, usages FROM " + KEYS_TABLE
+                    + " WHERE generator_id=?",
+                statement -> statement.set(1, generatorId.getBytes()),
+                result -> {
+                    final Collection<ValidVipKey> keys = new ArrayList<>();
 
-                while (result.next()) {
-                    keys.add(new ValidVipKey(
-                        generatorId, result.get("code"), result.get("vip_id"),
-                        VipType.fromId(result.get("vip_type")), result.get("duration"),
-                        result.get("usages")
-                    ));
+                    while (result.next()) {
+                        keys.add(new ValidVipKey(
+                            generatorId, result.get("code"), result.get("vip_id"),
+                            VipType.fromId(result.get("vip_type")), result.get("duration"),
+                            result.get("usages")
+                        ));
+                    }
+
+                    return keys;
                 }
-
-                return keys;
-            }
-        ), executor);
+            ), executor)
+            .whenComplete((keys, t) -> {
+                keys.forEach(key -> globalCache.set(key.getCode(), key));
+                generatorCache.set(generatorId, keys);
+            });
     }
 
     @Override
@@ -90,27 +98,31 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
                     return;
                 }
 
-                cache.put(code, key);
+                globalCache.set(code, key);
             });
     }
 
     @Override
-    public void consumeKey(@NonNull String code) {
-        final ValidVipKey key = cache.getIfPresent(code);
-
-        if (key != null) {
-            key.setUsages((short) (key.getUsages() - 1));
-        }
+    public void consumeKey(@NonNull ValidVipKey key) {
+        key.setUsages((short) (key.getUsages() - 1));
 
         CompletableFuture.runAsync(() -> sqlExecutor.update(
             "UPDATE " + KEYS_TABLE + " SET usages=usages - 1 WHERE code=?",
-            statement -> statement.set(1, code)
+            statement -> statement.set(1, key.getCode())
         ), executor);
     }
 
     @Override
     public void addKey(@NonNull ValidVipKey key) {
-        cache.put(key.getCode(), key);
+        globalCache.set(key.getCode(), key);
+
+        if (key.getGeneratorId() != null) {
+            if (!generatorCache.containsKey(key.getGeneratorId())) {
+                generatorCache.set(key.getGeneratorId(), new ArrayList<>(1));
+            }
+
+            generatorCache.get(key.getGeneratorId()).add(key);
+        }
 
         CompletableFuture.runAsync(() -> sqlExecutor.update(
             "INSERT INTO " + KEYS_TABLE
@@ -127,14 +139,16 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
     }
 
     @Override
-    public void removeKey(@NonNull String code) {
-        if (cache.getIfPresent(code) != null) {
-            cache.invalidate(code);
+    public void removeKey(@NonNull ValidVipKey key) {
+        globalCache.remove(key.getCode());
+
+        if (key.getGeneratorId() != null && generatorCache.containsKey(key.getGeneratorId())) {
+            generatorCache.get(key.getGeneratorId()).remove(key);
         }
 
         CompletableFuture.runAsync(() -> sqlExecutor.update(
             "DELETE FROM " + KEYS_TABLE + " WHERE code=?",
-            statement -> statement.set(1, code)
+            statement -> statement.set(1, key.getCode())
         ), executor);
     }
 }

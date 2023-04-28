@@ -14,7 +14,6 @@ import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.extension.ResponseExtensions;
-import com.worldplugins.vip.key.KeyStorageManager;
 import com.worldplugins.vip.util.TimeParser;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +36,6 @@ public class CreateKey implements CommandModule {
     private final @NonNull ConfigCache<VipData> vipConfig;
     private final @NonNull ValidKeyRepository validKeyRepository;
     private final @NonNull SchedulerBuilder scheduler;
-    private final @NonNull KeyStorageManager keyStorageManager;
 
     @Command(
         name = "criarkey",
@@ -134,7 +132,7 @@ public class CreateKey implements CommandModule {
                 final ValidVipKey validKey = new ValidVipKey(
                     generatorId, keyCode, configVip.getId(), vipType, duration, usages
                 );
-                keyStorageManager.store(validKey);
+                validKeyRepository.addKey(validKey);
                 sender.respond("Key-criada", message -> message.replace(
                     "@key".to(keyCode),
                     "@vip".to(configVip.getDisplay()),

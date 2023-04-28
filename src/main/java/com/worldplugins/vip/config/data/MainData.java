@@ -36,4 +36,6 @@ public class MainData {
     @Accessors(fluent = true)
     private final boolean storeItems;
     private final int switchVipDelay;
+    @Accessors(fluent = true)
+    private final boolean simultaneousReduction;
 }
