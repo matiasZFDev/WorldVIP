@@ -11,7 +11,12 @@ import java.util.UUID;
 @Getter
 public class VipPlayer {
     private final @NonNull UUID id;
+    private double spent;
     @Setter
     private VIP activeVip;
     private final @NonNull OwningVIPs owningVips;
+
+    public void incrementSpent(double amount) {
+        spent += amount;
+    }
 }

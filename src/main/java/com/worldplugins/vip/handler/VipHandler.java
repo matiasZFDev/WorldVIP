@@ -47,6 +47,7 @@ public class VipHandler {
         if (vipPlayer == null) {
             final VipPlayer newVipPlayer = new VipPlayer(
                 playerId,
+                0,
                 null,
                 new OwningVIPs(new ArrayList<>(0))
             );

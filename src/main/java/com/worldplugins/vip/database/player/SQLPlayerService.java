@@ -20,6 +20,7 @@ public class SQLPlayerService implements PlayerService {
     private final @NonNull SQLExecutor sqlExecutor;
     private final @NonNull Cache<UUID, VipPlayer> players;
 
+    private static final @NonNull String SPENT_TABLE = "worldvip_gasto";
     private static final @NonNull String PLAYER_TABLE = "worldvip_jogadores";
     private static final @NonNull String OWNING_TABLE = "worldvip_vips";
 
@@ -37,7 +38,14 @@ public class SQLPlayerService implements PlayerService {
 
     private void createTables() {
         sqlExecutor.query(
-            "CREATE TABLE IF NOT EXSITS " + PLAYER_TABLE + "(" +
+            "CREATE TABLE IF NOT EXISTS " + SPENT_TABLE + "(" +
+                "player_id BINARY(16) NOT NULL, " +
+                "spent DOUBLE NOT NULL, " +
+                "PRIMARY KEY(player_id)" +
+            ")"
+        );
+        sqlExecutor.query(
+            "CREATE TABLE IF NOT EXISTS " + PLAYER_TABLE + "(" +
                 "player_id BINARY(16) NOT NULL, " +
                 "vip_id TINYINT NOT NULL, " +
                 "vip_type TINYINT NOT NULL, " +
@@ -46,7 +54,7 @@ public class SQLPlayerService implements PlayerService {
             ")"
         );
         sqlExecutor.query(
-            "CREATE TABLE IF NOT EXSITS " + OWNING_TABLE + "(" +
+            "CREATE TABLE IF NOT EXISTS " + OWNING_TABLE + "(" +
                 "player_id BINARY(16) NOT NULL, " +
                 "vip_id TINYINT NOT NULL, " +
                 "vip_type TINYINT NOT NULL, " +
@@ -56,24 +64,20 @@ public class SQLPlayerService implements PlayerService {
     }
 
     private void loadPlayers() {
-        final Map<UUID, VipPlayer> players = sqlExecutor.executeQuery(
-            "SELECT * FROM " + PLAYER_TABLE,
+        sqlExecutor.executeQuery(
+            "SELECT * FROM " + SPENT_TABLE,
             statement -> {},
             result -> {
                 final Map<UUID, VipPlayer> data = new HashMap<>();
 
                 while (result.next()) {
                     final UUID playerId = ((byte[]) result.get("player_id")).toUUID();
-                    final VipPlayer vipPlayer = new VipPlayer(
+                    players.set(playerId, new VipPlayer(
                         playerId,
-                        new VIP(
-                            result.get("vip_id"), VipType.fromId(result.get("vip_type")),
-                            result.get("vip_duration")
-                        ),
-                        new OwningVIPs(new ArrayList<>(3))
-                    );
-
-                    data.put(playerId, vipPlayer);
+                        result.get("spent"),
+                        null,
+                        new OwningVIPs(new ArrayList<>(3)
+                    )));
                 }
 
                 return data;
@@ -81,17 +85,12 @@ public class SQLPlayerService implements PlayerService {
         );
 
         sqlExecutor.executeQuery(
-            "SELECT * FROM " + OWNING_TABLE,
+            "SELECT * FROM " + PLAYER_TABLE,
             statement -> {},
             result -> {
                 while (result.next()) {
                     final UUID playerId = ((byte[]) result.get("player_id")).toUUID();
-
-                    players.computeIfAbsent(playerId, id -> new VipPlayer(
-                        id, null, new OwningVIPs(new ArrayList<>(3))
-                    ));
-
-                    players.get(playerId).getOwningVips().add(
+                    players.get(playerId).setActiveVip(
                         new VIP(
                             result.get("vip_id"), VipType.fromId(result.get("vip_type")),
                             result.get("vip_duration")
@@ -103,12 +102,41 @@ public class SQLPlayerService implements PlayerService {
             }
         );
 
-        players.forEach(this.players::set);
+        sqlExecutor.executeQuery(
+            "SELECT * FROM " + OWNING_TABLE,
+            statement -> {},
+            result -> {
+                while (result.next()) {
+                    final UUID playerId = ((byte[]) result.get("player_id")).toUUID();
+                    players.get(playerId).getOwningVips().add(
+                        new VIP(
+                            result.get("vip_id"), VipType.fromId(result.get("vip_type")),
+                            result.get("vip_duration")
+                        )
+                    );
+                }
+
+                return null;
+            }
+        );
     }
 
     @Override
     public VipPlayer getById(@NonNull UUID playerId) {
         return players.get(playerId);
+    }
+
+    @Override
+    public void addSpent(@NonNull UUID playerId, double value) {
+        players.get(playerId).incrementSpent(value);
+
+        CompletableFuture.runAsync(() -> sqlExecutor.update(
+            "UPDATE " + SPENT_TABLE + " SET spent=? WHERE player_id=?",
+            statement -> {
+                statement.set(1, value);
+                statement.set(2, playerId.getBytes());
+            }
+        ), executor);
     }
 
     @Override
@@ -120,10 +148,18 @@ public class SQLPlayerService implements PlayerService {
         } else {
             final VipPlayer vipPlayer = new VipPlayer(
                 playerId,
+                0,
                 vip,
                 new OwningVIPs(new ArrayList<>(0))
             );
             players.set(playerId, vipPlayer);
+            CompletableFuture.runAsync(() -> sqlExecutor.update(
+                "INSERT INTO " + PLAYER_TABLE + "(player_id, spent) VALUES(?,?)",
+                statement -> {
+                    statement.set(1, playerId.getBytes());
+                    statement.set(2, vipPlayer.getSpent());
+                }
+            ), executor);
         }
 
         CompletableFuture.runAsync(() -> sqlExecutor.update(
@@ -201,15 +237,15 @@ public class SQLPlayerService implements PlayerService {
                 " SET vip_duration=? " +
                 "WHERE player_id=? AND vip_id=? AND vip_type=?",
             statement ->
-                vips.forEach((playerId, owningVips) -> {
+                vips.forEach((playerId, owningVips) ->
                     owningVips.forEach(owningVip -> {
                         statement.set(1, owningVip.getDuration());
                         statement.set(2, playerId.getBytes());
                         statement.set(3, owningVip.getId());
                         statement.set(4, owningVip.getType().getId());
                         statement.addBatch();
-                    });
-                })
+                    })
+                )
         ), executor);
     }
 }

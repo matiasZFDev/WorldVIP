@@ -37,7 +37,9 @@ import com.worldplugins.vip.key.VipKeyGenerator;
 import com.worldplugins.vip.listener.PlayerJoinListener;
 import com.worldplugins.vip.listener.PlayerQuitListener;
 import com.worldplugins.vip.manager.PermissionManager;
+import com.worldplugins.vip.manager.VipTopManager;
 import com.worldplugins.vip.view.VipItemsEditView;
+import com.worldplugins.vip.view.VipTopView;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Listener;
@@ -60,6 +62,7 @@ public class PluginExecutor {
     private final @NonNull VipHandler vipHandler;
     private final @NonNull OwningVipHandler owningVipHandler;
     private final @NonNull CacheUnloader<UUID> cacheUnloader;
+    private final @NonNull VipTopManager topManager;
 
     public PluginExecutor(@NonNull JavaPlugin plugin) {
         this.plugin = plugin;
@@ -83,6 +86,7 @@ public class PluginExecutor {
         cacheUnloader = new PlayerCacheUnload(
             scheduler, databaseAccessor.getPlayerCache(), databaseAccessor.getPlayerService()
         );
+        topManager = new VipTopManager(databaseAccessor.getPlayerCache());
     }
 
     /**
@@ -190,7 +194,8 @@ public class PluginExecutor {
                 databaseAccessor.getPlayerService(), databaseAccessor.getPlayerCache(),
                 config(MainConfig.class), config(VipConfig.class), owningVipHandler, vipHandler
             ),
-            new RemovePendingVips(databaseAccessor.getPendingVipRepository())
+            new RemovePendingVips(databaseAccessor.getPendingVipRepository()),
+            new VipTop()
         );
         registry.autoTabCompleter(
             "criarkey", "removerkey", "verkeys", "usarkey", "tempovip", "darvip", "setarvip",
@@ -202,7 +207,8 @@ public class PluginExecutor {
     private void registerViews() {
         final ViewRegistry registry = new ViewRegistry(viewManager, menuContainerManager, configManager);
         registry.register(
-            new VipItemsEditView(config(VipItemsConfig.class))
+            new VipItemsEditView(config(VipItemsConfig.class)),
+            new VipTopView(topManager)
         );
     }
 
@@ -212,5 +218,9 @@ public class PluginExecutor {
                 config.set("Ultimo-instante-online", System.nanoTime())
             )
         ).delay(0L).period(20L).run();
+        scheduler.newTimer(topManager::update)
+            .delay(0L)
+            .period(20 * 60 * 5)
+            .run();
     }
 }

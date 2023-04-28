@@ -11,6 +11,7 @@ import java.util.UUID;
 
 public interface PlayerService {
     VipPlayer getById(@NonNull UUID playerId);
+    void addSpent(@NonNull UUID playerId, double value);
     void setVip(@NonNull UUID playerId, @NonNull VIP vip);
     void removeVip(@NonNull UUID playerId);
     void updatePrimaryVip(@NonNull Collection<VipPlayer> players);

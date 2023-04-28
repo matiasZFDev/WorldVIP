@@ -1,0 +1,16 @@
+Nome: 'Top VIP'
+Linhas: 4
+Data:
+  Slots: [10,11,12,13,14,15,16,21,22,23]
+  Iten-top:
+    Id: 1 # Caveça do jogador
+    Nome: '&f#@posicao &6@jogador'
+    Lore:
+      - '&fGasto: &b$@gasto'
+Conteudo:
+  Voltar:
+    Id: 262
+    Nome: '&eVoltar'
+    Lore:
+      - '&7Clique para voltar'
+      - '&7ao menu principal.'

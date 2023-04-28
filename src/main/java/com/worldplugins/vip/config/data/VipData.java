@@ -16,14 +16,36 @@ import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 public class VipData {
+
     @RequiredArgsConstructor
     @Getter
     public static class VIP {
+        @RequiredArgsConstructor
+        public static class Pricing {
+            @RequiredArgsConstructor
+            @Getter
+            public static class PricePair {
+                private final int days;
+                private final double price;
+            }
+
+            private final @NonNull Collection<PricePair> prices;
+
+            public Double getPrice(int days) {
+                return prices.stream()
+                    .filter(pair -> pair.days == days)
+                    .findFirst()
+                    .map(PricePair::getPrice)
+                    .orElse(null);
+            }
+        }
+
         private final byte id;
         private final @NonNull String name;
         private final @NonNull String display;
         private final @NonNull String group;
         private final @NonNull List<String> activationCommands;
+        private final @NonNull Pricing pricing;
     }
 
     private final @NonNull Collection<VIP> vips;
