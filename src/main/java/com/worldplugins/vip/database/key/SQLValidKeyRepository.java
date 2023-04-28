@@ -11,7 +11,6 @@ import lombok.experimental.ExtensionMethod;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -23,7 +22,7 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
     private final @NonNull Executor executor;
     private final @NonNull SQLExecutor sqlExecutor;
     private final @NonNull Cache<String, ValidVipKey> globalCache;
-    private final @NonNull Cache<UUID, Collection<ValidVipKey>> generatorCache;
+    private final @NonNull Cache<String, Collection<ValidVipKey>> generatorCache;
 
     private static final @NonNull String KEYS_TABLE = "worldvip_keys_validas";
 
@@ -42,7 +41,7 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
     private void createTables() {
         sqlExecutor.query(
             "CREATE TABLE IF NOT EXISTS " + KEYS_TABLE + "(" +
-                "generator_id BINARY(16), " +
+                "generator_name VARCHAR(16), " +
                 "code CHAR(20) NOT NULL, " +
                 "vip_id TINYINT NOT NULL, " +
                 "vip_type TINYINT NOT NULL, " +
@@ -54,18 +53,18 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
     }
 
     @Override
-    public @NonNull CompletableFuture<Collection<ValidVipKey>> getKeys(@NonNull UUID generatorId) {
+    public @NonNull CompletableFuture<Collection<ValidVipKey>> getKeys(@NonNull String generatorName) {
         return CompletableFuture
             .supplyAsync(() -> sqlExecutor.executeQuery(
                 "SELECT code, vip_id, vip_type, duration, usages FROM " + KEYS_TABLE
                     + " WHERE generator_id=?",
-                statement -> statement.set(1, generatorId.getBytes()),
+                statement -> statement.set(1, generatorName),
                 result -> {
                     final Collection<ValidVipKey> keys = new ArrayList<>();
 
                     while (result.next()) {
                         keys.add(new ValidVipKey(
-                            generatorId, result.get("code"), result.get("vip_id"),
+                            generatorName, result.get("code"), result.get("vip_id"),
                             VipType.fromId(result.get("vip_type")), result.get("duration"),
                             result.get("usages")
                         ));
@@ -76,7 +75,7 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
             ), executor)
             .whenComplete((keys, t) -> {
                 keys.forEach(key -> globalCache.set(key.getCode(), key));
-                generatorCache.set(generatorId, keys);
+                generatorCache.set(generatorName, keys);
             });
     }
 
@@ -88,8 +87,9 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
                 statement -> statement.set(1, code),
                 result -> result.next()
                     ? new ValidVipKey(
-                        ((byte[]) result.get("generator_id")).toUUID(), code, result.get("vip_id"),
-                        VipType.fromId(result.get("vip_type")), result.get("duration"), result.get("usages")
+                        result.get("generator_anem"), code, result.get("vip_id"),
+                        VipType.fromId(result.get("vip_type")), result.get("duration"),
+                        result.get("usages")
                     )
                     : null
             ), executor)
@@ -116,19 +116,19 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
     public void addKey(@NonNull ValidVipKey key) {
         globalCache.set(key.getCode(), key);
 
-        if (key.getGeneratorId() != null) {
-            if (!generatorCache.containsKey(key.getGeneratorId())) {
-                generatorCache.set(key.getGeneratorId(), new ArrayList<>(1));
+        if (key.getGeneratorName() != null) {
+            if (!generatorCache.containsKey(key.getGeneratorName())) {
+                generatorCache.set(key.getGeneratorName(), new ArrayList<>(1));
             }
 
-            generatorCache.get(key.getGeneratorId()).add(key);
+            generatorCache.get(key.getGeneratorName()).add(key);
         }
 
         CompletableFuture.runAsync(() -> sqlExecutor.update(
             "INSERT INTO " + KEYS_TABLE
                 + "(generator_id, code, vip_id, vip_type, duration, usages) VALUES(?,?,?,?,?,?)",
             statement -> {
-                statement.set(1, key.getGeneratorId().getBytes());
+                statement.set(1, key.getGeneratorName().getBytes());
                 statement.set(2, key.getCode());
                 statement.set(3, key.getVipId());
                 statement.set(4, key.getVipType().getId());
@@ -142,8 +142,8 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
     public void removeKey(@NonNull ValidVipKey key) {
         globalCache.remove(key.getCode());
 
-        if (key.getGeneratorId() != null && generatorCache.containsKey(key.getGeneratorId())) {
-            generatorCache.get(key.getGeneratorId()).remove(key);
+        if (key.getGeneratorName() != null && generatorCache.containsKey(key.getGeneratorName())) {
+            generatorCache.get(key.getGeneratorName()).remove(key);
         }
 
         CompletableFuture.runAsync(() -> sqlExecutor.update(

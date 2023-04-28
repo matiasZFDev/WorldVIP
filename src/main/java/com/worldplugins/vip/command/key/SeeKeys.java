@@ -64,7 +64,7 @@ public class SeeKeys implements CommandModule {
                 return;
             }
 
-            validKeyRepository.getKeys(keysPlayer.getUniqueId()).thenAccept(keys -> scheduler.newTask(() -> {
+            validKeyRepository.getKeys(keysPlayer.getName()).thenAccept(keys -> scheduler.newTask(() -> {
                 if (keys.isEmpty()) {
                     player.respond("Jogador-sem-keys", message -> message.replace(
                         "@jogador".to(player.getName())
@@ -77,7 +77,7 @@ public class SeeKeys implements CommandModule {
             return;
         }
 
-        validKeyRepository.getKeys(player.getUniqueId()).thenAccept(keys -> scheduler.newTask(() -> {
+        validKeyRepository.getKeys(player.getName()).thenAccept(keys -> scheduler.newTask(() -> {
             if (keys.isEmpty()) {
                 sender.respond("Ver-keys-vazio");
                 return;

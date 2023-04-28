@@ -3,12 +3,10 @@ package com.worldplugins.vip.database.key;
 import com.worldplugins.vip.database.player.model.VipType;
 import lombok.*;
 
-import java.util.UUID;
-
 @AllArgsConstructor
 @Getter
 public class ValidVipKey {
-    private final UUID generatorId;
+    private final String generatorName;
     private final @NonNull String code;
     private final byte vipId;
     private final @NonNull VipType vipType;

@@ -6,8 +6,8 @@ api-version: 1.8
 commands:
   vip:
     description: Comando para operações gerais. Abre um GUI de gerenciamento caso executar sem argumentos
-  gerarkey:
-    description: Gera um key aleatoria
+  criarkey:
+    description: Cria uma key com os parametros indicados
   removerkey:
     description: Remover uma key (invalidar)
   verkeys:

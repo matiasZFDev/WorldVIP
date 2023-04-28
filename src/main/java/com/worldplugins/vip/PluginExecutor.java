@@ -170,12 +170,8 @@ public class PluginExecutor {
 
         registry.command(
             new Help(),
-            new GenerateKey(
-                config(VipConfig.class), databaseAccessor.getValidKeyRepository(), keyGenerator,
-                scheduler
-            ),
             new CreateKey(
-                config(VipConfig.class), databaseAccessor.getValidKeyRepository(), scheduler
+                keyGenerator, config(VipConfig.class), databaseAccessor.getValidKeyRepository(), scheduler
             ),
             new RemoveKey(databaseAccessor.getValidKeyRepository(), scheduler),
             new SeeKeys(
@@ -197,7 +193,7 @@ public class PluginExecutor {
             new RemovePendingVips(databaseAccessor.getPendingVipRepository())
         );
         registry.autoTabCompleter(
-            "gerarkey", "removerkey", "verkeys", "usarkey", "tempovip", "darvip", "setarvip",
+            "criarkey", "removerkey", "verkeys", "usarkey", "tempovip", "darvip", "setarvip",
             "removervip", "trocarvip", "vip"
         );
         registry.registerAll();

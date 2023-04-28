@@ -14,6 +14,9 @@ import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.extension.ResponseExtensions;
+import com.worldplugins.vip.key.VipKeyGenerator;
+import com.worldplugins.vip.util.CommandParameters;
+import com.worldplugins.vip.util.CommandParams;
 import com.worldplugins.vip.util.TimeParser;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +26,6 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.UUID;
 
 @ExtensionMethod({
     ResponseExtensions.class,
@@ -33,6 +35,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class CreateKey implements CommandModule {
+    private final @NonNull VipKeyGenerator keyGenerator;
     private final @NonNull ConfigCache<VipData> vipConfig;
     private final @NonNull ValidKeyRepository validKeyRepository;
     private final @NonNull SchedulerBuilder scheduler;
@@ -41,14 +44,16 @@ public class CreateKey implements CommandModule {
         name = "criarkey",
         permission = "worldvip.criarkey",
         argsChecks = {
-            @ArgsChecker(size = 3, check = ArgsCheck.GREATER_SIZE),
-            @ArgsChecker(size = 6, check = ArgsCheck.LOWER_SIZE)
+            @ArgsChecker(size = 2, check = ArgsCheck.GREATER_SIZE),
+            @ArgsChecker(size = 7, check = ArgsCheck.LOWER_SIZE)
         },
-        usage = "&cArgumentos invalidos. Digite /criarkey <codigo> <vip> <tipo> [tempo] [usos]"
+        usage = "&cArgumentos invalidos. Digite /criarkey <GERAR | key> <vip> <tipo> [tempo] [usos] [jogador]"
     )
     @Override
     public void execute(@NonNull CommandSender sender, @NonNull String[] args) {
-        final String keyCode = args[0];
+        final String keyCode = !args[0].equals("GERAR")
+            ? args[0]
+            : keyGenerator.generate();
 
         if (keyCode.length() > GlobalValues.MAX_KEY_LENGTH) {
             sender.respond("Key-tamanho-maximo", message -> message.replace(
@@ -80,12 +85,17 @@ public class CreateKey implements CommandModule {
 
         final String durationFormat;
         final Integer duration;
-        final int argsLength;
 
-        if (vipType != VipType.PERMANENT) {
+        final CommandParams params = CommandParameters.of(args, 4);
+        final String rawUsages = params.get(0);
+        final String rawPlayer = params.get(1);
+
+        if (vipType == VipType.PERMANENT) {
+            durationFormat = "∞";
+            duration = -1;
+        } else {
             durationFormat = args[3];
             duration = TimeParser.parseTime(durationFormat);
-            argsLength = 3;
 
             if (duration == null) {
                 sender.respond("Vip-duracao-invalida", message -> message.replace(
@@ -93,22 +103,18 @@ public class CreateKey implements CommandModule {
                 ));
                 return;
             }
-        } else {
-            durationFormat = "∞";
-            duration = -1;
-            argsLength = 4;
         }
 
         final short usages;
 
-        if (args.length == argsLength) {
+        if (rawUsages == null) {
             usages = 1;
         } else {
-            final Short usageCheck = args[argsLength].toShortOrNull();
+            final Short usageCheck = rawUsages.toShortOrNull();
 
             if (usageCheck == null) {
                 sender.respond("Key-usos-invalidos", message -> message.replace(
-                    "@valor".to(args[argsLength])
+                    "@valor".to(rawUsages)
                 ));
                 return;
             }
@@ -116,7 +122,9 @@ public class CreateKey implements CommandModule {
             usages = usageCheck;
         }
 
-        final UUID generatorId = sender instanceof Player ? ((Player) sender).getUniqueId() : null;
+        final String generatorName = rawPlayer == null
+            ? sender instanceof Player ? sender.getName() : null
+            : rawPlayer;
 
         validKeyRepository.getKeyByCode(keyCode).thenAccept(key -> {
             if (key != null) {
@@ -130,7 +138,7 @@ public class CreateKey implements CommandModule {
 
             scheduler.newTask(() -> {
                 final ValidVipKey validKey = new ValidVipKey(
-                    generatorId, keyCode, configVip.getId(), vipType, duration, usages
+                    generatorName, keyCode, configVip.getId(), vipType, duration, usages
                 );
                 validKeyRepository.addKey(validKey);
                 sender.respond("Key-criada", message -> message.replace(
