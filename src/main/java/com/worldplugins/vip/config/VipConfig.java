@@ -35,7 +35,8 @@ public class VipConfig implements InjectedConfigCache<VipData> {
                         )
                     )
                     .collect(Collectors.toList())
-            )
+            ),
+            section.getItem("Iten-key")
         )));
     }
 }

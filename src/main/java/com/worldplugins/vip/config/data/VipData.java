@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,6 +47,7 @@ public class VipData {
         private final @NonNull String group;
         private final @NonNull List<String> activationCommands;
         private final @NonNull Pricing pricing;
+        private final @NonNull ItemStack keyItem;
     }
 
     private final @NonNull Collection<VIP> vips;

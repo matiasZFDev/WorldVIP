@@ -7,6 +7,8 @@ vip1:
     30-dias: 5
     90-dias: 12.5
     Permanente: 75
+  Iten-key:
+    Material: COAL
 vip2:
   Id: 1
   Nome: 'vip2'
@@ -16,6 +18,8 @@ vip2:
     30-dias: 10
     90-dias: 25
     Permanente: 100
+  Iten-key:
+    Material: IRON_INGOT
 vip3:
   Id: 2
   Nome: 'vip3'
@@ -25,6 +29,8 @@ vip3:
     30-dias: 15
     90-dias: 38.5
     Permanente: 187.5
+  Iten-key:
+    Material: GOLD_INGOT
 vip4:
   Id: 3
   Nome: 'vip4'
@@ -34,6 +40,8 @@ vip4:
     30-dias: 30
     90-dias: 85
     Permanente: 300
+  Iten-key:
+    Material: DIAMOND
 vip5:
   Id: 4
   Nome: 'vip5'
@@ -43,3 +51,5 @@ vip5:
     30-dias: 65
     90-dias: 170
     Permanente: 530
+  Iten-key:
+    Material: EMERALD
