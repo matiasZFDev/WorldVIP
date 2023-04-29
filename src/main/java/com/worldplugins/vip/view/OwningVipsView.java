@@ -14,9 +14,9 @@ import com.worldplugins.lib.view.MenuDataView;
 import com.worldplugins.lib.view.ViewContext;
 import com.worldplugins.lib.view.annotation.ViewSpec;
 import com.worldplugins.vip.config.data.VipData;
-import com.worldplugins.vip.config.menu.KeysMenuContainer;
-import com.worldplugins.vip.controller.KeysController;
-import com.worldplugins.vip.database.key.ValidVipKey;
+import com.worldplugins.vip.config.menu.OwningVipsMenuContainer;
+import com.worldplugins.vip.controller.OwningVipsController;
+import com.worldplugins.vip.database.player.model.OwningVIP;
 import com.worldplugins.vip.extension.ViewExtensions;
 import com.worldplugins.vip.util.ItemFactory;
 import com.worldplugins.vip.util.VipDuration;
@@ -39,13 +39,13 @@ import java.util.stream.Collectors;
 })
 
 @RequiredArgsConstructor
-@ViewSpec(menuContainer = KeysMenuContainer.class)
-public class KeysView extends MenuDataView<KeysView.Context> {
+@ViewSpec(menuContainer = OwningVipsMenuContainer.class)
+public class OwningVipsView extends MenuDataView<OwningVipsView.Context> {
     @RequiredArgsConstructor
     public static class Context implements ViewContext {
         private final int page;
         private final int totalPages;
-        private final Collection<ValidVipKey> pageKeys;
+        private final Collection<OwningVIP> pageVips;
 
         @Override
         public ViewContext viewDidOpen() {
@@ -54,7 +54,7 @@ public class KeysView extends MenuDataView<KeysView.Context> {
     }
 
     private final @NonNull ConfigCache<VipData> vipConfig;
-    private final @NonNull KeysController keysController;
+    private final @NonNull OwningVipsController owningVipsController;
 
     @Override
     public @NonNull ItemProcessResult processItems(
@@ -63,7 +63,7 @@ public class KeysView extends MenuDataView<KeysView.Context> {
         @NonNull MenuData menuData
     ) {
         final List<Integer> slots = menuData.getData("Slots");
-        final ItemDisplay keyDisplay = menuData.getData("Display-key");
+        final ItemDisplay vipDisplay = menuData.getData("Display-vip");
         return MenuItemsUtils.newSession(menuData.getItems(), session -> {
             if (context.page == 0) {
                 session.remove("Pagina-anterior");
@@ -74,17 +74,17 @@ public class KeysView extends MenuDataView<KeysView.Context> {
             }
 
             session.addDynamics(() ->
-                context.pageKeys.zip(slots).stream()
-                    .map(keyPair -> {
-                        final ValidVipKey key = keyPair.first();
-                        final VipData.VIP configVip = vipConfig.data().getById(key.getVipId());
+                context.pageVips.zip(slots).stream()
+                    .map(vipPair -> {
+                        final OwningVIP vip = vipPair.first();
+                        final VipData.VIP configVip = vipConfig.data().getById(vip.getId());
                         return ItemFactory.dynamicOf(
-                            "Key", keyPair.second(), configVip.getItem()
-                                .display(keyDisplay)
-                                .nameFormat("@nome".to(configVip.getDisplay()))
+                            "Vip", vipPair.second(), configVip.getItem()
+                                .display(vipDisplay)
+                                .nameFormat("@vip".to(configVip.getDisplay()))
                                 .loreFormat(
-                                    "@tipo".to(key.getVipType().getName().toUpperCase()),
-                                    "@tempo".to(VipDuration.format(key))
+                                    "@tipo".to(vip.getType().getName().toUpperCase()),
+                                    "@tempo".to(VipDuration.format(vip))
                                 )
                         );
                     })
@@ -102,8 +102,8 @@ public class KeysView extends MenuDataView<KeysView.Context> {
     }
 
     @Override
-    public void onClick(@NonNull Player player, @NonNull MenuItem menuItem, @NonNull InventoryClickEvent inventoryClickEvent) {
-        switch (menuItem.getId()) {
+    public void onClick(@NonNull Player player, @NonNull MenuItem item, @NonNull InventoryClickEvent event) {
+        switch (item.getId()) {
             case "Voltar": {
                 player.openView(VipMenuView.class);
                 break;
@@ -111,13 +111,13 @@ public class KeysView extends MenuDataView<KeysView.Context> {
 
             case "Pagina-seguinte": {
                 final Context context = getContext(player);
-                keysController.openView(player.getPlayer(), context.page + 1);
+                owningVipsController.openView(player.getPlayer(), context.page + 1);
                 break;
             }
 
             case "Pagina-anterior": {
                 final Context context = getContext(player);
-                keysController.openView(player.getPlayer(), context.page - 1);
+                owningVipsController.openView(player.getPlayer(), context.page - 1);
                 break;
             }
         }

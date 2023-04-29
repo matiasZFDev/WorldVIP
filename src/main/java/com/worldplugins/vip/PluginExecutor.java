@@ -16,6 +16,7 @@ import com.worldplugins.vip.config.VipConfig;
 import com.worldplugins.vip.config.VipItemsConfig;
 import com.worldplugins.vip.config.data.ServerData;
 import com.worldplugins.vip.controller.KeysController;
+import com.worldplugins.vip.controller.OwningVipsController;
 import com.worldplugins.vip.controller.VipItemsController;
 import com.worldplugins.vip.database.CacheUnloader;
 import com.worldplugins.vip.database.DatabaseAccessor;
@@ -214,16 +215,20 @@ public class PluginExecutor {
         final VipItemsController vipItemsController = new VipItemsController(
             databaseAccessor.getVipItemsRepository(), scheduler
         );
+        final OwningVipsController owningVipsController = new OwningVipsController(
+            databaseAccessor.getPlayerService(), menuContainerManager
+        );
 
         registry.register(
             new VipItemsEditView(config(VipItemsConfig.class)),
             new VipTopView(topManager),
             new VipMenuView(
                 databaseAccessor.getPlayerService(), keysController, vipItemsController,
-                config(VipConfig.class), config(MainConfig.class)
+                owningVipsController, config(VipConfig.class), config(MainConfig.class)
             ),
             new VipItemsView(config(VipConfig.class), vipItemsController),
-            new KeysView(config(VipConfig.class), keysController)
+            new KeysView(config(VipConfig.class), keysController),
+            new OwningVipsView(config(VipConfig.class), owningVipsController)
         );
     }
 

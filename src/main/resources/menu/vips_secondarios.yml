@@ -1,0 +1,29 @@
+Nome: 'Seus VIPs secondarios (@atual/@totais)'
+Linhas: 4
+Data:
+  Slots: [10,11,12,13,14,15,16,19,20,21,22,23,24,25]
+  Display-vip:
+    Nome: '@vip'
+    Lore:
+      - '&fTipo: &e@tipo'
+      - '&fTempo: &7@tempo'
+Conteudo:
+  Voltar:
+    Slot: 27
+    Material: ARROW
+    Nome: '&eVoltar'
+    Lore:
+      - '&7Clique para voltar'
+      - '&7ao menu principal.'
+  Pagina-seguinte:
+    Slot: 32
+    Material: INK_SACK
+    Data: 10
+    Nome: '&aSeguinte página'
+    Lore: ''
+  Pagina-anterior:
+    Slot: 30
+    Material: INK_SACK
+    Data: 10
+    Nome: '&aPágina anterior'
+    Lore: ''

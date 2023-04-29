@@ -1,4 +1,4 @@
-package com.worldplugins.vip.view;
+package com.worldplugins.vip.util;
 
 import com.worldplugins.lib.extension.TimeExtensions;
 import com.worldplugins.vip.GlobalValues;

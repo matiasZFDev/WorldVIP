@@ -16,6 +16,7 @@ import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.controller.KeysController;
+import com.worldplugins.vip.controller.OwningVipsController;
 import com.worldplugins.vip.controller.VipItemsController;
 import com.worldplugins.vip.database.player.PlayerService;
 import com.worldplugins.vip.database.player.model.VIP;
@@ -44,6 +45,7 @@ public class VipMenuView extends MenuDataView<ViewContext> {
     private final @NonNull PlayerService playerService;
     private final @NonNull KeysController keysController;
     private final @NonNull VipItemsController vipItemsController;
+    private final @NonNull OwningVipsController owningVipsController;
 
     private final @NonNull ConfigCache<VipData> vipConfig;
     private final @NonNull ConfigCache<MainData> mainConfig;
@@ -73,14 +75,14 @@ public class VipMenuView extends MenuDataView<ViewContext> {
 
         final String spentValue = vipPlayer == null ? "0" : ((Double) vipPlayer.getSpent()).plainFormat();
 
-        return MenuItemsUtils.newSession(menuData.getItems(), session -> {
+        return MenuItemsUtils.newSession(menuData.getItems(), session ->
             session.modify("Perfil", item ->
                 item.loreFormat(
                     "@estado-vip".to(vipState),
                     "@gasto".to(spentValue)
                 )
-            );
-        }).build();
+            )
+        ).build();
     }
 
     @Override
@@ -97,7 +99,7 @@ public class VipMenuView extends MenuDataView<ViewContext> {
                 break;
 
             case "Vips-secondarios":
-                // Abrir vips secondarios
+                owningVipsController.openView(player, 0);
                 break;
 
             case "Keys":
