@@ -1,0 +1,18 @@
+Nome: 'Coletar itens VIP'
+Linhas: 4
+Data:
+  Slots: [11,12,13,14,15]
+  Display-itens:
+    Nome: '@vip'
+    Lore:
+      - '&fQuantia: &7@quantia'
+      - ''
+      - '&aClique para abrir &n1&a.'
+Conteudo:
+  Voltar:
+    Slot: 27
+    Material: ARROW
+    Nome: '&eVoltar'
+    Lore:
+      - '&7Clique para voltar'
+      - '&7ao menu principal.'

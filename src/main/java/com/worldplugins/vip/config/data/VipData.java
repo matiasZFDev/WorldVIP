@@ -47,7 +47,7 @@ public class VipData {
         private final @NonNull String group;
         private final @NonNull List<String> activationCommands;
         private final @NonNull Pricing pricing;
-        private final @NonNull ItemStack keyItem;
+        private final @NonNull ItemStack item;
     }
 
     private final @NonNull Collection<VIP> vips;

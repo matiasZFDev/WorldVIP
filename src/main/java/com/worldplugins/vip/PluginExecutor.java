@@ -16,6 +16,7 @@ import com.worldplugins.vip.config.VipConfig;
 import com.worldplugins.vip.config.VipItemsConfig;
 import com.worldplugins.vip.config.data.ServerData;
 import com.worldplugins.vip.controller.KeysController;
+import com.worldplugins.vip.controller.VipItemsController;
 import com.worldplugins.vip.database.CacheUnloader;
 import com.worldplugins.vip.database.DatabaseAccessor;
 import com.worldplugins.vip.database.PlayerCacheUnload;
@@ -39,10 +40,7 @@ import com.worldplugins.vip.listener.PlayerJoinListener;
 import com.worldplugins.vip.listener.PlayerQuitListener;
 import com.worldplugins.vip.manager.PermissionManager;
 import com.worldplugins.vip.manager.VipTopManager;
-import com.worldplugins.vip.view.KeysView;
-import com.worldplugins.vip.view.VipItemsEditView;
-import com.worldplugins.vip.view.VipMenuView;
-import com.worldplugins.vip.view.VipTopView;
+import com.worldplugins.vip.view.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Listener;
@@ -213,13 +211,18 @@ public class PluginExecutor {
         final KeysController keysController = new KeysController(
             databaseAccessor.getValidKeyRepository(), scheduler, menuContainerManager
         );
+        final VipItemsController vipItemsController = new VipItemsController(
+            databaseAccessor.getVipItemsRepository(), scheduler
+        );
 
         registry.register(
             new VipItemsEditView(config(VipItemsConfig.class)),
             new VipTopView(topManager),
             new VipMenuView(
-                databaseAccessor.getPlayerService(), config(VipConfig.class), config(MainConfig.class)
+                databaseAccessor.getPlayerService(), keysController, vipItemsController,
+                config(VipConfig.class), config(MainConfig.class)
             ),
+            new VipItemsView(config(VipConfig.class), vipItemsController),
             new KeysView(config(VipConfig.class), keysController)
         );
     }

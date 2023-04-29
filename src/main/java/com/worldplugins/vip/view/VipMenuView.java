@@ -15,6 +15,8 @@ import com.worldplugins.lib.view.ViewContext;
 import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
+import com.worldplugins.vip.controller.KeysController;
+import com.worldplugins.vip.controller.VipItemsController;
 import com.worldplugins.vip.database.player.PlayerService;
 import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipPlayer;
@@ -40,6 +42,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 @RequiredArgsConstructor
 public class VipMenuView extends MenuDataView<ViewContext> {
     private final @NonNull PlayerService playerService;
+    private final @NonNull KeysController keysController;
+    private final @NonNull VipItemsController vipItemsController;
+
     private final @NonNull ConfigCache<VipData> vipConfig;
     private final @NonNull ConfigCache<MainData> mainConfig;
 
@@ -88,7 +93,7 @@ public class VipMenuView extends MenuDataView<ViewContext> {
                     return;
                 }
 
-                // Abrir coleta de itens
+                vipItemsController.openView(player);
                 break;
 
             case "Vips-secondarios":
@@ -96,7 +101,7 @@ public class VipMenuView extends MenuDataView<ViewContext> {
                 break;
 
             case "Keys":
-                // Abrir menu de keys
+                keysController.openView(player, 0);
                 break;
 
             case "Top-vip":

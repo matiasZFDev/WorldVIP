@@ -17,14 +17,13 @@ import java.util.HashMap;
     MenuItemsExtension.class
 })
 
-@MenuContainerSpec(name = "keys")
-public class KeysMenuContainer implements InjectedMenuContainer {
+@MenuContainerSpec(name = "coletar_itens")
+public class VipItemsMenuContainer implements InjectedMenuContainer {
     public @NonNull MenuData createData(@NonNull ConfigurationSection section) {
         return MenuDataUtils.fetch(section)
             .modifyItems(items -> items.colorAll())
             .modifyData(dataSection -> new HashMap<String, Object>() {{
-                put("Slots", dataSection.getIntegerList("Slots"));
-                put("Display-key", dataSection.itemDisplay("Display-key"));
+                put("Display-itens", dataSection.itemDisplay("Display-itens"));
             }})
             .build();
     }

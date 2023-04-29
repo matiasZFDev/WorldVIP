@@ -78,7 +78,7 @@ public class KeysView extends MenuDataView<KeysView.Context> {
                         final ValidVipKey key = keyPair.first();
                         final VipData.VIP configVip = vipConfig.data().getById(key.getVipId());
                         return ItemFactory.dynamicOf(
-                            "Key", keyPair.second(), configVip.getKeyItem()
+                            "Key", keyPair.second(), configVip.getItem()
                                 .display(keyDisplay)
                                 .nameFormat("@nome".to(configVip.getDisplay()))
                                 .loreFormat(
