@@ -10,9 +10,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Getter
 public class SellingKey {
+    private final @NonNull String code;
     private final @NonNull UUID sellerId;
     private final double price;
     private final byte vipId;
     private final @NonNull VipType vipType;
     private final int vipDuration;
+    private final short vipUsages;
+    private final long postTimestamp;
 }

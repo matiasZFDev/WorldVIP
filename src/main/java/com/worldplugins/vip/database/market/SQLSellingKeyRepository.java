@@ -3,6 +3,7 @@ package com.worldplugins.vip.database.market;
 import com.worldplugins.lib.database.sql.SQLExecutor;
 import com.worldplugins.lib.extension.UUIDExtensions;
 import com.worldplugins.lib.util.SchedulerBuilder;
+import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.util.TemporaryDataSet;
 import lombok.NonNull;
@@ -40,11 +41,13 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
     private void createTable() {
         sqlExecutor.query(
             "CREATE TABLE IF NOT EXISTS " + MARKET_TABLE + "(" +
+                "code VARCHAR(" + GlobalValues.MAX_KEY_LENGTH + "), " +
                 "seller_id BINARY(16) NOT NULL, " +
                 "price DOUBLE NOT NULL, " +
                 "vip_id TINYINT NOT NULL, " +
                 "vip_type TINYINT NOT NULL, " +
-                "vip_duration INT NOT NULL" +
+                "vip_duration INT NOT NULL, " +
+                "PRIMARY KEY(code)" +
             ")"
         );
     }
@@ -68,11 +71,14 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
 
                     while (result.next()) {
                         data.add(new SellingKey(
+                            result.get("code"),
                             ((byte[]) result.get("seller_id")).toUUID(),
                             result.get("price"),
                             result.get("vip_id"),
-                            VipType.fromId((byte) result.get("vip_type")),
-                            result.get("vip_duration")
+                            VipType.fromId(result.get("vip_type")),
+                            result.get("vip_duration"),
+                            result.get("vip_short"),
+                            result.get("post_timestamp")
                         ));
                     }
 
@@ -90,14 +96,18 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
         }
 
         CompletableFuture.runAsync(() -> sqlExecutor.update(
-            "INSERT INTO " + MARKET_TABLE + "(seller_id, price, vip_id, vip_type, vip_duration)" +
-                "VALUES(?,?,?,?,?)",
+            "INSERT INTO " + MARKET_TABLE +
+                "(code, seller_id, price, vip_id, vip_type, vip_duration, vip_usages, post_timestamp)" +
+                "VALUES(?,?,?,?,?,?,?,?)",
             statement -> {
-                statement.set(1, key.getSellerId().getBytes());
-                statement.set(2, key.getPrice());
-                statement.set(3, key.getVipId());
-                statement.set(4, key.getVipType().getId());
-                statement.set(5, key.getVipDuration());
+                statement.set(1, key.getCode());
+                statement.set(2, key.getSellerId().getBytes());
+                statement.set(3, key.getPrice());
+                statement.set(4, key.getVipId());
+                statement.set(5, key.getVipType().getId());
+                statement.set(6, key.getVipDuration());
+                statement.set(7, key.getVipUsages());
+                statement.set(8, key.getPostTimestamp());
             }
         ), executor);
     }
@@ -109,15 +119,8 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
         }
 
         CompletableFuture.runAsync(() -> sqlExecutor.update(
-            "DELETE FROM " + MARKET_TABLE + " WHERE " +
-                "seller_id=? AND price=? AND vip_id=? AND vip_type=? AND vip_duration=?",
-            statement -> {
-                statement.set(1, key.getSellerId().getBytes());
-                statement.set(2, key.getPrice());
-                statement.set(3, key.getVipId());
-                statement.set(4, key.getVipType().getId());
-                statement.set(5, key.getVipDuration());
-            }
+            "DELETE FROM " + MARKET_TABLE + " WHERE code=?",
+            statement -> statement.set(1, key.getCode())
         ), executor);
     }
 }
