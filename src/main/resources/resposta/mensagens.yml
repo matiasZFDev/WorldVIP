@@ -175,3 +175,6 @@ Vip-trocado: '&6Seu vip @atual-vip &f@atual-tipo foi trocado pelo vip @novo-vip 
 Vip-pendentes-removidos: '&6Todos os vips pendentes do jogador &f@jogador &6foram removidos.'
 
 Coleta-desabilitada: '&cA coleta se encontra desabilitada.'
+Vip-itens-inexistentes: '&cOcorreu um erro ao momento de coletar itens. Tente novamente.'
+Vip-itens-inventario-cheio: '&cSeu inventario está cheio.'
+Vip-itens-colhidos: '&aItens foram coletados!'

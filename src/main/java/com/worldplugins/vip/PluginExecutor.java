@@ -226,7 +226,10 @@ public class PluginExecutor {
                 databaseAccessor.getPlayerService(), keysController, vipItemsController,
                 owningVipsController, config(VipConfig.class), config(MainConfig.class)
             ),
-            new VipItemsView(config(VipConfig.class), vipItemsController),
+            new VipItemsView(
+                databaseAccessor.getVipItemsRepository(), scheduler, vipItemsController,
+                config(MainConfig.class), config(VipConfig.class), config(VipItemsConfig.class)
+            ),
             new KeysView(config(VipConfig.class), keysController),
             new OwningVipsView(config(VipConfig.class), owningVipsController)
         );
