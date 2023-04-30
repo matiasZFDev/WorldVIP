@@ -33,6 +33,10 @@ public class KeysController {
 
         validKeyRepository.getKeys(player.getName()).thenAccept(keys ->
             scheduler.newTask(() -> {
+                if (!player.isOnline()) {
+                    return;
+                }
+
                 final int totalPages = keys.size() <= slots.size()
                     ? 1
                     : keys.size() / slots.size();

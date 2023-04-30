@@ -40,6 +40,10 @@ public class UseKey implements CommandModule {
 
         validKeyRepository.getKeyByCode(code).thenAccept(key ->
             scheduler.newTask(() -> {
+                if (!player.isOnline()) {
+                    return;
+                }
+
                 if (key == null) {
                     sender.respond("Key-inexistente", message -> message.replace(
                         "@key".to(code)

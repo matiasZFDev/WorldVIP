@@ -20,9 +20,13 @@ public class VipItemsController {
 
     public void openView(@NonNull Player player) {
         vipItemsRepository.getItems(player.getUniqueId()).thenAccept(itemList ->
-            scheduler.newTask(() ->
-                player.openView(VipItemsView.class, new VipItemsView.Context(itemList))
-            ).run()
+            scheduler.newTask(() -> {
+                if (!player.isOnline()) {
+                    return;
+                }
+
+                player.openView(VipItemsView.class, new VipItemsView.Context(itemList));
+            }).run()
         );
     }
 }

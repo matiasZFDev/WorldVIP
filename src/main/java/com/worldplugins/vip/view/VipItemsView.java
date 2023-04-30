@@ -103,6 +103,10 @@ public class VipItemsView extends MenuDataView<VipItemsView.Context> {
 
             final byte vipId = item.getItem().getReferenceValue("vip_id", NBTTagCompound::getByte);
             vipItemsRepository.getItems(player.getUniqueId()).thenAccept(itemList -> scheduler.newTask(() -> {
+                if (!player.isOnline()) {
+                    return;
+                }
+
                 final VipItems matchingItems = itemList.stream()
                     .filter(items -> items.getVipId() == vipId)
                     .findFirst()
