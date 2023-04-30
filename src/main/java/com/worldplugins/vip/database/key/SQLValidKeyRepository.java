@@ -54,6 +54,10 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
 
     @Override
     public @NonNull CompletableFuture<Collection<ValidVipKey>> getKeys(@NonNull String generatorName) {
+        if (generatorCache.containsKey(generatorName)) {
+            return CompletableFuture.completedFuture(generatorCache.get(generatorName));
+        }
+
         return CompletableFuture
             .supplyAsync(() -> sqlExecutor.executeQuery(
                 "SELECT code, vip_id, vip_type, duration, usages FROM " + KEYS_TABLE
@@ -81,6 +85,10 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
 
     @Override
     public @NonNull CompletableFuture<ValidVipKey> getKeyByCode(@NonNull String code) {
+        if (globalCache.containsKey(code)) {
+            return CompletableFuture.completedFuture(globalCache.get(code));
+        }
+
         return CompletableFuture
             .supplyAsync(() -> sqlExecutor.executeQuery(
                 "SELECT generator_id, usages FROM " + KEYS_TABLE + " WHERE code=?",

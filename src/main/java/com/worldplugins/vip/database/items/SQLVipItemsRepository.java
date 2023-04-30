@@ -10,7 +10,6 @@ import lombok.experimental.ExtensionMethod;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -49,6 +48,10 @@ public class SQLVipItemsRepository implements VipItemsRepository {
 
     @Override
     public @NonNull CompletableFuture<Collection<VipItems>> getItems(@NonNull UUID playerId) {
+        if (cache.containsKey(playerId)) {
+            return CompletableFuture.completedFuture(cache.get(playerId));
+        }
+
         return CompletableFuture
             .supplyAsync(() -> sqlExecutor.executeQuery(
                 "SELECT vip_id, amount FROM " + ITEMS_TABLE + "WHERE player_id=?",
