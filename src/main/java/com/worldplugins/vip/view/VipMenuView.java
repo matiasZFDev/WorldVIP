@@ -30,7 +30,7 @@ import lombok.experimental.ExtensionMethod;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-@ExtensionMethod({
+@ExtensionMethod(value = {
     ItemExtensions.class,
     ReplaceExtensions.class,
     GenericExtensions.class,
@@ -38,7 +38,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
     NumberExtensions.class,
     ResponseExtensions.class,
     ViewExtensions.class
-})
+}, suppressBaseMethods = false)
 
 @RequiredArgsConstructor
 public class VipMenuView extends MenuDataView<ViewContext> {
