@@ -11,10 +11,8 @@ import lombok.experimental.ExtensionMethod;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 
 @ExtensionMethod({
     UUIDExtensions.class
@@ -50,14 +48,6 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
                 "PRIMARY KEY(code)" +
             ")"
         );
-    }
-
-    @Override
-    public @NonNull CompletableFuture<Collection<SellingKey>> getSellerKeys(@NonNull UUID sellerId) {
-        return getAllKeys().thenApply(keys -> keys.stream()
-            .filter(key -> key.getSellerId().equals(sellerId))
-            .collect(Collectors.toList()
-        ));
     }
 
     @Override

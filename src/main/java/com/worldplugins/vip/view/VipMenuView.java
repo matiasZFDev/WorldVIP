@@ -18,12 +18,14 @@ import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.controller.KeysController;
 import com.worldplugins.vip.controller.OwningVipsController;
 import com.worldplugins.vip.controller.VipItemsController;
+import com.worldplugins.vip.controller.VipKeyShopController;
 import com.worldplugins.vip.database.player.PlayerService;
 import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipPlayer;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.extension.ResponseExtensions;
 import com.worldplugins.vip.extension.ViewExtensions;
+import com.worldplugins.vip.view.data.KeyMarketOrder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
@@ -46,6 +48,7 @@ public class VipMenuView extends MenuDataView<ViewContext> {
     private final @NonNull KeysController keysController;
     private final @NonNull VipItemsController vipItemsController;
     private final @NonNull OwningVipsController owningVipsController;
+    private final @NonNull VipKeyShopController vipKeyShopController;
 
     private final @NonNull ConfigCache<VipData> vipConfig;
     private final @NonNull ConfigCache<MainData> mainConfig;
@@ -111,7 +114,7 @@ public class VipMenuView extends MenuDataView<ViewContext> {
                 break;
 
             case "Mercado-vip":
-                // Abrir menu do mercado
+                vipKeyShopController.openView(player, 0, KeyMarketOrder.NONE);
                 break;
         }
     }

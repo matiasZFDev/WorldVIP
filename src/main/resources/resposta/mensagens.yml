@@ -178,3 +178,29 @@ Coleta-desabilitada: '&cA coleta se encontra desabilitada.'
 Vip-itens-inexistentes: '&cOcorreu um erro ao momento de coletar itens. Tente novamente.'
 Vip-itens-inventario-cheio: '&cSeu inventario está cheio.'
 Vip-itens-colhidos: '&aItens foram coletados!'
+
+Mercado-key-inexistente: '&cKey retirada. Atualizando produtos...'
+Comprar-key-cash-insuficiente: '&cCash insuficiente.'
+Key-comprada:
+  _@Lista:
+    m1:
+      - ''
+      - '  &6Você comprou uma key @vip &f@tipo &7(@tempo) &6de &f@usos &6usos por &e$@preco &6de cash!'
+      - ''
+    m2:
+      Json:
+        Mensagem: '&6Clique @Json(var)&6 para preparar ativação!'
+        Variaveis:
+          var:
+            Display: '&f&nAQUI'
+            Hover: '&e[Preparar ativação]'
+            Click:
+              Sugerir-comando: '/usarkey @key'
+    m3:
+      Server-actionbar: '&6&lVIP &fUma key @vip &ffoi vendida no mercado.'
+Key-vendida:
+  - ''
+  - '  &6Você vendeu uma key @vip &ftipo &7(@tempo) &6de &f@usos &6usos por &e$@preco &6de cash!'
+  - '  &fComprador: &a@comprador'
+  - '  &fDuração da postagem: &7@tempo-postagem'
+  - ''

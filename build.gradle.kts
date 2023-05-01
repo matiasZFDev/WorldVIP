@@ -21,6 +21,10 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.20")
     compileOnly(files("/home/post/dev/bukkit-libs/spigot.jar"))
     compileOnly(files("/home/post/dev/bukkit-libs/worldplugins/WorldLib/WorldLib-LATEST.jar"))
+
+    compileOnly(files("/home/post/dev/bukkit-libs/PlayerPoints-LATEST.jar"))
+    compileOnly(files("/home/post/dev/bukkit-libs/yPoints-LATEST.jar"))
+
     compileOnly("net.luckperms:api:5.4")
 }
 

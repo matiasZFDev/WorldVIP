@@ -18,6 +18,7 @@ import com.worldplugins.vip.config.data.ServerData;
 import com.worldplugins.vip.controller.KeysController;
 import com.worldplugins.vip.controller.OwningVipsController;
 import com.worldplugins.vip.controller.VipItemsController;
+import com.worldplugins.vip.controller.VipKeyShopController;
 import com.worldplugins.vip.database.DatabaseAccessor;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.handler.VipHandler;
@@ -33,9 +34,11 @@ import com.worldplugins.lib.manager.view.ViewManagerImpl;
 import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.init.DatabaseInitializer;
 import com.worldplugins.vip.init.PermissionManagerInitializer;
+import com.worldplugins.vip.init.PointsInitializer;
 import com.worldplugins.vip.key.ConfigKeyGenerator;
 import com.worldplugins.vip.key.VipKeyGenerator;
 import com.worldplugins.vip.manager.PermissionManager;
+import com.worldplugins.vip.manager.PointsManager;
 import com.worldplugins.vip.manager.VipTopManager;
 import com.worldplugins.vip.view.*;
 import lombok.NonNull;
@@ -54,7 +57,9 @@ public class PluginExecutor {
     private final @NonNull ViewManager viewManager;
 
     private final @NonNull DatabaseAccessor databaseAccessor;
+    private final VipKeyGenerator keyGenerator;
     private final @NonNull PermissionManager permissionManager;
+    private final @NonNull PointsManager pointsManager;
     private final @NonNull VipHandler vipHandler;
     private final @NonNull OwningVipHandler owningVipHandler;
     private final @NonNull VipTopManager topManager;
@@ -68,7 +73,9 @@ public class PluginExecutor {
         viewManager = new ViewManagerImpl();
 
         databaseAccessor = new DatabaseInitializer(configManager, plugin, scheduler).init();
+        keyGenerator = new ConfigKeyGenerator(config(MainConfig.class));
         permissionManager = new PermissionManagerInitializer().init();
+        pointsManager = new PointsInitializer(plugin).init();
         owningVipHandler = new OwningVipHandler(
             databaseAccessor.getPlayerService(), permissionManager, config(VipConfig.class),
             config(MainConfig.class)
@@ -158,7 +165,6 @@ public class PluginExecutor {
 
     private void registerCommands() {
         final CommandRegistry registry = new CommandRegistry(plugin);
-        final VipKeyGenerator keyGenerator = new ConfigKeyGenerator(config(MainConfig.class));
 
         registry.command(
             new Help(),
@@ -204,20 +210,33 @@ public class PluginExecutor {
         final OwningVipsController owningVipsController = new OwningVipsController(
             databaseAccessor.getPlayerService(), menuContainerManager
         );
+        final VipKeyShopController vipKeyShopController = new VipKeyShopController(
+            databaseAccessor.getSellingKeyRepository(), scheduler, menuContainerManager
+        );
 
         registry.register(
             new VipItemsEditView(config(VipItemsConfig.class)),
             new VipTopView(topManager),
             new VipMenuView(
                 databaseAccessor.getPlayerService(), keysController, vipItemsController,
-                owningVipsController, config(VipConfig.class), config(MainConfig.class)
+                owningVipsController, vipKeyShopController, config(VipConfig.class),
+                config(MainConfig.class)
             ),
             new VipItemsView(
                 databaseAccessor.getVipItemsRepository(), scheduler, vipItemsController,
                 config(MainConfig.class), config(VipConfig.class), config(VipItemsConfig.class)
             ),
             new KeysView(config(VipConfig.class), keysController),
-            new OwningVipsView(config(VipConfig.class), owningVipsController)
+            new OwningVipsView(config(VipConfig.class), owningVipsController),
+            new KeyMarketView(
+                databaseAccessor.getSellingKeyRepository(), scheduler, vipKeyShopController,
+                config(VipConfig.class)
+            ),
+            new KeyMarketPurchaseView(
+                vipKeyShopController, databaseAccessor.getSellingKeyRepository(), scheduler,
+                pointsManager, databaseAccessor.getValidKeyRepository(), keyGenerator,
+                config(VipConfig.class)
+            )
         );
     }
 

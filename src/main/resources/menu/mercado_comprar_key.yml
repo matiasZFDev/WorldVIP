@@ -1,0 +1,27 @@
+Nome: 'Confirmar compra'
+Linhas: 5
+Conteudo:
+  Key:
+    Slot: 13
+    Id: 1 # Iten do vip
+    Nome: '&bKey VIP'
+    Lore:
+      - '&fVIP: @vip'
+      - '&fTipo: &e@tipo'
+      - '&fTempo: &7@tempo'
+      - '&fUsos: &7@usos'
+      - '&fVendedor: &b@vendedor'
+      - ''
+      - ' &6b* &fPreço: &6$@preco'
+  Confirmar:
+    Slot: 29
+    Material: INK_SACK
+    Data: 10
+    Nome: '&aConfirmar'
+    Lore: ''
+  Cancelar:
+    Slot: 33
+    Material: INK_SACK
+    Data: 1
+    Nome: '&cCancelar'
+    Lore: ''
