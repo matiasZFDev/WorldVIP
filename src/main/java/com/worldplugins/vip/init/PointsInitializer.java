@@ -2,6 +2,7 @@ package com.worldplugins.vip.init;
 
 import com.worldplugins.lib.common.Initializer;
 import com.worldplugins.vip.manager.PointsManager;
+import com.worldplugins.vip.util.BukkitUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.black_ixx.playerpoints.PlayerPoints;
@@ -21,13 +22,18 @@ public class PointsInitializer implements Initializer<PointsManager> {
             public @NonNull PointsManager createManager() {
                 return new PointsManager() {
                     @Override
-                    public boolean hasPoints(@NonNull UUID playerId, double points) {
+                    public boolean has(@NonNull UUID playerId, double points) {
                         return PlayerPoints.getInstance().getAPI().look(playerId) >= points;
                     }
 
                     @Override
-                    public void withdrawPoints(@NonNull UUID playerId, double points) {
+                    public void withdraw(@NonNull UUID playerId, double points) {
                         PlayerPoints.getInstance().getAPI().take(playerId, (int) points);
+                    }
+
+                    @Override
+                    public void deposit(@NonNull UUID playerId, double points) {
+                        PlayerPoints.getInstance().getAPI().give(playerId, (int) points);
                     }
                 };
             }
@@ -37,17 +43,22 @@ public class PointsInitializer implements Initializer<PointsManager> {
             public @NonNull PointsManager createManager() {
                 return new PointsManager() {
                     @Override
-                    public boolean hasPoints(@NonNull UUID playerId, double points) {
+                    public boolean has(@NonNull UUID playerId, double points) {
                         return yPointsAPI.has(Bukkit.getPlayer(playerId).getName(), points);
                     }
 
                     @Override
-                    public void withdrawPoints(@NonNull UUID playerId, double points) {
+                    public void withdraw(@NonNull UUID playerId, double points) {
                         yPointsAPI.withdraw(
                             Bukkit.getPlayer(playerId).getName(),
                             points,
                             true
                         );
+                    }
+
+                    @Override
+                    public void deposit(@NonNull UUID playerId, double points) {
+                        yPointsAPI.deposit(BukkitUtils.getPlayerName(playerId), points, true);
                     }
                 };
             }

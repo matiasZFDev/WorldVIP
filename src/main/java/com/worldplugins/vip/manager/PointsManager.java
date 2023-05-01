@@ -5,6 +5,7 @@ import lombok.NonNull;
 import java.util.UUID;
 
 public interface PointsManager {
-    boolean hasPoints(@NonNull UUID playerId, double points);
-    void withdrawPoints(@NonNull UUID playerId, double points);
+    boolean has(@NonNull UUID playerId, double points);
+    void withdraw(@NonNull UUID playerId, double points);
+    void deposit(@NonNull UUID playerId, double points);
 }

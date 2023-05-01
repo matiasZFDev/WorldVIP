@@ -114,7 +114,7 @@ public class KeyMarketPurchaseView extends MenuDataView<KeyMarketPurchaseView.Co
                 return;
             }
 
-            if (!pointsManager.hasPoints(player.getUniqueId(), key.getPrice())) {
+            if (!pointsManager.has(player.getUniqueId(), key.getPrice())) {
                 player.respond("Comprar-key-cash-insuficiente");
                 return;
             }
@@ -139,8 +139,10 @@ public class KeyMarketPurchaseView extends MenuDataView<KeyMarketPurchaseView.Co
 
                 final VipData.VIP configVip = vipConfig.data().getById(key.getVipId());
                 final Player seller = Bukkit.getPlayer(key.getSellerId());
+                final Double points = key.getPrice();
 
-                pointsManager.withdrawPoints(player.getUniqueId(), key.getPrice());
+                pointsManager.withdraw(player.getUniqueId(), points);
+                pointsManager.deposit(key.getSellerId(), points);
                 sellingKeyRepository.removeKey(key);
                 validKeyRepository.addKey(newValidKey);
 
@@ -151,7 +153,7 @@ public class KeyMarketPurchaseView extends MenuDataView<KeyMarketPurchaseView.Co
                     "@tipo".to(key.getVipType().getName().toUpperCase()),
                     "@vendedor".to(BukkitUtils.getPlayerName(key.getSellerId())),
                     "@usos".to(String.valueOf(key.getVipUsages())),
-                    "@preco".to(((Double) key.getPrice()).suffixed()),
+                    "@preco".to(points.suffixed()),
                     "@key".to(newValidKey.getCode())
                 ));
 
@@ -165,7 +167,7 @@ public class KeyMarketPurchaseView extends MenuDataView<KeyMarketPurchaseView.Co
                         "@tipo".to(key.getVipType().getName().toUpperCase()),
                         "@comprador".to(player.getName()),
                         "@usos".to(String.valueOf(key.getVipUsages())),
-                        "@preco".to(((Double) key.getPrice()).suffixed()),
+                        "@preco".to(points.suffixed()),
                         "@tempo-postagem".to(postTimeElapsed.toTime())
                     ));
                 }
