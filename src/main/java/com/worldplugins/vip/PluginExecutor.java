@@ -7,6 +7,7 @@ import com.worldplugins.lib.config.cache.impl.SoundsConfig;
 import com.worldplugins.lib.registry.CommandRegistry;
 import com.worldplugins.lib.registry.ViewRegistry;
 import com.worldplugins.lib.util.ConfigUtils;
+import com.worldplugins.lib.util.ConversationProvider;
 import com.worldplugins.vip.command.*;
 import com.worldplugins.vip.command.key.*;
 import com.worldplugins.vip.command.vip.*;
@@ -36,6 +37,7 @@ import com.worldplugins.vip.init.DatabaseInitializer;
 import com.worldplugins.vip.init.PermissionManagerInitializer;
 import com.worldplugins.vip.init.PointsInitializer;
 import com.worldplugins.vip.key.ConfigKeyGenerator;
+import com.worldplugins.vip.key.KeyManagement;
 import com.worldplugins.vip.key.VipKeyGenerator;
 import com.worldplugins.vip.manager.PermissionManager;
 import com.worldplugins.vip.manager.PointsManager;
@@ -213,6 +215,10 @@ public class PluginExecutor {
         final VipKeyShopController vipKeyShopController = new VipKeyShopController(
             databaseAccessor.getSellingKeyRepository(), scheduler, menuContainerManager
         );
+        final KeyManagement keyManagement = new KeyManagement(
+            databaseAccessor.getValidKeyRepository(), scheduler, keysController
+        );
+        final ConversationProvider conversationProvider = new ConversationProvider(plugin);
 
         registry.register(
             new VipItemsEditView(config(VipItemsConfig.class)),
@@ -226,7 +232,7 @@ public class PluginExecutor {
                 databaseAccessor.getVipItemsRepository(), scheduler, vipItemsController,
                 config(MainConfig.class), config(VipConfig.class), config(VipItemsConfig.class)
             ),
-            new KeysView(config(VipConfig.class), keysController),
+            new KeysView(keysController, keyManagement, config(VipConfig.class)),
             new OwningVipsView(config(VipConfig.class), owningVipsController),
             new KeyMarketView(
                 databaseAccessor.getSellingKeyRepository(), scheduler, vipKeyShopController,
@@ -236,6 +242,13 @@ public class PluginExecutor {
                 vipKeyShopController, databaseAccessor.getSellingKeyRepository(), scheduler,
                 pointsManager, databaseAccessor.getValidKeyRepository(), keyGenerator,
                 config(VipConfig.class)
+            ),
+            new ManageKeyView(
+                keysController, keyManagement, conversationProvider, databaseAccessor.getSellingKeyRepository(),
+                databaseAccessor.getValidKeyRepository(), config(VipConfig.class)
+            ),
+            new ConfirmKeyActivationView(
+                keyManagement, vipHandler, databaseAccessor.getValidKeyRepository(), config(VipConfig.class)
             )
         );
     }

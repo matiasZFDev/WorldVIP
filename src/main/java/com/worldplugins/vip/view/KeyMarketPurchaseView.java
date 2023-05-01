@@ -35,13 +35,13 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.util.concurrent.TimeUnit;
 
-@ExtensionMethod({
+@ExtensionMethod(value = {
     ItemExtensions.class,
     GenericExtensions.class,
     NumberFormatExtensions.class,
     ResponseExtensions.class,
     TimeExtensions.class
-})
+}, suppressBaseMethods = false)
 
 @RequiredArgsConstructor
 @ViewSpec(menuContainer = KeyMarketPurchaseMenuContainer.class)

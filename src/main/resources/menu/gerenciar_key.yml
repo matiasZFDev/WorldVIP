@@ -1,0 +1,34 @@
+Nome: 'Gerenciar key'
+Linhas: 3
+Conteudo:
+  Voltar:
+    Slot: 18
+    Material: ARROW
+    Nome: '&eVoltar'
+    Lore:
+      - '&7Clique para voltar'
+      - '&7ao menu principal.'
+  Info:
+    Slot: 11
+    Id: 1 # Iten do vip
+    Nome: '&fKey @vip'
+    Lore:
+      - '&fTipo: &e@tipo'
+      - '&fTempo: &7@tempo'
+      - '&fUsos: &7@usos'
+      - ''
+  Ativar:
+    Slot: 13
+    Material: ENDER_EYE
+    Nome: '&aAtivar'
+    Lore:
+      - '&7Clique para ativar'
+      - '&7a key.'
+      - '&8(Terá que confirmar)'
+  Vender:
+    Slot: 15
+    Material: ENDER_CHEST
+    Nome: '&eVender'
+    Lore:
+      - '&7Clique para começar'
+      - '&7a venda.'

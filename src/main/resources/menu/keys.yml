@@ -3,10 +3,13 @@ Linhas: 4
 Data:
   Slots: [10,11,12,13,14,15,16,19,20,21,22,23,24,25]
   Display-key:
-    Nome: '@nome'
+    Nome: '@vip'
     Lore:
       - '&fTipo: &e@tipo'
       - '&fTempo: &7@tempo'
+      - '&fUsos: &7@usos'
+      - ''
+      - '&aClique para gerenciar'
 Conteudo:
   Voltar:
     Slot: 27

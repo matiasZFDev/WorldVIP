@@ -9,15 +9,19 @@ import com.worldplugins.lib.extension.CollectionExtensions;
 import com.worldplugins.lib.extension.GenericExtensions;
 import com.worldplugins.lib.extension.ReplaceExtensions;
 import com.worldplugins.lib.extension.bukkit.ItemExtensions;
+import com.worldplugins.lib.extension.bukkit.NBTExtensions;
 import com.worldplugins.lib.util.MenuItemsUtils;
 import com.worldplugins.lib.view.MenuDataView;
 import com.worldplugins.lib.view.ViewContext;
 import com.worldplugins.lib.view.annotation.ViewSpec;
+import com.worldplugins.vip.NBTKeys;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.config.menu.KeysMenuContainer;
 import com.worldplugins.vip.controller.KeysController;
 import com.worldplugins.vip.database.key.ValidVipKey;
+import com.worldplugins.vip.extension.ResponseExtensions;
 import com.worldplugins.vip.extension.ViewExtensions;
+import com.worldplugins.vip.key.KeyManagement;
 import com.worldplugins.vip.util.ItemFactory;
 import com.worldplugins.vip.util.VipDuration;
 import lombok.NonNull;
@@ -35,7 +39,9 @@ import java.util.stream.Collectors;
     GenericExtensions.class,
     CollectionExtensions.class,
     ItemExtensions.class,
-    ViewExtensions.class
+    ViewExtensions.class,
+    NBTExtensions.class,
+    ResponseExtensions.class
 })
 
 @RequiredArgsConstructor
@@ -53,8 +59,10 @@ public class KeysView extends MenuDataView<KeysView.Context> {
         }
     }
 
-    private final @NonNull ConfigCache<VipData> vipConfig;
     private final @NonNull KeysController keysController;
+    private final @NonNull KeyManagement keyManagement;
+
+    private final @NonNull ConfigCache<VipData> vipConfig;
 
     @Override
     public @NonNull ItemProcessResult processItems(
@@ -81,11 +89,13 @@ public class KeysView extends MenuDataView<KeysView.Context> {
                         return ItemFactory.dynamicOf(
                             "Key", keyPair.second(), configVip.getItem()
                                 .display(keyDisplay)
-                                .nameFormat("@nome".to(configVip.getDisplay()))
+                                .nameFormat("@vip".to(configVip.getDisplay()))
                                 .loreFormat(
                                     "@tipo".to(key.getVipType().getName().toUpperCase()),
-                                    "@tempo".to(VipDuration.format(key))
+                                    "@tempo".to(VipDuration.format(key)),
+                                    "@usos".to(String.valueOf(key.getUsages()))
                                 )
+                                .addReference(NBTKeys.VIEW_KEY, keyPair.first().getCode())
                         );
                     })
                     .collect(Collectors.toList())
@@ -119,6 +129,14 @@ public class KeysView extends MenuDataView<KeysView.Context> {
                 final Context context = getContext(player);
                 keysController.openView(player.getPlayer(), context.page - 1);
                 break;
+            }
+
+            case "Key": {
+                final String keyCode = menuItem.getItem().getReference(NBTKeys.VIEW_KEY);
+                final Context context = getContext(player);
+                keyManagement.manage(
+                    player, keyCode, context.page, key -> {}
+                );
             }
         }
     }
