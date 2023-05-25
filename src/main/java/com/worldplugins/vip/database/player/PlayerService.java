@@ -3,19 +3,20 @@ package com.worldplugins.vip.database.player;
 import com.worldplugins.vip.database.player.model.OwningVIP;
 import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipPlayer;
-import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
 public interface PlayerService {
-    VipPlayer getById(@NonNull UUID playerId);
-    void addSpent(@NonNull UUID playerId, double value);
-    void setVip(@NonNull UUID playerId, @NonNull VIP vip);
-    void removeVip(@NonNull UUID playerId);
-    void updatePrimaryVip(@NonNull Collection<VipPlayer> players);
-    void addOwningVip(@NonNull UUID playerId, @NonNull VIP vip);
-    void removeOwningVip(@NonNull UUID playerId, @NonNull OwningVIP owningVip);
-    void updateOwningVips(@NonNull Map<UUID, Collection<OwningVIP>> vips);
+    @Nullable VipPlayer getById(@NotNull UUID playerId);
+    void addSpent(@NotNull UUID playerId, double value);
+    void setVip(@NotNull UUID playerId, @NotNull VIP vip);
+    void removeVip(@NotNull UUID playerId);
+    void updatePrimaryVip(@NotNull Collection<VipPlayer> players);
+    void addOwningVip(@NotNull UUID playerId, @NotNull VIP vip);
+    void removeOwningVip(@NotNull UUID playerId, @NotNull OwningVIP owningVip);
+    void updateOwningVips(@NotNull Map<UUID, Collection<OwningVIP>> vips);
 }

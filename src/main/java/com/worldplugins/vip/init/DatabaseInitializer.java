@@ -1,14 +1,8 @@
 package com.worldplugins.vip.init;
 
-import com.worldplugins.lib.common.Factory;
-import com.worldplugins.lib.common.Initializer;
 import com.worldplugins.lib.database.sql.SQLDatabase;
 import com.worldplugins.lib.database.sql.SQLExecutor;
 import com.worldplugins.lib.factory.SQLDatabaseFactoryProducer;
-import com.worldplugins.lib.manager.config.ConfigManager;
-import com.worldplugins.lib.util.SchedulerBuilder;
-import com.worldplugins.lib.util.cache.Cache;
-import com.worldplugins.lib.util.cache.SimpleCache;
 import com.worldplugins.vip.database.DatabaseAccessor;
 import com.worldplugins.vip.database.items.SQLVipItemsRepository;
 import com.worldplugins.vip.database.items.VipItemsRepository;
@@ -19,24 +13,32 @@ import com.worldplugins.vip.database.market.SellingKeyRepository;
 import com.worldplugins.vip.database.pending.SQLPendingVipRepository;
 import com.worldplugins.vip.database.player.SQLPlayerService;
 import com.worldplugins.vip.database.player.model.VipPlayer;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import me.post.lib.common.Factory;
+import me.post.lib.config.wrapper.ConfigManager;
+import me.post.lib.database.cache.Cache;
+import me.post.lib.database.cache.SimpleCache;
+import me.post.lib.util.Scheduler;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-@RequiredArgsConstructor
-public class DatabaseInitializer implements Initializer<DatabaseAccessor> {
-    private final @NonNull ConfigManager configManager;
-    private final @NonNull Plugin plugin;
-    private final @NonNull SchedulerBuilder scheduler;
+public class DatabaseInitializer {
+    private final @NotNull ConfigManager configManager;
+    private final @NotNull Plugin plugin;
+    private final @NotNull Scheduler scheduler;
 
-    @Override
-    public @NonNull DatabaseAccessor init() {
+    public DatabaseInitializer(@NotNull ConfigManager configManager, @NotNull Plugin plugin, @NotNull Scheduler scheduler) {
+        this.configManager = configManager;
+        this.plugin = plugin;
+        this.scheduler = scheduler;
+    }
+
+    public @NotNull DatabaseAccessor init() {
         final Executor executor = Executors.newSingleThreadExecutor();
         final SQLExecutor sqlExecutor = new SQLExecutor(databaseFactory().create().connect());
         final Cache<UUID, VipPlayer> playerCache = new SimpleCache<>(new HashMap<>());
@@ -56,8 +58,8 @@ public class DatabaseInitializer implements Initializer<DatabaseAccessor> {
         );
     }
 
-    private @NonNull Factory<SQLDatabase> databaseFactory() {
-        final ConfigurationSection dataSection = configManager.getContainer("config").config().getConfigurationSection("Database");
+    private @NotNull Factory<SQLDatabase> databaseFactory() {
+        final ConfigurationSection dataSection = configManager.getWrapper("config").unwrap().getConfigurationSection("Database");
         final String databaseType = dataSection.getString("Tipo");
         final Factory<SQLDatabase> sqlFactory = new SQLDatabaseFactoryProducer(databaseType, dataSection, plugin).create();
 

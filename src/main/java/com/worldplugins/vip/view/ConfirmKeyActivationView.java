@@ -1,95 +1,108 @@
 package com.worldplugins.vip.view;
 
-import com.worldplugins.lib.config.cache.ConfigCache;
-import com.worldplugins.lib.config.cache.menu.ItemProcessResult;
-import com.worldplugins.lib.config.cache.menu.MenuData;
-import com.worldplugins.lib.config.cache.menu.MenuItem;
-import com.worldplugins.lib.extension.GenericExtensions;
-import com.worldplugins.lib.extension.bukkit.ItemExtensions;
-import com.worldplugins.lib.util.MenuItemsUtils;
-import com.worldplugins.lib.view.MenuDataView;
-import com.worldplugins.lib.view.annotation.ViewSpec;
+import com.worldplugins.lib.config.model.MenuModel;
+import com.worldplugins.lib.util.ItemBuilding;
+import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.vip.config.data.VipData;
-import com.worldplugins.vip.config.menu.ConfirmKeyActivationMenuContainer;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
 import com.worldplugins.vip.database.player.model.VIP;
-import com.worldplugins.vip.extension.ViewExtensions;
 import com.worldplugins.vip.handler.VipHandler;
 import com.worldplugins.vip.key.KeyManagement;
 import com.worldplugins.vip.util.VipDuration;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.config.model.ConfigModel;
+import me.post.lib.view.View;
+import me.post.lib.view.Views;
+import me.post.lib.view.action.ViewClick;
+import me.post.lib.view.action.ViewClose;
+import me.post.lib.view.helper.ClickHandler;
+import me.post.lib.view.helper.ViewContext;
+import me.post.lib.view.helper.impl.MapViewContext;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-@ExtensionMethod(value = {
-    ItemExtensions.class,
-    GenericExtensions.class,
-    ViewExtensions.class
-}, suppressBaseMethods = false)
+import static java.util.Objects.requireNonNull;
+import static me.post.lib.util.Pairs.to;
 
-@RequiredArgsConstructor
-@ViewSpec(menuContainer = ConfirmKeyActivationMenuContainer.class)
-public class ConfirmKeyActivationView extends MenuDataView<ManageKeyView.Context> {
-    private final @NonNull KeyManagement keyManagement;
-    private final @NonNull VipHandler vipHandler;
-    private final @NonNull ValidKeyRepository validKeyRepository;
+public class ConfirmKeyActivationView implements View {
+    private final @NotNull ViewContext viewContext;
+    private final @NotNull MenuModel menuModel;
+    private final @NotNull KeyManagement keyManagement;
+    private final @NotNull VipHandler vipHandler;
+    private final @NotNull ValidKeyRepository validKeyRepository;
+    private final @NotNull ConfigModel<VipData> vipConfig;
 
-    private final @NonNull ConfigCache<VipData> vipConfig;
-
-    @Override
-    public @NonNull ItemProcessResult processItems(@NonNull Player player, ManageKeyView.Context context, @NonNull MenuData menuData) {
-        final ValidVipKey key = context.getKey();
-        final VipData.VIP configVip = vipConfig.data().getById(key.getVipId());
-
-        return MenuItemsUtils.newSession(menuData.getItems(), session ->
-            session.modify("Key", item ->
-                item
-                    .loreFormat(
-                        "@vip".to(configVip.getDisplay()),
-                        "@tipo".to(key.getVipType().getName().toUpperCase()),
-                        "@tempo".to(VipDuration.format(key)),
-                        "@usos".to(String.valueOf(key.getUsages()))
-                    )
-            )
-        ).build();
+    public ConfirmKeyActivationView(
+        @NotNull MenuModel menuModel,
+        @NotNull KeyManagement keyManagement,
+        @NotNull VipHandler vipHandler,
+        @NotNull ValidKeyRepository validKeyRepository,
+        @NotNull ConfigModel<VipData> vipConfig
+    ) {
+        this.viewContext = new MapViewContext();
+        this.menuModel = menuModel;
+        this.keyManagement = keyManagement;
+        this.vipHandler = vipHandler;
+        this.validKeyRepository = validKeyRepository;
+        this.vipConfig = vipConfig;
     }
 
     @Override
-    public void onClick(@NonNull Player player, @NonNull MenuItem menuItem, @NonNull InventoryClickEvent inventoryClickEvent) {
-        if (menuItem.getId().equals("Cancelar")) {
-            final ManageKeyView.Context context = getContext(player);
-            keyManagement.manage(
-                player,
-                context.getKey().getCode(),
-                context.getKeysViewPage(),
-                key -> player.openView(ManageKeyView.class, getContext(player))
-            );
-            return;
-        }
+    public void open(@NotNull Player player, @Nullable Object data) {
+        final ManageKeyView.Context context = (ManageKeyView.Context) requireNonNull(data);
+        final ValidVipKey key = context.key();
+        final VipData.VIP configVip = vipConfig.data().getById(key.vipId());
 
-        if (menuItem.getId().equals("Confirmar")) {
-            final ManageKeyView.Context context = getContext(player);
+        ConfigContextBuilder.withModel(menuModel)
+            .editMenuItem("Key", item ->
+                ItemBuilding.loreFormat(
+                    item,
+                    to("@vip", configVip.display()),
+                    to("@tipo", key.vipType().getName().toUpperCase()),
+                    to("@tempo", VipDuration.format(key)),
+                    to("@usos", String.valueOf(key.usages()))
+                )
+            )
+            .handleMenuItemClick(
+                "Cancelar",
+                click -> keyManagement.manage(
+                    player,
+                    context.key().code(),
+                    context.keysViewPage(),
+                    $ -> Views.get().open(player, ManageKeyView.class, context)
+                )
+            )
+            .handleMenuItemClick(
+                "Confirmar",
+                click -> keyManagement.manage(
+                    player,
+                    context.key().code(),
+                    context.keysViewPage(),
+                    $ -> {
+                        final VIP vip = new VIP(key.vipId(), key.vipType(), key.vipDuration());
 
-            keyManagement.manage(
-                player,
-                context.getKey().getCode(),
-                context.getKeysViewPage(),
-                key -> {
-                    final VIP vip = new VIP(key.getVipId(), key.getVipType(), key.getVipDuration());
+                        player.closeInventory();
+                        vipHandler.activate(player.getUniqueId(), vip, true);
 
-                    player.closeInventory();
-                    vipHandler.activate(player.getUniqueId(), vip, true);
-
-                    if (key.getUsages() > 1) {
-                        validKeyRepository.consumeKey(key);
-                    } else {
-                        validKeyRepository.removeKey(key);
+                        if (key.usages() > 1) {
+                            validKeyRepository.consumeKey(key);
+                        } else {
+                            validKeyRepository.removeKey(key);
+                        }
                     }
-                }
-            );
-        }
+                )
+            )
+            .build(viewContext, player, data);
+    }
+
+    @Override
+    public void onClick(@NotNull ViewClick click) {
+        ClickHandler.handleTopNonNull(viewContext, click);
+    }
+
+    @Override
+    public void onClose(@NotNull ViewClose close) {
+        viewContext.removeViewer(close.whoCloses().getUniqueId());
     }
 }

@@ -1,64 +1,66 @@
 package com.worldplugins.vip.command.vip;
 
-import com.worldplugins.lib.command.ArgsCheck;
-import com.worldplugins.lib.command.CommandModule;
-import com.worldplugins.lib.command.annotation.ArgsChecker;
-import com.worldplugins.lib.command.annotation.Command;
-import com.worldplugins.lib.config.cache.ConfigCache;
-import com.worldplugins.lib.extension.GenericExtensions;
 import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.pending.PendingVIP;
 import com.worldplugins.vip.database.pending.PendingVipRepository;
 import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipType;
-import com.worldplugins.vip.extension.ResponseExtensions;
 import com.worldplugins.vip.handler.VipHandler;
 import com.worldplugins.vip.util.TimeParser;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.command.CommandModule;
+import me.post.lib.command.annotation.Command;
+import me.post.lib.config.model.ConfigModel;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-@ExtensionMethod({
-    ResponseExtensions.class,
-    GenericExtensions.class
-})
+import static com.worldplugins.vip.Response.respond;
+import static me.post.lib.util.Pairs.to;
 
-@RequiredArgsConstructor
 public class GiveVip implements CommandModule {
-    private final @NonNull PendingVipRepository pendingVipRepository;
-    private final @NonNull VipHandler activationHandler;
-    private final @NonNull ConfigCache<VipData> vipConfig;
+    private final @NotNull PendingVipRepository pendingVipRepository;
+    private final @NotNull VipHandler activationHandler;
+    private final @NotNull ConfigModel<VipData> vipConfig;
 
-    @Command(
-        name = "darvip",
-        permission = "worldvip.darvip",
-        usage = "&cArgumentos invalidos. Digite /darkvip <jogador> <vip> <tipo> [tempo]",
-        argsChecks = {
-                @ArgsChecker(size = 2, check = ArgsCheck.GREATER_SIZE),
-                @ArgsChecker(size = 5, check = ArgsCheck.LOWER_SIZE)
-        }
-    )
+    public GiveVip(
+        @NotNull PendingVipRepository pendingVipRepository,
+        @NotNull VipHandler activationHandler,
+        @NotNull ConfigModel<VipData> vipConfig) {
+        this.pendingVipRepository = pendingVipRepository;
+        this.activationHandler = activationHandler;
+        this.vipConfig = vipConfig;
+    }
+
+    @Command(name = "darvip")
     @Override
-    public void execute(@NonNull CommandSender sender, @NonNull String[] args) {
+    public void execute(@NotNull CommandSender sender, @NotNull String[] args) {
+        if (!sender.hasPermission("worldvip.darvip")) {
+            return;
+        }
+
+        if (!(args.length > 2 && args.length < 5)) {
+            respond(sender, "Dar-vip-uso");
+            return;
+        }
+
         final String playerName = args[0];
         final Player player = Bukkit.getPlayer(playerName);
         final VipData.VIP configVip = vipConfig.data().getByName(args[1]);
 
         if (configVip == null) {
             final Collection<String> vipList = vipConfig.data().all().stream()
-                .map(VipData.VIP::getName)
+                .map(VipData.VIP::name)
                 .collect(Collectors.toList());
-            sender.respond("Vip-inexistente", message -> message.replace(
-                "@nome".to(args[1]),
-                "@vips".to(vipList.toString())
+
+            respond(sender, "Vip-inexistente", message -> message.replace(
+                to("@nome", args[1]),
+                to("@vips", vipList.toString())
             ));
             return;
         }
@@ -69,15 +71,16 @@ public class GiveVip implements CommandModule {
             final Collection<String> vipTypes = Arrays.stream(VipType.values())
                 .map(type -> type.getName().toUpperCase())
                 .collect(Collectors.toList());
-            sender.respond("Tipo-vip-inexistente", message -> message.replace(
-                "@nome".to(args[2]),
-                "@tipos".to(vipTypes.toString())
+
+            respond(sender, "Tipo-vip-inexistente", message -> message.replace(
+                to("@nome", args[2]),
+                to("@tipos", vipTypes.toString())
             ));
             return;
         }
 
         if (vipType != VipType.PERMANENT && args.length == 3) {
-            sender.respond("Vip-tempo-inexistente");
+            respond(sender, "Vip-tempo-inexistente");
             return;
         }
 
@@ -90,33 +93,35 @@ public class GiveVip implements CommandModule {
             : GlobalValues.PERMANENT_DURATION;
 
         if (duration == null) {
-            sender.respond("Vip-duracao-invalida", message -> message.replace(
-                "@valor".to(durationFormat)
+            respond(sender, "Vip-duracao-invalida", message -> message.replace(
+                to("@valor", durationFormat)
             ));
             return;
         }
 
         if (player == null) {
             final PendingVIP pendingVip = new PendingVIP(
-                playerName, configVip.getId(), vipType, duration
+                playerName, configVip.id(), vipType, duration
             );
+
             pendingVipRepository.addPending(pendingVip);
-            sender.respond("Vip-givado-pendente", message -> message.replace(
-                "@jogador".to(playerName),
-                "@vip".to(configVip.getDisplay()),
-                "@tipo".to(vipType.getName().toUpperCase()),
-                "@tempo".to(durationFormat)
+            respond(sender, "Vip-givado-pendente", message -> message.replace(
+                to("@jogador", playerName),
+                to("@vip", configVip.display()),
+                to("@tipo", vipType.getName().toUpperCase()),
+                to("@tempo", durationFormat)
             ));
             return;
         }
 
-        final VIP vip = new VIP(configVip.getId(), vipType, duration);
+        final VIP vip = new VIP(configVip.id(), vipType, duration);
+
         activationHandler.activate(player.getUniqueId(), vip, true);
-        sender.respond("Vip-givado", message -> message.replace(
-            "@jogador".to(player.getName()),
-            "@vip".to(configVip.getDisplay()),
-            "@tipo".to(vipType.getName().toUpperCase()),
-            "@tempo".to(durationFormat)
+        respond(sender, "Vip-givado", message -> message.replace(
+            to("@jogador", player.getName()),
+            to("@vip", configVip.display()),
+            to("@tipo", vipType.getName().toUpperCase()),
+            to("@tempo", durationFormat)
         ));
     }
 }

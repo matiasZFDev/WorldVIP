@@ -1,14 +1,33 @@
 package com.worldplugins.vip.database.items;
 
-import lombok.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-@AllArgsConstructor
-@Getter
 public class VipItems {
-    private final @NonNull UUID playerId;
+    private final @NotNull UUID playerId;
     private final byte vipId;
-    @Setter
     private short amount;
+
+    public VipItems(@NotNull UUID playerId, byte vipId, short amount) {
+        this.playerId = playerId;
+        this.vipId = vipId;
+        this.amount = amount;
+    }
+
+    public UUID playerId() {
+        return playerId;
+    }
+
+    public byte vipId() {
+        return vipId;
+    }
+
+    public short amount() {
+        return amount;
+    }
+
+    public void setAmount(short amount) {
+        this.amount = amount;
+    }
 }

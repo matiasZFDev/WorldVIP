@@ -1,15 +1,34 @@
 package com.worldplugins.vip.database.pending;
 
 import com.worldplugins.vip.database.player.model.VipType;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
-@RequiredArgsConstructor
-@Getter
 public class PendingVIP {
-    private final @NonNull String playerName;
+    private final @NotNull String playerName;
     private final byte id;
-    private final @NonNull VipType type;
+    private final @NotNull VipType type;
     private final int duration;
+
+    public PendingVIP(@NotNull String playerName, byte id, @NotNull VipType type, int duration) {
+        this.playerName = playerName;
+        this.id = id;
+        this.type = type;
+        this.duration = duration;
+    }
+
+    public @NotNull String playerName() {
+        return playerName;
+    }
+
+    public byte id() {
+        return id;
+    }
+
+    public @NotNull VipType type() {
+        return type;
+    }
+
+    public int duration() {
+        return duration;
+    }
 }

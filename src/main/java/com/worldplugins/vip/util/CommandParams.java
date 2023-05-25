@@ -1,11 +1,13 @@
 package com.worldplugins.vip.util;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
-@RequiredArgsConstructor
 public final class CommandParams {
-    private final @NonNull String[] options;
+    private final @NotNull String[] options;
+
+    public CommandParams(@NotNull String[] options) {
+        this.options = options;
+    }
 
     public String get(int position) {
         if (position > options.length - 1) {

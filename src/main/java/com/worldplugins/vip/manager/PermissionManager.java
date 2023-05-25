@@ -1,10 +1,10 @@
 package com.worldplugins.vip.manager;
 
-import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public interface PermissionManager {
-    void addGroup(@NonNull UUID playerId, @NonNull String group);
-    void removeGroup(@NonNull UUID playerId, @NonNull String group);
+    void addGroup(@NotNull UUID playerId, @NotNull String group);
+    void removeGroup(@NotNull UUID playerId, @NotNull String group);
 }

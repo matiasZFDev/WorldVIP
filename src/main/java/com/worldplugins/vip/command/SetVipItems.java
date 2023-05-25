@@ -1,57 +1,60 @@
 package com.worldplugins.vip.command;
 
-import com.worldplugins.lib.command.CommandModule;
-import com.worldplugins.lib.command.CommandTarget;
-import com.worldplugins.lib.command.annotation.ArgsChecker;
-import com.worldplugins.lib.command.annotation.Command;
-import com.worldplugins.lib.config.cache.ConfigCache;
-import com.worldplugins.lib.extension.GenericExtensions;
 import com.worldplugins.vip.config.data.VipData;
-import com.worldplugins.vip.extension.ResponseExtensions;
-import com.worldplugins.vip.extension.ViewExtensions;
 import com.worldplugins.vip.view.VipItemsEditView;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.command.CommandModule;
+import me.post.lib.command.annotation.Command;
+import me.post.lib.config.model.ConfigModel;
+import me.post.lib.view.Views;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ExtensionMethod({
-    ResponseExtensions.class,
-    GenericExtensions.class,
-    ViewExtensions.class
-})
+import static com.worldplugins.vip.Response.respond;
+import static me.post.lib.util.Pairs.to;
 
-@RequiredArgsConstructor
 public class SetVipItems implements CommandModule {
-    private final @NonNull ConfigCache<VipData> vipConfig;
+    private final @NotNull ConfigModel<VipData> vipConfig;
 
-    @Command(
-        name = "vip itens",
-        permission = "worldvip.setitems",
-        target = CommandTarget.PLAYER,
-        argsChecks = {@ArgsChecker(size = 1)},
-        usage = "&cArgumentos invalidos. Digite /vip itens <vip>"
-    )
+    public SetVipItems(@NotNull ConfigModel<VipData> vipConfig) {
+        this.vipConfig = vipConfig;
+    }
+
+    @Command(name = "vip itens")
     @Override
-    public void execute(@NonNull CommandSender sender, @NonNull String[] args) {
+    public void execute(@NotNull CommandSender sender, @NotNull String[] args) {
+        if (!sender.hasPermission("worldvip.setitems")) {
+            respond(sender, "Itens-vip-permissoes");
+            return;
+        }
+
+        if (!(sender instanceof Player)) {
+            respond(sender, "Comando-jogador");
+            return;
+        }
+
+        if (args.length != 1) {
+            respond(sender, "Itens-vip-uso");
+            return;
+        }
+
         final Player player = (Player) sender;
         final String vipName = args[0];
 
         if (vipConfig.data().getByName(vipName) == null) {
             final List<String> vipList = vipConfig.data().all().stream()
-                    .map(VipData.VIP::getName)
+                    .map(VipData.VIP::name)
                     .collect(Collectors.toList());
-            player.respond("Vip-inexistente", message -> message.replace(
-                "@nome".to(vipName),
-                "@vips".to(vipList.toString())
+            respond(player, "Vip-inexistente", message -> message.replace(
+                to("@nome", vipName),
+                to("@vips", vipList.toString())
             ));
             return;
         }
 
-        player.openView(VipItemsEditView.class, new VipItemsEditView.Context(vipName));
+        Views.get().open(player, VipItemsEditView.class, new VipItemsEditView.Context(vipName));
     }
 }

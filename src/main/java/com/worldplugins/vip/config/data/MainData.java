@@ -1,41 +1,118 @@
 package com.worldplugins.vip.config.data;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Accessors;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-@RequiredArgsConstructor
-@Getter
 public class MainData {
-    @RequiredArgsConstructor
-    @Getter
-    @Accessors(fluent = true)
+    public MainData(@NotNull KeyGenOptions keyGen, @NotNull KeyListingOptions keyListing, boolean stackVips, boolean storeItems, int switchVipDelay, boolean simultaneousReduction) {
+        this.keyGen = keyGen;
+        this.keyListing = keyListing;
+        this.stackVips = stackVips;
+        this.storeItems = storeItems;
+        this.switchVipDelay = switchVipDelay;
+        this.simultaneousReduction = simultaneousReduction;
+    }
+
     public static class KeyGenOptions {
         private final byte length;
         private final boolean numbers;
         private final boolean lowercaseLetters;
-        private final boolean upercaseLetters;
+        private final boolean uppercaseLetters;
+
+        public KeyGenOptions(
+            byte length,
+            boolean numbers,
+            boolean lowercaseLetters,
+            boolean uppercaseLetters
+        ) {
+            this.length = length;
+            this.numbers = numbers;
+            this.lowercaseLetters = lowercaseLetters;
+            this.uppercaseLetters = uppercaseLetters;
+        }
+
+        public byte length() {
+            return length;
+        }
+
+        public boolean numbers() {
+            return numbers;
+        }
+
+
+        public boolean lowercaseLetters() {
+            return lowercaseLetters;
+        }
+
+        public boolean uppercaseLetters() {
+            return uppercaseLetters;
+        }
     }
 
-    @RequiredArgsConstructor
-    @Getter
     public static class KeyListingOptions {
-        private final @NonNull List<String> playerKeysMessage;
-        private final @NonNull List<String> ownKeysMessages;
-        private final @NonNull String keyFormat;
-        private final @NonNull String hoverMessage;
+        private final @NotNull List<String> playerKeysMessage;
+        private final @NotNull List<String> ownKeysMessages;
+        private final @NotNull String keyFormat;
+        private final @NotNull String hoverMessage;
+
+        public KeyListingOptions(
+            @NotNull List<String> playerKeysMessage,
+            @NotNull List<String> ownKeysMessages,
+            @NotNull String keyFormat,
+            @NotNull String hoverMessage
+        ) {
+            this.playerKeysMessage = playerKeysMessage;
+            this.ownKeysMessages = ownKeysMessages;
+            this.keyFormat = keyFormat;
+            this.hoverMessage = hoverMessage;
+        }
+
+        public @NotNull List<String> playerKeysMessage() {
+            return playerKeysMessage;
+        }
+
+        public @NotNull List<String> ownKeysMessages() {
+            return ownKeysMessages;
+        }
+
+        public @NotNull String keyFormat() {
+            return keyFormat;
+        }
+
+        public @NotNull String hoverMessage() {
+            return hoverMessage;
+        }
     }
 
-    private final @NonNull KeyGenOptions keyGen;
-    private final @NonNull KeyListingOptions keyListing;
-    @Accessors(fluent = true)
+    private final @NotNull KeyGenOptions keyGen;
+    private final @NotNull KeyListingOptions keyListing;
     private final boolean stackVips;
-    @Accessors(fluent = true)
     private final boolean storeItems;
     private final int switchVipDelay;
-    @Accessors(fluent = true)
     private final boolean simultaneousReduction;
+
+    public @NotNull KeyGenOptions keyGen() {
+        return keyGen;
+    }
+
+    public @NotNull KeyListingOptions keyListing() {
+        return keyListing;
+    }
+
+    public boolean stackVips() {
+        return stackVips;
+    }
+
+    public boolean storeItems() {
+        return storeItems;
+    }
+
+    public int switchVipDelay() {
+        return switchVipDelay;
+    }
+
+    public boolean simultaneousReduction() {
+        return simultaneousReduction;
+    }
 }

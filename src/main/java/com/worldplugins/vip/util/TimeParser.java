@@ -1,22 +1,18 @@
 package com.worldplugins.vip.util;
 
-import com.worldplugins.lib.extension.NumberExtensions;
-import lombok.NonNull;
-import lombok.experimental.ExtensionMethod;
-
-@ExtensionMethod({
-    NumberExtensions.class
-})
+import me.post.lib.util.Numbers;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class TimeParser {
-    public static Integer parseTime(@NonNull String timeFormat) {
+    public static @Nullable Integer parseTime(@NotNull String timeFormat) {
         if (timeFormat.length() <= 1) {
             return null;
         }
 
-        final Integer numericValue = timeFormat
-            .substring(0, timeFormat.length() - 1)
-            .toIntOrNull();
+        final Integer numericValue = Numbers.toIntOrNull(
+            timeFormat.substring(0, timeFormat.length() - 1)
+        );
 
         if (numericValue == null) {
             return null;

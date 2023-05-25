@@ -1,59 +1,76 @@
 package com.worldplugins.vip.view;
 
-import com.worldplugins.lib.config.cache.ConfigCache;
-import com.worldplugins.lib.extension.GenericExtensions;
-import com.worldplugins.lib.util.BukkitSerializer;
-import com.worldplugins.lib.util.ConfigUtils;
-import com.worldplugins.lib.view.CloseableView;
-import com.worldplugins.lib.view.ContextView;
-import com.worldplugins.lib.view.ViewContext;
 import com.worldplugins.vip.config.data.VipItemsData;
-import com.worldplugins.vip.extension.ResponseExtensions;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
-import org.bukkit.Bukkit;
+import me.post.lib.config.model.ConfigModel;
+import me.post.lib.util.BukkitSerializer;
+import me.post.lib.util.Configurations;
+import me.post.lib.view.View;
+import me.post.lib.view.action.ViewClick;
+import me.post.lib.view.action.ViewClose;
+import me.post.lib.view.helper.ContextBuilder;
+import me.post.lib.view.helper.ViewContext;
+import me.post.lib.view.helper.impl.MapViewContext;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-@ExtensionMethod({
-    ResponseExtensions.class,
-    GenericExtensions.class
-})
+import static com.worldplugins.vip.Response.respond;
+import static java.util.Objects.requireNonNull;
+import static me.post.lib.util.Pairs.to;
 
-@RequiredArgsConstructor
-public class VipItemsEditView
-    extends ContextView<VipItemsEditView.Context>
-    implements CloseableView {
-    @RequiredArgsConstructor
-    public static class Context implements ViewContext {
-        private final @NonNull String vipName;
+public class VipItemsEditView implements View {
+    public static class Context {
+        private final @NotNull String vipName;
+
+        public Context(@NotNull String vipName) {
+            this.vipName = vipName;
+        }
     }
 
-    private final @NonNull ConfigCache<VipItemsData> vipItemsConfig;
-    @Override
-    public void openView(@NonNull Player player, Context context) {
-        final Inventory inventory = Bukkit.createInventory(
-            this, 54, "Editar itens - VIP " + context.vipName
-        );
-        player.openInventory(inventory);
+    private final @NotNull ViewContext viewContext;
+    private final @NotNull ConfigModel<VipItemsData> vipItemsConfig;
+
+    public VipItemsEditView(@NotNull ConfigModel<VipItemsData> vipItemsConfig) {
+        this.viewContext = new MapViewContext();
+        this.vipItemsConfig = vipItemsConfig;
     }
 
     @Override
-    public void onClick(@NonNull InventoryClickEvent event) { }
-
-    @Override
-    public void onClose(@NonNull Player player) {
-        final String vipName = getContext(player).vipName;
+    public void open(@NotNull Player player, @Nullable Object data) {
         final ItemStack[] vipItems = player.getOpenInventory().getTopInventory().getContents();
 
-        ConfigUtils.update(vipItemsConfig, config ->
-            config.set(vipName, BukkitSerializer.serialize(vipItems))
+        ContextBuilder.of(6)
+            .apply(builder -> {
+                for (int slot = 0; slot < vipItems.length; slot++) {
+                    if (vipItems[slot] == null) {
+                        continue;
+                    }
+
+                    builder.item(slot, vipItems[slot].clone());
+                }
+            })
+            .build(viewContext, player, data);
+    }
+
+    @Override
+    public void onClick(@NotNull ViewClick click) {
+
+    }
+
+    @Override
+    public void onClose(@NotNull ViewClose close) {
+        final Player player = close.whoCloses();
+        final Context context = (Context) requireNonNull(
+            viewContext.getViewer(player.getUniqueId()).data()
         );
-        player.respond("Itens-vip-salvos", message -> message.replace(
-            "@vip".to(vipName)
+        final ItemStack[] vipItems = player.getOpenInventory().getTopInventory().getContents();
+
+        Configurations.update(vipItemsConfig, config ->
+            config.set(context.vipName, BukkitSerializer.serialize(vipItems))
+        );
+        respond(player, "Itens-vip-salvos", message -> message.replace(
+            to("@vip", context.vipName)
         ));
     }
 }

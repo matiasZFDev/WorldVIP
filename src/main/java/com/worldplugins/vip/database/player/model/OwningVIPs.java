@@ -1,32 +1,36 @@
 package com.worldplugins.vip.database.player.model;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-@RequiredArgsConstructor
 public class OwningVIPs {
-    @Getter
-    private final @NonNull List<OwningVIP> vips;
+    private final @NotNull List<OwningVIP> vips;
 
-    public OwningVIP get(byte id, @NonNull VipType type) {
+    public OwningVIPs(@NotNull List<OwningVIP> vips) {
+        this.vips = vips;
+    }
+
+    public @NotNull List<OwningVIP> vips() {
+        return vips;
+    }
+
+    public OwningVIP get(byte id, @NotNull VipType type) {
         return vips.stream()
-            .filter(owningVip -> owningVip.getId() == id && owningVip.getType() == type)
+            .filter(owningVip -> owningVip.id() == id && owningVip.type() == type)
             .findFirst()
             .orElse(null);
     }
 
-    public @NonNull OwningVIP add(@NonNull VIP vip) {
-        final OwningVIP owningVip  = new OwningVIP(vip.getId(), vip.getType(), vip.getDuration());
+    public @NotNull OwningVIP add(@NotNull VIP vip) {
+        final OwningVIP owningVip  = new OwningVIP(vip.id(), vip.type(), vip.duration());
         vips.add(owningVip);
         return owningVip;
     }
 
-    public boolean remove(byte id, @NonNull VipType type) {
+    public boolean remove(byte id, @NotNull VipType type) {
         final OwningVIP owningVip =  vips.stream()
-            .filter(current -> current.getId() == id && current.getType() == type)
+            .filter(current -> current.id() == id && current.type() == type)
             .findFirst()
             .orElse(null);
 

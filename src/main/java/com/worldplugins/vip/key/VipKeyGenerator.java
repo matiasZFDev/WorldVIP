@@ -1,7 +1,7 @@
 package com.worldplugins.vip.key;
 
-import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 public interface VipKeyGenerator {
-    @NonNull String generate();
+    @NotNull String generate();
 }

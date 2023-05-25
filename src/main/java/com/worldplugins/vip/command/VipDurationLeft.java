@@ -1,86 +1,87 @@
 package com.worldplugins.vip.command;
 
-import com.worldplugins.lib.command.ArgsCheck;
-import com.worldplugins.lib.command.CommandModule;
-import com.worldplugins.lib.command.annotation.ArgsChecker;
-import com.worldplugins.lib.command.annotation.Command;
-import com.worldplugins.lib.extension.GenericExtensions;
-import com.worldplugins.lib.extension.TimeExtensions;
 import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.database.player.PlayerService;
+import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipPlayer;
 import com.worldplugins.vip.database.player.model.VipType;
-import com.worldplugins.vip.extension.ResponseExtensions;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.command.CommandModule;
+import me.post.lib.command.annotation.Command;
+import me.post.lib.util.Time;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
-@ExtensionMethod({
-    ResponseExtensions.class,
-    GenericExtensions.class,
-    TimeExtensions.class
-})
+import static com.worldplugins.vip.Response.respond;
+import static java.util.Objects.requireNonNull;
+import static me.post.lib.util.Pairs.to;
 
-@RequiredArgsConstructor
 public class VipDurationLeft implements CommandModule {
-    private final @NonNull PlayerService playerService;
+    private final @NotNull PlayerService playerService;
 
-    @Command(
-        name = "tempovip",
-        usage = "&cArgumentos invalidos. Digite /tempovip [jogador]",
-        argsChecks = {@ArgsChecker(size = 2, check = ArgsCheck.LOWER_SIZE)}
-    )
+    public VipDurationLeft(@NotNull PlayerService playerService) {
+        this.playerService = playerService;
+    }
+
+    @Command(name = "tempovip")
     @Override
-    public void execute(@NonNull CommandSender sender, @NonNull String[] args) {
-        if (args.length == 1) {
+    public void execute(@NotNull CommandSender sender, @NotNull String[] args) {
+        if (args.length >= 1) {
             if (!sender.hasPermission("worldvip.tempovip")) {
-                sender.respond("Tempo-vip-permissoes");
+                respond(sender, "Tempo-vip-permissoes");
                 return;
             }
 
             final Player player = Bukkit.getPlayer(args[0]);
 
             if (player == null) {
-                sender.respond("Jogador-offline", message -> message.replace(
-                    "@jogador".to(args[0])
+                respond(sender, "Jogador-offline", message -> message.replace(
+                    to("@jogador", args[0])
                 ));
                 return;
             }
 
             final VipPlayer vipPlayer = playerService.getById(player.getUniqueId());
 
-            if (vipPlayer == null || vipPlayer.getActiveVip() == null) {
-                sender.respond("Tempo-jogador-sem-vip", message -> message.replace(
-                    "@jogador".to(player.getName())
+            if (vipPlayer == null || vipPlayer.activeVip() == null) {
+                respond(sender, "Tempo-jogador-sem-vip", message -> message.replace(
+                    to("@jogador", player.getName())
                 ));
                 return;
             }
 
-            final String durationFormat = vipPlayer.getActiveVip().getType() == VipType.PERMANENT
+            final VIP activeVip = requireNonNull(vipPlayer.activeVip());
+            final String durationFormat = activeVip.type() == VipType.PERMANENT
                 ? GlobalValues.PERMANENT_DURATION
-                : ((Integer) vipPlayer.getActiveVip().getDuration()).toTime();
-            sender.respond("Tempo-vip-jogador", message -> message.replace(
-                "@jogador".to(player.getName()),
-                "@tempo".to(durationFormat)
+                : Time.toFormat(activeVip.duration());
+
+            respond(sender, "Tempo-vip-jogador", message -> message.replace(
+                to("@jogador", player.getName()),
+                to("@tempo", durationFormat)
             ));
         }
 
-        final Player player = Bukkit.getPlayer(args[0]);
-        final VipPlayer vipPlayer = playerService.getById(player.getUniqueId());
-
-        if (vipPlayer == null || vipPlayer.getActiveVip() == null) {
-            sender.respond("Tempo-sem-vip");
+        if (!(sender instanceof Player)) {
+            respond(sender, "Comando-jogador");
             return;
         }
 
-        final String durationFormat = vipPlayer.getActiveVip().getType() == VipType.PERMANENT
+        final Player player = (Player) sender;
+        final VipPlayer vipPlayer = playerService.getById(player.getUniqueId());
+
+        if (vipPlayer == null || vipPlayer.activeVip() == null) {
+            respond(sender, "Tempo-sem-vip");
+            return;
+        }
+
+        final VIP activeVip = requireNonNull(vipPlayer.activeVip());
+        final String durationFormat = activeVip.type() == VipType.PERMANENT
             ? GlobalValues.PERMANENT_DURATION
-            : ((Integer) vipPlayer.getActiveVip().getDuration()).toTime();
-        sender.respond("Tempo-vip", message -> message.replace(
-            "@tempo".to((durationFormat)
-        )));
+            : Time.toFormat(activeVip.duration());
+
+        respond(sender, "Tempo-vip", message -> message.replace(
+            to("@tempo", durationFormat)
+        ));
     }
 }

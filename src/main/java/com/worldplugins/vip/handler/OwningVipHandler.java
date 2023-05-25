@@ -1,38 +1,47 @@
 package com.worldplugins.vip.handler;
 
-import com.worldplugins.lib.config.cache.ConfigCache;
 import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.player.PlayerService;
 import com.worldplugins.vip.database.player.model.OwningVIP;
 import com.worldplugins.vip.database.player.model.VipPlayer;
 import com.worldplugins.vip.manager.PermissionManager;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import me.post.lib.config.model.ConfigModel;
+import org.jetbrains.annotations.NotNull;
 
-@RequiredArgsConstructor
 public class OwningVipHandler {
-    private final @NonNull PlayerService playerService;
-    private final @NonNull PermissionManager permissionManager;
-    private final @NonNull ConfigCache<VipData> vipConfig;
-    private final @NonNull ConfigCache<MainData> mainConfig;
+    private final @NotNull PlayerService playerService;
+    private final @NotNull PermissionManager permissionManager;
+    private final @NotNull ConfigModel<VipData> vipConfig;
+    private final @NotNull ConfigModel<MainData> mainConfig;
 
-    public void remove(@NonNull VipPlayer vipPlayer, @NonNull OwningVIP owningVip) {
-        playerService.removeOwningVip(vipPlayer.getId(), owningVip);
+    public OwningVipHandler(
+        @NotNull PlayerService playerService,
+        @NotNull PermissionManager permissionManager,
+        @NotNull ConfigModel<VipData> vipConfig,
+        @NotNull ConfigModel<MainData> mainConfig
+    ) {
+        this.playerService = playerService;
+        this.permissionManager = permissionManager;
+        this.vipConfig = vipConfig;
+        this.mainConfig = mainConfig;
+    }
+
+    public void remove(@NotNull VipPlayer vipPlayer, @NotNull OwningVIP owningVip) {
+        playerService.removeOwningVip(vipPlayer.id(), owningVip);
 
         if (!mainConfig.data().stackVips()) {
             return;
         }
 
-        final boolean existingSameVipCategory = vipPlayer.getOwningVips().getVips()
-            .stream()
-            .anyMatch(vip -> vip.getId() == owningVip.getId());
+        final boolean existingSameVipCategory = vipPlayer.owningVips().vips().stream()
+            .anyMatch(vip -> vip.id() == owningVip.id());
 
         if (existingSameVipCategory) {
             return;
         }
 
-        final VipData.VIP configVip = vipConfig.data().getById(owningVip.getId());
-        permissionManager.removeGroup(vipPlayer.getId(), configVip.getGroup());
+        final VipData.VIP configVip = vipConfig.data().getById(owningVip.id());
+        permissionManager.removeGroup(vipPlayer.id(), configVip.group());
     }
 }

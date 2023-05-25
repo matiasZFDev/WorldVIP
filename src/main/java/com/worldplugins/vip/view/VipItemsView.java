@@ -1,138 +1,159 @@
 package com.worldplugins.vip.view;
 
-import com.worldplugins.lib.config.cache.ConfigCache;
-import com.worldplugins.lib.config.cache.menu.ItemProcessResult;
-import com.worldplugins.lib.config.cache.menu.MenuData;
-import com.worldplugins.lib.config.cache.menu.MenuItem;
-import com.worldplugins.lib.config.data.ItemDisplay;
-import com.worldplugins.lib.extension.CollectionExtensions;
-import com.worldplugins.lib.extension.GenericExtensions;
-import com.worldplugins.lib.extension.bukkit.ItemExtensions;
-import com.worldplugins.lib.extension.bukkit.NBTExtensions;
-import com.worldplugins.lib.extension.bukkit.PlayerExtensions;
-import com.worldplugins.lib.util.MenuItemsUtils;
-import com.worldplugins.lib.util.SchedulerBuilder;
-import com.worldplugins.lib.view.MenuDataView;
-import com.worldplugins.lib.view.ViewContext;
-import com.worldplugins.lib.view.annotation.ViewSpec;
+import com.worldplugins.lib.config.common.ItemDisplay;
+import com.worldplugins.lib.config.model.MenuModel;
+import com.worldplugins.lib.util.ItemTransformer;
+import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.config.data.VipItemsData;
-import com.worldplugins.vip.config.menu.VipItemsMenuContainer;
 import com.worldplugins.vip.controller.VipItemsController;
 import com.worldplugins.vip.database.items.VipItems;
 import com.worldplugins.vip.database.items.VipItemsRepository;
-import com.worldplugins.vip.extension.ResponseExtensions;
-import com.worldplugins.vip.extension.ViewExtensions;
-import com.worldplugins.vip.util.ItemFactory;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
-import net.minecraft.server.v1_8_R3.NBTTagByte;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
+import me.post.deps.nbt_api.nbtapi.NBTCompound;
+import me.post.lib.config.model.ConfigModel;
+import me.post.lib.util.CollectionHelpers;
+import me.post.lib.util.NBTs;
+import me.post.lib.util.Players;
+import me.post.lib.util.Scheduler;
+import me.post.lib.view.View;
+import me.post.lib.view.Views;
+import me.post.lib.view.action.ViewClick;
+import me.post.lib.view.action.ViewClose;
+import me.post.lib.view.helper.ClickHandler;
+import me.post.lib.view.helper.ViewContext;
+import me.post.lib.view.helper.impl.MapViewContext;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@ExtensionMethod({
-    CollectionExtensions.class,
-    ItemExtensions.class,
-    GenericExtensions.class,
-    ViewExtensions.class,
-    NBTExtensions.class,
-    ResponseExtensions.class,
-    PlayerExtensions.class
-})
+import static com.worldplugins.vip.Response.respond;
+import static java.util.Objects.requireNonNull;
+import static me.post.lib.util.Pairs.to;
 
-@RequiredArgsConstructor
-@ViewSpec(menuContainer = VipItemsMenuContainer.class)
-public class VipItemsView extends MenuDataView<VipItemsView.Context> {
-    @RequiredArgsConstructor
-    public static class Context implements ViewContext {
-        private final @NonNull Collection<VipItems> itemsList;
+public class VipItemsView implements View {
+    public static class Context {
+        private final @NotNull Collection<VipItems> itemsList;
+
+        public Context(@NotNull Collection<VipItems> itemsList) {
+            this.itemsList = itemsList;
+        }
     }
 
-    private final @NonNull VipItemsRepository vipItemsRepository;
-    private final @NonNull SchedulerBuilder scheduler;
-    private final @NonNull VipItemsController vipItemsController;
+    private final @NotNull ViewContext viewContext;
+    private final @NotNull MenuModel menuModel;
+    private final @NotNull VipItemsRepository vipItemsRepository;
+    private final @NotNull Scheduler scheduler;
+    private final @NotNull VipItemsController vipItemsController;
+    private final @NotNull ConfigModel<MainData> mainConfig;
+    private final @NotNull ConfigModel<VipData> vipConfig;
+    private final @NotNull ConfigModel<VipItemsData> vipItemsConfig;
 
-    private final @NonNull ConfigCache<MainData> mainConfig;
-    private final @NonNull ConfigCache<VipData> vipConfig;
-    private final @NonNull ConfigCache<VipItemsData> vipItemsConfig;
+    private static final @NotNull String ITEMS_TAG = "wvip_vip_items_id";
 
-    @Override
-    public @NonNull ItemProcessResult processItems(
-        @NonNull Player player,
-        Context context,
-        @NonNull MenuData menuData
+    public VipItemsView(
+        @NotNull MenuModel menuModel,
+        @NotNull VipItemsRepository vipItemsRepository,
+        @NotNull Scheduler scheduler,
+        @NotNull VipItemsController vipItemsController,
+        @NotNull ConfigModel<MainData> mainConfig,
+        @NotNull ConfigModel<VipData> vipConfig,
+        @NotNull ConfigModel<VipItemsData> vipItemsConfig
     ) {
-        final List<Integer> slots = menuData.getData("Slots");
-        final ItemDisplay itemsDisplay = menuData.getData("Display-itens");
-        return MenuItemsUtils.newSession(menuData.getItems(), session ->
-            session.addDynamics(() ->
-                context.itemsList.zip(slots).stream()
-                    .map(itemsPair -> {
-                        final VipData.VIP configVip = vipConfig.data().getById(itemsPair.first().getVipId());
-                        final ItemStack item = configVip.getItem()
-                            .display(itemsDisplay)
-                            .loreFormat("@quantia".to(String.valueOf(itemsPair.first().getAmount())))
-                            .addReferenceValue("vip_id", new NBTTagByte(configVip.getId()));
-                        return ItemFactory.dynamicOf("Itens", itemsPair.second(), item);
-                    })
-                    .collect(Collectors.toList())
-            )
-        ).build();
+        this.viewContext = new MapViewContext();
+        this.menuModel = menuModel;
+        this.vipItemsRepository = vipItemsRepository;
+        this.scheduler = scheduler;
+        this.vipItemsController = vipItemsController;
+        this.mainConfig = mainConfig;
+        this.vipConfig = vipConfig;
+        this.vipItemsConfig = vipItemsConfig;
     }
 
     @Override
-    public void onClick(@NonNull Player player, @NonNull MenuItem item, @NonNull InventoryClickEvent event) {
-        if (item.getId().equals("Voltar")) {
-            player.openView(VipMenuView.class);
+    public void open(@NotNull Player player, @Nullable Object data) {
+        final Context context = (Context) requireNonNull(data);
+        final List<Integer> slots = menuModel.data().getData("Slots");
+        final ItemDisplay itemsDisplay = menuModel.data().getData("Display-itens");
+
+        ConfigContextBuilder.withModel(menuModel)
+            .handleMenuItemClick(
+                "Voltar",
+                click -> Views.get().open(click.whoClicked(), VipMenuView.class)
+            )
+            .apply(builder ->
+                CollectionHelpers.zip(context.itemsList, slots).forEach(itemsPair -> {
+                    final VipData.VIP configVip = requireNonNull(
+                        vipConfig.data().getById(itemsPair.first().vipId())
+                    );
+                    final ItemStack item = ItemTransformer.of(configVip.item())
+                        .display(itemsDisplay)
+                        .loreFormat(to("@quantia", String.valueOf(itemsPair.first().amount())))
+                        .addNBT(ITEMS_TAG, configVip.id())
+                        .transform();
+                    builder.item(itemsPair.second(), item, this::handleVipItemsClick);
+                })
+            )
+            .build(viewContext, player, data);
+    }
+
+    private void handleVipItemsClick(@NotNull ViewClick click) {
+        final Player player = click.whoClicked();
+
+        if (!mainConfig.data().storeItems()) {
+            respond(player, "Coleta-desabilitada");
             return;
         }
 
-        if (item.getId().equals("Itens")) {
-            if (!mainConfig.data().storeItems()) {
-                player.respond("Coleta-desabilitada");
-                return;
-            }
-
-            final byte vipId = item.getItem().getReferenceValue("vip_id", NBTTagCompound::getByte);
-            vipItemsRepository.getItems(player.getUniqueId()).thenAccept(itemList -> scheduler.newTask(() -> {
+        final ItemStack item = requireNonNull(click.clickedItem());
+        final byte vipId = NBTs.getTagValue(item, ITEMS_TAG, NBTCompound::getByte);
+        vipItemsRepository
+            .getItems(player.getUniqueId())
+            .thenAccept(itemList -> scheduler.runTask(0, false, () -> {
                 if (!player.isOnline()) {
                     return;
                 }
 
                 final VipItems matchingItems = itemList.stream()
-                    .filter(items -> items.getVipId() == vipId)
+                    .filter(items -> items.vipId() == vipId)
                     .findFirst()
                     .orElse(null);
 
                 if (matchingItems == null) {
-                    player.respond("Vip-itens-inexistentes");
+                    respond(player, "Vip-itens-inexistentes");
                     vipItemsController.openView(player);
                     return;
                 }
 
                 final VipData.VIP configVip = vipConfig.data().getById(vipId);
-                final ItemStack[] vipItems = vipItemsConfig.data().getByName(configVip.getName()).getData();
+                final ItemStack[] vipItems = vipItemsConfig.data().getByName(configVip.name()).data();
 
-                if (player.giveItemsChecking(vipItems)) {
-                    player.respond("Vip-itens-inventario-cheio");
+                if (Players.giveItemsChecking(player, vipItems)) {
+                    respond(player, "Vip-itens-inventario-cheio");
                     return;
                 }
 
-                final short amountReduced = matchingItems.getAmount() == 1
+                final short amountReduced = matchingItems.amount() == 1
                     ? (short) -1
                     : 1;
+
+                respond(player, "Vip-itens-colhidos");
                 vipItemsRepository.removeItems(player.getUniqueId(), vipId, amountReduced);
-                player.respond("Vip-itens-colhidos");
                 vipItemsController.openView(player);
-            }).run());
-        }
+            }));
+    }
+
+    @Override
+    public void onClick(@NotNull ViewClick click) {
+        ClickHandler.handleTopNonNull(viewContext, click);
+    }
+
+    @Override
+    public void onClose(@NotNull ViewClose close) {
+        viewContext.removeViewer(close.whoCloses().getUniqueId());
     }
 }

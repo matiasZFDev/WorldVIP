@@ -1,16 +1,12 @@
 package com.worldplugins.vip.database.player.model;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
-@Getter
 public enum VipType {
     BASIC((byte) 0, "basico", (byte) 1),
     ONLINE((byte) 1, "online", (byte) 2),
@@ -18,20 +14,38 @@ public enum VipType {
     PERMANENT((byte) 3, "permanente", (byte) 4);
 
     private final byte id;
-    private final @NonNull String name;
+    private final @NotNull String name;
     private final byte priority;
 
-    private static final @NonNull Map<Byte, VipType> idMap = Arrays.stream(values()).collect(Collectors.toMap(
-        VipType::getId, Function.identity()
+    private static final @NotNull Map<Byte, VipType> idMap = Arrays.stream(values()).collect(Collectors.toMap(
+        VipType::id, Function.identity()
     ));
+
+    VipType(byte id, @NotNull String name, byte priority) {
+        this.id = id;
+        this.name = name;
+        this.priority = priority;
+    }
+
+    public byte id() {
+        return id;
+    }
+
+    public @NotNull String getName() {
+        return name;
+    }
+
+    public byte priority() {
+        return priority;
+    }
 
     public static VipType fromId(byte id) {
         return idMap.get(id);
     }
 
-    public static VipType fromName(@NonNull String name) {
+    public static VipType fromName(@NotNull String name) {
         return Arrays.stream(values())
-            .filter(type -> type.name.equals(name))
+            .filter(type -> type.getName().equals(name))
             .findFirst()
             .orElse(null);
     }

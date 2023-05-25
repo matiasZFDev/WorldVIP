@@ -1,26 +1,42 @@
 package com.worldplugins.vip.config.data;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-@RequiredArgsConstructor
 public class VipItemsData {
-    @RequiredArgsConstructor
-    @Getter
     public static class VipItems {
-        private final @NonNull String vipName;
-        private final @NonNull ItemStack[] data;
+        private final @NotNull String vipName;
+        private final @NotNull ItemStack[] data;
+
+        public VipItems(@NotNull String vipName, @NotNull ItemStack[] data) {
+            this.vipName = vipName;
+            this.data = data;
+        }
+
+        public @NotNull String vipName() {
+            return vipName;
+        }
+
+        public @NotNull ItemStack[] data() {
+            return data;
+        }
     }
 
-    public final @NonNull Collection<VipItems> items;
+    public final @NotNull Collection<VipItems> items;
 
-    public VipItems getByName(@NonNull String vipName) {
+    public VipItemsData(@NotNull Collection<VipItems> items) {
+        this.items = items;
+    }
+
+    public @NotNull Collection<VipItems> items() {
+        return items;
+    }
+
+    public VipItems getByName(@NotNull String vipName) {
         return items.stream()
-            .filter(vipItems -> vipItems.getVipName().equals(vipName))
+            .filter(vipItems -> vipItems.vipName.equals(vipName))
             .findFirst()
             .orElse(null);
     }

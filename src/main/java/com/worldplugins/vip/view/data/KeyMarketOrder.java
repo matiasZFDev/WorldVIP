@@ -2,192 +2,190 @@ package com.worldplugins.vip.view.data;
 
 import com.worldplugins.vip.database.market.SellingKey;
 import com.worldplugins.vip.database.player.model.VipType;
-import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 
 public enum KeyMarketOrder {
-    NONE {
+    NONE(
+        "Ordenar-nenhum",
+        (a, b) -> 0
+    ) {
         @Override
-        public @NonNull Comparator<SellingKey> comparator() {
-            return (a, b) -> 0;
-        }
-
-        @Override
-        public @NonNull KeyMarketOrder next() {
+        public @NotNull KeyMarketOrder next() {
             return BETTER_TYPE;
         }
 
         @Override
-        public @NonNull KeyMarketOrder alternate() {
+        public @NotNull KeyMarketOrder alternate() {
             return this;
         }
     },
-    BETTER_TYPE {
+    BETTER_TYPE(
+        "Ordenar-melhor-tipo",
+        Comparator.comparingInt(SellingKey::vipId).reversed()
+    ) {
         @Override
-        public @NonNull Comparator<SellingKey> comparator() {
-            return WORST_TYPE.comparator().reversed();
-        }
-
-        @Override
-        public @NonNull KeyMarketOrder next() {
+        public @NotNull KeyMarketOrder next() {
             return EXPENSIVE;
         }
 
         @Override
-        public @NonNull KeyMarketOrder alternate() {
+        public @NotNull KeyMarketOrder alternate() {
             return WORST_TYPE;
         }
     },
-    WORST_TYPE {
+    WORST_TYPE(
+        "Ordenar-pior-tipo",
+        Comparator.comparingInt(SellingKey::vipId)
+    ) {
         @Override
-        public @NonNull Comparator<SellingKey> comparator() {
-            return Comparator.comparingInt(SellingKey::getVipId);
-        }
-
-        @Override
-        public @NonNull KeyMarketOrder next() {
+        public @NotNull KeyMarketOrder next() {
             return EXPENSIVE;
         }
 
         @Override
-        public @NonNull KeyMarketOrder alternate() {
+        public @NotNull KeyMarketOrder alternate() {
             return BETTER_TYPE;
         }
     },
-    EXPENSIVE {
+    EXPENSIVE(
+        "Ordenar-maior-preço",
+        Comparator.comparingDouble(SellingKey::price).reversed()
+    ) {
         @Override
-        public @NonNull Comparator<SellingKey> comparator() {
-            return CHEAPER.comparator().reversed();
-        }
-
-        @Override
-        public @NonNull KeyMarketOrder next() {
+        public @NotNull KeyMarketOrder next() {
             return MORE_USAGES;
         }
 
         @Override
-        public @NonNull KeyMarketOrder alternate() {
+        public @NotNull KeyMarketOrder alternate() {
             return CHEAPER;
         }
     },
-    CHEAPER {
+    CHEAPER(
+        "Ordenar-menor-preço",
+        Comparator.comparingDouble(SellingKey::price)
+    ) {
         @Override
-        public @NonNull Comparator<SellingKey> comparator() {
-            return Comparator.comparingDouble(SellingKey::getPrice);
-        }
-
-        @Override
-        public @NonNull KeyMarketOrder next() {
+        public @NotNull KeyMarketOrder next() {
             return MORE_USAGES;
         }
 
         @Override
-        public @NonNull KeyMarketOrder alternate() {
+        public @NotNull KeyMarketOrder alternate() {
             return EXPENSIVE;
         }
     },
-    MORE_USAGES {
+    MORE_USAGES(
+        "Ordenar-mais-usos",
+        Comparator.comparingInt(SellingKey::vipUsages).reversed()
+    ) {
         @Override
-        public @NonNull Comparator<SellingKey> comparator() {
-            return LESS_USAGES.comparator().reversed();
-        }
-
-        @Override
-        public @NonNull KeyMarketOrder next() {
+        public @NotNull KeyMarketOrder next() {
             return LONGER_DURATION;
         }
 
         @Override
-        public @NonNull KeyMarketOrder alternate() {
+        public @NotNull KeyMarketOrder alternate() {
             return LESS_USAGES;
         }
     },
-    LESS_USAGES {
+    LESS_USAGES(
+        "Ordenar-menos-usos",
+        Comparator.comparingInt(SellingKey::vipUsages)
+    ) {
         @Override
-        public @NonNull Comparator<SellingKey> comparator() {
-            return Comparator.comparingInt(SellingKey::getVipUsages);
-        }
-
-        @Override
-        public @NonNull KeyMarketOrder next() {
+        public @NotNull KeyMarketOrder next() {
             return LONGER_DURATION;
         }
 
         @Override
-        public @NonNull KeyMarketOrder alternate() {
+        public @NotNull KeyMarketOrder alternate() {
             return MORE_USAGES;
         }
     },
-    LONGER_DURATION {
+    LONGER_DURATION(
+        "Ordenar-maior-duração",
+        (a, b) -> a.vipType() == VipType.PERMANENT ? 1 : a.vipDuration() - b.vipDuration()
+    ) {
         @Override
-        public @NonNull Comparator<SellingKey> comparator() {
-            return (a, b) ->
-                a.getVipType() == VipType.PERMANENT
-                    ? 1
-                    : a.getVipDuration() - b.getVipDuration();
-        }
-
-        @Override
-        public @NonNull KeyMarketOrder next() {
+        public @NotNull KeyMarketOrder next() {
             return RECENT_POST;
         }
 
         @Override
-        public @NonNull KeyMarketOrder alternate() {
+        public @NotNull KeyMarketOrder alternate() {
             return SHORTER_DURATION;
         }
     },
-    SHORTER_DURATION {
+    SHORTER_DURATION(
+        "Ordenar-menor-duração",
+        (a, b) -> a.vipType() == VipType.PERMANENT ? 0 : b.vipDuration() - a.vipDuration()
+    ) {
         @Override
-        public @NonNull Comparator<SellingKey> comparator() {
-            return SHORTER_DURATION.comparator().reversed();
-        }
-
-        @Override
-        public @NonNull KeyMarketOrder next() {
+        public @NotNull KeyMarketOrder next() {
             return RECENT_POST;
         }
 
         @Override
-        public @NonNull KeyMarketOrder alternate() {
+        public @NotNull KeyMarketOrder alternate() {
             return LONGER_DURATION;
         }
     },
-    RECENT_POST {
+    RECENT_POST(
+        "Ordenar-mais-recente",
+        Comparator.comparingLong(SellingKey::postTimestamp).reversed()
+    ) {
         @Override
-        public @NonNull Comparator<SellingKey> comparator() {
-            return OLDER_POST.comparator().reversed();
-        }
-
-        @Override
-        public @NonNull KeyMarketOrder next() {
+        public @NotNull KeyMarketOrder next() {
             return NONE;
         }
 
         @Override
-        public @NonNull KeyMarketOrder alternate() {
+        public @NotNull KeyMarketOrder alternate() {
             return OLDER_POST;
         }
     },
-    OLDER_POST {
+    OLDER_POST(
+        "Ordenar-mais-antiga",
+        Comparator.comparingLong(SellingKey::postTimestamp)
+    ) {
         @Override
-        public @NonNull Comparator<SellingKey> comparator() {
-            return Comparator.comparingLong(SellingKey::getPostTimestamp);
-        }
-
-        @Override
-        public @NonNull KeyMarketOrder next() {
+        public @NotNull KeyMarketOrder next() {
             return NONE;
         }
 
         @Override
-        public @NonNull KeyMarketOrder alternate() {
+        public @NotNull KeyMarketOrder alternate() {
             return RECENT_POST;
         }
     };
 
-    public abstract @NonNull Comparator<SellingKey> comparator();
-    public abstract @NonNull KeyMarketOrder next();
-    public abstract @NonNull KeyMarketOrder alternate();
+    private final @NotNull String configItemId;
+    private final @NotNull Comparator<SellingKey> comparator;
+
+    private static final @NotNull Collection<KeyMarketOrder> orders = Arrays.asList(values());
+
+    KeyMarketOrder(@NotNull String configItemId, @NotNull Comparator<SellingKey> comparator) {
+        this.configItemId = configItemId;
+        this.comparator = comparator;
+    }
+
+    public @NotNull String configItemId() {
+        return configItemId;
+    }
+
+    public @NotNull Comparator<SellingKey> comparator() {
+        return comparator;
+    }
+
+    public abstract @NotNull KeyMarketOrder next();
+    public abstract @NotNull KeyMarketOrder alternate();
+
+    public static @NotNull Collection<KeyMarketOrder> orders() {
+        return orders;
+    }
 }

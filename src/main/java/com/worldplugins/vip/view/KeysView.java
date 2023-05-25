@@ -1,143 +1,129 @@
 package com.worldplugins.vip.view;
 
-import com.worldplugins.lib.config.cache.ConfigCache;
-import com.worldplugins.lib.config.cache.menu.ItemProcessResult;
-import com.worldplugins.lib.config.cache.menu.MenuData;
-import com.worldplugins.lib.config.cache.menu.MenuItem;
-import com.worldplugins.lib.config.data.ItemDisplay;
-import com.worldplugins.lib.extension.CollectionExtensions;
-import com.worldplugins.lib.extension.GenericExtensions;
-import com.worldplugins.lib.extension.ReplaceExtensions;
-import com.worldplugins.lib.extension.bukkit.ItemExtensions;
-import com.worldplugins.lib.extension.bukkit.NBTExtensions;
-import com.worldplugins.lib.util.MenuItemsUtils;
-import com.worldplugins.lib.view.MenuDataView;
-import com.worldplugins.lib.view.ViewContext;
-import com.worldplugins.lib.view.annotation.ViewSpec;
-import com.worldplugins.vip.NBTKeys;
+import com.worldplugins.lib.config.common.ItemDisplay;
+import com.worldplugins.lib.config.model.MenuModel;
+import com.worldplugins.lib.util.ItemTransformer;
+import com.worldplugins.lib.util.Strings;
+import com.worldplugins.lib.view.PageConfigContextBuilder;
 import com.worldplugins.vip.config.data.VipData;
-import com.worldplugins.vip.config.menu.KeysMenuContainer;
 import com.worldplugins.vip.controller.KeysController;
 import com.worldplugins.vip.database.key.ValidVipKey;
-import com.worldplugins.vip.extension.ResponseExtensions;
-import com.worldplugins.vip.extension.ViewExtensions;
 import com.worldplugins.vip.key.KeyManagement;
-import com.worldplugins.vip.util.ItemFactory;
 import com.worldplugins.vip.util.VipDuration;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
+import me.post.deps.nbt_api.nbtapi.NBTCompound;
+import me.post.lib.config.model.ConfigModel;
+import me.post.lib.util.NBTs;
+import me.post.lib.view.View;
+import me.post.lib.view.Views;
+import me.post.lib.view.action.ViewClick;
+import me.post.lib.view.action.ViewClose;
+import me.post.lib.view.helper.ClickHandler;
+import me.post.lib.view.helper.ViewContext;
+import me.post.lib.view.helper.impl.MapViewContext;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@ExtensionMethod({
-    ReplaceExtensions.class,
-    GenericExtensions.class,
-    CollectionExtensions.class,
-    ItemExtensions.class,
-    ViewExtensions.class,
-    NBTExtensions.class,
-    ResponseExtensions.class
-})
+import static java.util.Objects.requireNonNull;
+import static me.post.lib.util.Pairs.to;
 
-@RequiredArgsConstructor
-@ViewSpec(menuContainer = KeysMenuContainer.class)
-public class KeysView extends MenuDataView<KeysView.Context> {
-    @RequiredArgsConstructor
-    public static class Context implements ViewContext {
+public class KeysView implements View {
+    public static class Context {
         private final int page;
-        private final int totalPages;
-        private final Collection<ValidVipKey> pageKeys;
+        private final @NotNull List<ValidVipKey> keys;
 
-        @Override
-        public ViewContext viewDidOpen() {
-            return new Context(page, totalPages, null);
+        public Context(int page, @NotNull List<ValidVipKey> keys) {
+            this.page = page;
+            this.keys = keys;
         }
     }
 
-    private final @NonNull KeysController keysController;
-    private final @NonNull KeyManagement keyManagement;
+    private final @NotNull MenuModel menuModel;
+    private final @NotNull ViewContext viewContext;
+    private final @NotNull KeysController keysController;
+    private final @NotNull KeyManagement keyManagement;
+    private final @NotNull ConfigModel<VipData> vipConfig;
 
-    private final @NonNull ConfigCache<VipData> vipConfig;
+    public static final @NotNull String KEY_CODE_TAG = "wvip_view_key_code";
 
-    @Override
-    public @NonNull ItemProcessResult processItems(
-        @NonNull Player player,
-        Context context,
-        @NonNull MenuData menuData
+    public KeysView(
+        @NotNull MenuModel menuModel,
+        @NotNull KeysController keysController,
+        @NotNull KeyManagement keyManagement,
+        @NotNull ConfigModel<VipData> vipConfig
     ) {
-        final List<Integer> slots = menuData.getData("Slots");
-        final ItemDisplay keyDisplay = menuData.getData("Display-key");
-        return MenuItemsUtils.newSession(menuData.getItems(), session -> {
-            if (context.page == 0) {
-                session.remove("Pagina-anterior");
-            }
-
-            if (context.page == context.totalPages - 1) {
-                session.remove("Pagina-seguinte");
-            }
-
-            session.addDynamics(() ->
-                context.pageKeys.zip(slots).stream()
-                    .map(keyPair -> {
-                        final ValidVipKey key = keyPair.first();
-                        final VipData.VIP configVip = vipConfig.data().getById(key.getVipId());
-                        return ItemFactory.dynamicOf(
-                            "Key", keyPair.second(), configVip.getItem()
-                                .display(keyDisplay)
-                                .nameFormat("@vip".to(configVip.getDisplay()))
-                                .loreFormat(
-                                    "@tipo".to(key.getVipType().getName().toUpperCase()),
-                                    "@tempo".to(VipDuration.format(key)),
-                                    "@usos".to(String.valueOf(key.getUsages()))
-                                )
-                                .addReference(NBTKeys.VIEW_KEY, keyPair.first().getCode())
-                        );
-                    })
-                    .collect(Collectors.toList())
-            );
-        }).build();
+        this.menuModel = menuModel;
+        this.viewContext = new MapViewContext();
+        this.keysController = keysController;
+        this.keyManagement = keyManagement;
+        this.vipConfig = vipConfig;
     }
 
     @Override
-    public @NonNull String getTitle(@NonNull String title, Context data, @NonNull MenuData menuData) {
-        return title.formatReplace(
-            "@atual".to(String.valueOf(data.page + 1)),
-            "@totais".to(String.valueOf(data.totalPages))
-        );
+    public void open(@NotNull Player player, @Nullable Object data) {
+        final Context context = (Context) requireNonNull(data);
+        final int page = context.page;
+        final List<Integer> slots = menuModel.data().getData("Slots");
+        final ItemDisplay keyDisplay = menuModel.data().getData("Display-key");
+
+        PageConfigContextBuilder.of(
+                menuModel,
+                currentPage -> keysController.openView(player, currentPage),
+                context.page
+            )
+            .editTitle((pageInfo, title) ->
+                Strings.replace(
+                    title,
+                    to("@atual", String.valueOf(pageInfo.page() + 1)),
+                    to("@totais", String.valueOf(pageInfo.totalPages()))
+                )
+            )
+            .handleMenuItemClick("Voltar", click ->
+                Views.get().open(click.whoClicked(), VipMenuView.class)
+            )
+            .previousPageButtonAs("Pagina-anterior")
+            .nextPageButtonAs("Pagina-seguinte")
+            .withSlots(slots)
+            .fill(
+                context.keys,
+                key -> {
+                    final VipData.VIP configVip = vipConfig.data().getById(key.vipId());
+                    return ItemTransformer.of(configVip.item().clone())
+                        .display(keyDisplay)
+                        .nameFormat(to("@vip", configVip.display()))
+                        .loreFormat(
+                            to("@tipo", key.vipType().getName().toUpperCase()),
+                            to("@tempo", VipDuration.format(key)),
+                            to("@usos", String.valueOf(key.usages()))
+                        )
+                        .addNBT(KEY_CODE_TAG, key.code())
+                        .transform();
+                },
+                click -> {
+                    final String keyCode = NBTs.getTagValue(
+                        requireNonNull(click.clickedItem()),
+                        KEY_CODE_TAG,
+                        NBTCompound::getString
+                    );
+                    keyManagement.manage(
+                        player, keyCode, page, key -> {
+                            // open key management view
+                        }
+                    );
+                }
+            )
+            .build(viewContext, player, null);
     }
 
     @Override
-    public void onClick(@NonNull Player player, @NonNull MenuItem menuItem, @NonNull InventoryClickEvent inventoryClickEvent) {
-        switch (menuItem.getId()) {
-            case "Voltar": {
-                player.openView(VipMenuView.class);
-                break;
-            }
+    public void onClick(@NotNull ViewClick click) {
+        ClickHandler.handleTopNonNull(viewContext, click);
+    }
 
-            case "Pagina-seguinte": {
-                final Context context = getContext(player);
-                keysController.openView(player.getPlayer(), context.page + 1);
-                break;
-            }
-
-            case "Pagina-anterior": {
-                final Context context = getContext(player);
-                keysController.openView(player.getPlayer(), context.page - 1);
-                break;
-            }
-
-            case "Key": {
-                final String keyCode = menuItem.getItem().getReference(NBTKeys.VIEW_KEY);
-                final Context context = getContext(player);
-                keyManagement.manage(
-                    player, keyCode, context.page, key -> {}
-                );
-            }
-        }
+    @Override
+    public void onClose(@NotNull ViewClose close) {
+        viewContext.removeViewer(close.whoCloses().getUniqueId());
     }
 }

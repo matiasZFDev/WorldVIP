@@ -1,34 +1,30 @@
 package com.worldplugins.vip.database.market;
 
 import com.worldplugins.lib.database.sql.SQLExecutor;
-import com.worldplugins.lib.extension.UUIDExtensions;
-import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.util.TemporaryDataSet;
-import lombok.NonNull;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.util.Scheduler;
+import me.post.lib.util.UUIDs;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-@ExtensionMethod({
-    UUIDExtensions.class
-})
-
 public class SQLSellingKeyRepository implements SellingKeyRepository {
-    private final @NonNull Executor executor;
-    private final @NonNull SQLExecutor sqlExecutor;
-    private final @NonNull TemporaryDataSet<SellingKey> cache;
+    private final @NotNull Executor executor;
+    private final @NotNull SQLExecutor sqlExecutor;
+    private final @NotNull TemporaryDataSet<SellingKey> cache;
 
-    private static final @NonNull String MARKET_TABLE = "worldvip_loja";
+    private static final @NotNull String MARKET_TABLE = "worldvip_loja";
 
     public SQLSellingKeyRepository(
-        @NonNull Executor executor,
-        @NonNull SQLExecutor sqlExecutor,
-        @NonNull SchedulerBuilder scheduler
+        @NotNull Executor executor,
+        @NotNull SQLExecutor sqlExecutor,
+        @NotNull Scheduler scheduler
     ) {
         this.executor = executor;
         this.sqlExecutor = sqlExecutor;
@@ -51,7 +47,7 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
     }
 
     @Override
-    public @NonNull CompletableFuture<Collection<SellingKey>> getAllKeys() {
+    public @NotNull CompletableFuture<List<SellingKey>> getAllKeys() {
         return cache.expired()
             ? CompletableFuture.supplyAsync(() -> sqlExecutor.executeQuery(
                 "SELECT * FROM " + MARKET_TABLE,
@@ -62,7 +58,7 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
                     while (result.next()) {
                         data.add(new SellingKey(
                             result.get("code"),
-                            ((byte[]) result.get("seller_id")).toUUID(),
+                            UUIDs.toUUID(result.get("seller_id")),
                             result.get("price"),
                             result.get("vip_id"),
                             VipType.fromId(result.get("vip_type")),
@@ -72,6 +68,7 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
                         ));
                     }
 
+                    cache.clear();
                     cache.addAll(data);
                     return cache.getAll();
                 }
@@ -80,7 +77,7 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
     }
 
     @Override
-    public void addKey(@NonNull SellingKey key) {
+    public void addKey(@NotNull SellingKey key) {
         if (!cache.expired()) {
             cache.add(key);
         }
@@ -90,27 +87,27 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
                 "(code, seller_id, price, vip_id, vip_type, vip_duration, vip_usages, post_timestamp)" +
                 "VALUES(?,?,?,?,?,?,?,?)",
             statement -> {
-                statement.set(1, key.getCode());
-                statement.set(2, key.getSellerId().getBytes());
-                statement.set(3, key.getPrice());
-                statement.set(4, key.getVipId());
-                statement.set(5, key.getVipType().getId());
-                statement.set(6, key.getVipDuration());
-                statement.set(7, key.getVipUsages());
-                statement.set(8, key.getPostTimestamp());
+                statement.set(1, key.code());
+                statement.set(2, UUIDs.getBytes(key.sellerId()));
+                statement.set(3, key.price());
+                statement.set(4, key.vipId());
+                statement.set(5, key.vipType().id());
+                statement.set(6, key.vipDuration());
+                statement.set(7, key.vipUsages());
+                statement.set(8, key.postTimestamp());
             }
         ), executor);
     }
 
     @Override
-    public void removeKey(@NonNull SellingKey key) {
+    public void removeKey(@NotNull SellingKey key) {
         if (!cache.expired()) {
             cache.remove(key);
         }
 
         CompletableFuture.runAsync(() -> sqlExecutor.update(
             "DELETE FROM " + MARKET_TABLE + " WHERE code=?",
-            statement -> statement.set(1, key.getCode())
+            statement -> statement.set(1, key.code())
         ), executor);
     }
 }

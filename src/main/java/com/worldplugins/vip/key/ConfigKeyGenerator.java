@@ -1,68 +1,61 @@
 package com.worldplugins.vip.key;
 
-import com.worldplugins.lib.config.cache.ConfigCache;
 import com.worldplugins.vip.config.data.MainData;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import me.post.lib.config.model.ConfigModel;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 public class ConfigKeyGenerator implements VipKeyGenerator {
     private enum CharGen {
-        NUMBER {
-            @Override
-            public @NonNull Supplier<Character> charSupplier() {
-                return () -> (char) (48 + random.nextInt(9));
-            }
+        NUMBER(
+            () -> (char) (48 + random.nextInt(9)),
+            MainData.KeyGenOptions::numbers
+        ),
+        LOWERCASE_LETTERS(
+            () -> (char) (97 + random.nextInt(122 - 97)),
+            MainData.KeyGenOptions::lowercaseLetters
+        ),
+        UPPERCASE_LETTERS(
+            () -> (char) (65 + random.nextInt(90 - 65)),
+            MainData.KeyGenOptions::uppercaseLetters
+        );
 
-            @Override
-            public @NonNull Function<MainData.KeyGenOptions, Boolean> option() {
-                return MainData.KeyGenOptions::numbers;
-            }
-        },
-        LOWERCASE_LETTERS {
-            @Override
-            public @NonNull Supplier<Character> charSupplier() {
-                return () -> (char) (97 + random.nextInt(122 - 97));
-            }
+        private final @NotNull Supplier<Character> charSupplier;
+        private final @NotNull Function<MainData.KeyGenOptions, Boolean> option;
+        private static final @NotNull List<CharGen> list = Arrays.asList(values());
 
-            @Override
-            public @NonNull Function<MainData.KeyGenOptions, Boolean> option() {
-                return MainData.KeyGenOptions::lowercaseLetters;
-            }
-        },
-        UPPERCASE_LETTERS {
-            @Override
-            public @NonNull Supplier<Character> charSupplier() {
-                return () -> (char) (65 + random.nextInt(90 - 65));
-            }
+        CharGen(@NotNull Supplier<Character> charSupplier, @NotNull Function<MainData.KeyGenOptions, Boolean> option) {
+            this.charSupplier = charSupplier;
+            this.option = option;
+        }
 
-            @Override
-            public @NonNull Function<MainData.KeyGenOptions, Boolean> option() {
-                return MainData.KeyGenOptions::upercaseLetters;
-            }
-        };
+        public @NotNull Supplier<Character> charSupplier() {
+            return charSupplier;
+        }
 
-        public abstract @NonNull Supplier<Character> charSupplier();
-        public abstract @NonNull Function<MainData.KeyGenOptions, Boolean> option();
+        public @NotNull Function<MainData.KeyGenOptions, Boolean> option() {
+            return option;
+        }
 
-        private static final @NonNull List<CharGen> list = Arrays.asList(values());
-
-        public static @NonNull List<CharGen> list() {
+        public static @NotNull List<CharGen> list() {
             return list;
         }
     }
 
-    private final @NonNull ConfigCache<MainData> mainConfig;
-    private static final @NonNull Random random = new Random();
+    private final @NotNull ConfigModel<MainData> mainConfig;
+    private static final @NotNull Random random = new Random();
+
+    public ConfigKeyGenerator(@NotNull ConfigModel<MainData> mainConfig) {
+        this.mainConfig = mainConfig;
+    }
 
     @Override
-    public @NonNull String generate() {
-        final byte keyLength = mainConfig.data().getKeyGen().length();
+    public @NotNull String generate() {
+        final byte keyLength = mainConfig.data().keyGen().length();
         final StringBuilder codeBuilder = new StringBuilder(keyLength);
 
         for (int i = 0; i < keyLength; i++) {
@@ -72,9 +65,9 @@ public class ConfigKeyGenerator implements VipKeyGenerator {
         return codeBuilder.toString();
     }
 
-    private @NonNull Supplier<Character> rollCharGen() {
+    private @NotNull Supplier<Character> rollCharGen() {
         final List<Supplier<Character>> filteredGenList = CharGen.list().stream()
-            .filter(charGen -> charGen.option().apply(mainConfig.data().getKeyGen()))
+            .filter(charGen -> charGen.option().apply(mainConfig.data().keyGen()))
             .map(CharGen::charSupplier)
             .collect(Collectors.toList());
 

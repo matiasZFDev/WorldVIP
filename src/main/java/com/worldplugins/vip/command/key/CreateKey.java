@@ -1,63 +1,68 @@
 package com.worldplugins.vip.command.key;
 
-import com.worldplugins.lib.command.ArgsCheck;
-import com.worldplugins.lib.command.CommandModule;
-import com.worldplugins.lib.command.annotation.ArgsChecker;
-import com.worldplugins.lib.command.annotation.Command;
-import com.worldplugins.lib.config.cache.ConfigCache;
-import com.worldplugins.lib.extension.GenericExtensions;
-import com.worldplugins.lib.extension.NumberExtensions;
-import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
 import com.worldplugins.vip.database.player.model.VipType;
-import com.worldplugins.vip.extension.ResponseExtensions;
 import com.worldplugins.vip.key.VipKeyGenerator;
 import com.worldplugins.vip.util.CommandParameters;
 import com.worldplugins.vip.util.CommandParams;
 import com.worldplugins.vip.util.TimeParser;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.command.CommandModule;
+import me.post.lib.command.annotation.Command;
+import me.post.lib.config.model.ConfigModel;
+import me.post.lib.util.Numbers;
+import me.post.lib.util.Scheduler;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-@ExtensionMethod({
-    ResponseExtensions.class,
-    GenericExtensions.class,
-    NumberExtensions.class
-})
+import static com.worldplugins.vip.Response.respond;
+import static me.post.lib.util.Pairs.to;
 
-@RequiredArgsConstructor
 public class CreateKey implements CommandModule {
-    private final @NonNull VipKeyGenerator keyGenerator;
-    private final @NonNull ConfigCache<VipData> vipConfig;
-    private final @NonNull ValidKeyRepository validKeyRepository;
-    private final @NonNull SchedulerBuilder scheduler;
+    private final @NotNull VipKeyGenerator keyGenerator;
+    private final @NotNull ConfigModel<VipData> vipConfig;
+    private final @NotNull ValidKeyRepository validKeyRepository;
+    private final @NotNull Scheduler scheduler;
 
-    @Command(
-        name = "criarkey",
-        permission = "worldvip.criarkey",
-        argsChecks = {
-            @ArgsChecker(size = 2, check = ArgsCheck.GREATER_SIZE),
-            @ArgsChecker(size = 7, check = ArgsCheck.LOWER_SIZE)
-        },
-        usage = "&cArgumentos invalidos. Digite /criarkey <GERAR | key> <vip> <tipo> [tempo] [usos] [jogador]"
-    )
+    public CreateKey(
+        @NotNull VipKeyGenerator keyGenerator,
+        @NotNull ConfigModel<VipData> vipConfig,
+        @NotNull ValidKeyRepository validKeyRepository,
+        @NotNull Scheduler scheduler
+    ) {
+        this.keyGenerator = keyGenerator;
+        this.vipConfig = vipConfig;
+        this.validKeyRepository = validKeyRepository;
+        this.scheduler = scheduler;
+    }
+
+    @Command(name = "criarkey")
     @Override
-    public void execute(@NonNull CommandSender sender, @NonNull String[] args) {
+    public void execute(@NotNull CommandSender sender, @NotNull String[] args) {
+        if (!sender.hasPermission("worldvip.criarkey")) {
+            respond(sender, "Criar-key-permissoes");
+            return;
+        }
+
+        if (!(args.length > 2 && args.length < 7)) {
+            respond(sender, "Criar-key-uso");
+            return;
+        }
+
         final String keyCode = !args[0].equals("GERAR")
             ? args[0]
             : keyGenerator.generate();
 
         if (keyCode.length() > GlobalValues.MAX_KEY_LENGTH) {
-            sender.respond("Key-tamanho-maximo", message -> message.replace(
-                "@maximo".to(String.valueOf(GlobalValues.MAX_KEY_LENGTH))
+            respond(sender, "Key-tamanho-maximo", message -> message.replace(
+                to("@maximo", String.valueOf(GlobalValues.MAX_KEY_LENGTH))
             ));
             return;
         }
@@ -65,9 +70,9 @@ public class CreateKey implements CommandModule {
         final VipData.VIP configVip = vipConfig.data().getByName(args[1]);
 
         if (configVip == null) {
-            sender.respond("Vip-inexistente", message -> message.replace(
-                "@nome".to(args[1]),
-                "@vips".to(vipConfig.data().all().toString())
+            respond(sender, "Vip-inexistente", message -> message.replace(
+                to("@nome", args[1]),
+                to("@vips", vipConfig.data().all().toString())
             ));
             return;
         }
@@ -76,13 +81,74 @@ public class CreateKey implements CommandModule {
 
         if (vipType == null) {
             final Collection<VipType> types = Arrays.asList(VipType.values());
-            sender.respond("Tipo-vip-inexistente", message -> message.replace(
-                "@nome".to(args[2]),
-                "@tipos".to(types.toString())
+            respond(sender, "Tipo-vip-inexistente", message -> message.replace(
+                to("@nome", args[2]),
+                to("@tipos", types.toString())
             ));
             return;
         }
 
+        final ParamsResult params = getParamsResult(sender, vipType, args);
+
+        if (params == null) {
+            return;
+        }
+
+        validKeyRepository.getKeyByCode(keyCode).thenAccept(key -> {
+            if (key != null) {
+                scheduler.runTask(0, false, () ->
+                    respond(sender, "Key-duplicada", message -> message.replace(
+                        to("@key", keyCode)
+                    ))
+                );
+                return;
+            }
+
+            scheduler.runTask(0, false, () -> {
+                final ValidVipKey validKey = new ValidVipKey(
+                    params.generatorName,
+                    keyCode,
+                    configVip.id(),
+                    vipType,
+                    params.duration,
+                    params.usages
+                );
+                validKeyRepository.addKey(validKey);
+                respond(sender, "Key-criada", message -> message.replace(
+                    to("@key", keyCode),
+                    to("@vip", configVip.display()),
+                    to("@usos", String.valueOf(params.usages)),
+                    to("@tipo", vipType.getName().toUpperCase()),
+                    to("@tempo", params.durationFormat)
+                ));
+            });
+        });
+    }
+
+    private static class ParamsResult {
+        private final @NotNull String durationFormat;
+        private final int duration;
+        private final short usages;
+        private final @Nullable String generatorName;
+
+        private ParamsResult(
+            @NotNull String durationFormat,
+            int duration,
+            short usages,
+            @Nullable String generatorName
+        ) {
+            this.durationFormat = durationFormat;
+            this.duration = duration;
+            this.usages = usages;
+            this.generatorName = generatorName;
+        }
+    }
+
+    private @Nullable ParamsResult getParamsResult(
+        @NotNull CommandSender sender,
+        @NotNull VipType vipType,
+        @NotNull String[] args
+    ) {
         final String durationFormat;
         final Integer duration;
 
@@ -98,10 +164,10 @@ public class CreateKey implements CommandModule {
             duration = TimeParser.parseTime(durationFormat);
 
             if (duration == null) {
-                sender.respond("Vip-duracao-invalida", message -> message.replace(
-                    "@valor".to(durationFormat)
+                respond(sender, "Vip-duracao-invalida", message -> message.replace(
+                    to("@valor", durationFormat)
                 ));
-                return;
+                return null;
             }
         }
 
@@ -110,13 +176,13 @@ public class CreateKey implements CommandModule {
         if (rawUsages == null) {
             usages = 1;
         } else {
-            final Short usageCheck = rawUsages.toShortOrNull();
+            final Short usageCheck = Numbers.toShortOrNull(rawUsages);
 
             if (usageCheck == null) {
-                sender.respond("Key-usos-invalidos", message -> message.replace(
-                    "@valor".to(rawUsages)
+                respond(sender, "Key-usos-invalidos", message -> message.replace(
+                    to("@valor", rawUsages)
                 ));
-                return;
+                return null;
             }
 
             usages = usageCheck;
@@ -126,29 +192,6 @@ public class CreateKey implements CommandModule {
             ? sender instanceof Player ? sender.getName() : null
             : rawPlayer;
 
-        validKeyRepository.getKeyByCode(keyCode).thenAccept(key -> {
-            if (key != null) {
-                scheduler.newTask(() ->
-                    sender.respond("Key-duplicada", message -> message.replace(
-                        "@key".to(keyCode)
-                    ))
-                ).run();
-                return;
-            }
-
-            scheduler.newTask(() -> {
-                final ValidVipKey validKey = new ValidVipKey(
-                    generatorName, keyCode, configVip.getId(), vipType, duration, usages
-                );
-                validKeyRepository.addKey(validKey);
-                sender.respond("Key-criada", message -> message.replace(
-                    "@key".to(keyCode),
-                    "@vip".to(configVip.getDisplay()),
-                    "@usos".to(String.valueOf(usages)),
-                    "@tipo".to(vipType.getName().toUpperCase()),
-                    "@tempo".to(durationFormat)
-                ));
-            }).run();
-        });
+        return new ParamsResult(durationFormat, duration, usages, generatorName);
     }
 }

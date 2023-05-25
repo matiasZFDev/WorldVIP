@@ -1,9 +1,10 @@
 package com.worldplugins.vip;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 
 public class WorldVIP extends JavaPlugin {
-    private Runnable onDisable;
+    private @Nullable Runnable onDisable;
 
     @Override
     public void onEnable() {

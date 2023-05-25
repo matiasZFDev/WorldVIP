@@ -1,8 +1,9 @@
 name: WorldVIP
 main: com.worldplugins.vip.WorldVIP
 version: 1.0
-authors: [PostDev]
+author: PostDev
 api-version: 1.8
+depend: [WorldLib]
 commands:
   vip:
     description: Comando para operações gerais. Abre um GUI de gerenciamento caso executar sem argumentos

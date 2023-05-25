@@ -1,59 +1,61 @@
 package com.worldplugins.vip.key;
 
-import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.controller.KeysController;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
-import com.worldplugins.vip.extension.ResponseExtensions;
-import com.worldplugins.vip.extension.ViewExtensions;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.util.Scheduler;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
-@ExtensionMethod({
-    ViewExtensions.class,
-    ResponseExtensions.class
-})
+import static com.worldplugins.vip.Response.respond;
 
-@RequiredArgsConstructor
 public class KeyManagement {
-    private final @NonNull ValidKeyRepository validKeyRepository;
-    private final @NonNull SchedulerBuilder scheduler;
-    private final @NonNull KeysController keysController;
+    private final @NotNull ValidKeyRepository validKeyRepository;
+    private final @NotNull Scheduler scheduler;
+    private final @NotNull KeysController keysController;
+
+    public KeyManagement(
+        @NotNull ValidKeyRepository validKeyRepository,
+        @NotNull Scheduler scheduler,
+        @NotNull KeysController keysController
+    ) {
+        this.validKeyRepository = validKeyRepository;
+        this.scheduler = scheduler;
+        this.keysController = keysController;
+    }
 
     public void manage(
-        @NonNull Player player,
-        @NonNull String keyCode,
+        @NotNull Player player,
+        @NotNull String keyCode,
         int keysViewPage,
-        @NonNull Consumer<ValidVipKey> onSuccess
+        @NotNull Consumer<ValidVipKey> onSuccess
     ) {
-        validKeyRepository.getKeyByCode(keyCode).thenAccept(key -> scheduler.newTask(() -> {
+        validKeyRepository.getKeyByCode(keyCode).thenAccept(key -> scheduler.runTask(0, false, () -> {
             if (!player.isOnline()) {
                 return;
             }
 
             if (key == null) {
-                player.respond("Gerenciar-key-error");
                 keysController.openView(player, keysViewPage);
+                respond(player, "Gerenciar-key-error");
                 return;
             }
 
-            if (key.getGeneratorName() == null) {
-                player.respond("Gerenciar-key-error");
+            if (key.generatorName() == null) {
                 keysController.openView(player, keysViewPage);
+                respond(player, "Gerenciar-key-error");
                 return;
             }
 
-            if (!player.getName().equals(key.getGeneratorName())) {
-                player.respond("Gerenciar-key-error");
+            if (!player.getName().equals(key.generatorName())) {
                 keysController.openView(player, keysViewPage);
+                respond(player, "Gerenciar-key-error");
                 return;
             }
 
             onSuccess.accept(key);
-        }).run());
+        }));
     }
 }

@@ -1,21 +1,22 @@
 package com.worldplugins.vip.util;
 
-import com.worldplugins.lib.util.SchedulerBuilder;
-import lombok.NonNull;
+import me.post.lib.util.Scheduler;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Vector;
 
 public class TemporaryDataSet<E> {
-    private final @NonNull Collection<E> data;
+    private final @NotNull List<E> data;
     private final int expireAfterWrite;
     private final int expireAfterAccess;
 
     private int expireIn = -1;
 
     public TemporaryDataSet(
-        @NonNull SchedulerBuilder scheduler,
+        @NotNull Scheduler scheduler,
         int expireAfterWrite,
         int expireAfterAccess,
         boolean concurrent
@@ -23,10 +24,7 @@ public class TemporaryDataSet<E> {
         this.data = concurrent ? new Vector<>() : new ArrayList<>();
         this.expireAfterWrite = expireAfterWrite;
         this.expireAfterAccess = expireAfterAccess;
-        scheduler.newTimer(this::run)
-            .delay(20L)
-            .period(20L)
-            .run();
+        scheduler.runTimer(20, 20, false, this::run);
     }
 
     private void run() {
@@ -70,7 +68,7 @@ public class TemporaryDataSet<E> {
 
         data.remove(element);
     }
-    public void addAll(@NonNull Collection<E> elements) {
+    public void addAll(@NotNull Collection<E> elements) {
         if (expireAfterWrite != -1  && expireIn < expireAfterWrite) {
             expireIn = expireAfterWrite;
         }
@@ -78,7 +76,15 @@ public class TemporaryDataSet<E> {
         data.addAll(elements);
     }
 
-    public @NonNull Collection<E> getAll() {
+    public void clear() {
+        data.clear();
+    }
+
+    public @NotNull List<E> getAll() {
+        if (expireIn < expireAfterAccess) {
+            expireIn = expireAfterAccess;
+        }
+
         return data;
     }
 }

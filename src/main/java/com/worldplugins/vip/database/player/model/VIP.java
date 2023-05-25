@@ -1,21 +1,29 @@
 package com.worldplugins.vip.database.player.model;
 
-import lombok.Getter;
-import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 public class VIP {
-    @Getter
     private final byte id;
-    @Getter
-    private final @NonNull VipType type;
-    @Getter
+    private final @NotNull VipType type;
     private int duration;
     private boolean updated;
 
-    public VIP(byte id, @NonNull VipType type, int duration) {
+    public VIP(byte id, @NotNull VipType type, int duration) {
         this.id = id;
         this.type = type;
         this.duration = duration;
+    }
+
+    public byte id() {
+        return id;
+    }
+
+    public @NotNull VipType type() {
+        return type;
+    }
+
+    public int duration() {
+        return duration;
     }
 
     public void decrementDuration(int time) {

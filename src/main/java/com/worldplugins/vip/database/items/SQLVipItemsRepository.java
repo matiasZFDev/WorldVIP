@@ -1,38 +1,45 @@
 package com.worldplugins.vip.database.items;
 
 import com.worldplugins.lib.database.sql.SQLExecutor;
-import com.worldplugins.lib.extension.UUIDExtensions;
-import com.worldplugins.lib.util.SchedulerBuilder;
-import com.worldplugins.lib.util.cache.Cache;
-import com.worldplugins.vip.util.ExpiringMap;
-import lombok.NonNull;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.database.cache.Cache;
+import me.post.lib.database.cache.SynchronizedExpiringCache;
+import me.post.lib.database.cache.implementor.BukkitExpiringCacheImplementor;
+import me.post.lib.util.Scheduler;
+import me.post.lib.util.UUIDs;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-@ExtensionMethod({
-    UUIDExtensions.class
-})
-
 public class SQLVipItemsRepository implements VipItemsRepository {
-    private final @NonNull Executor executor;
-    private final @NonNull SQLExecutor sqlExecutor;
-    private final @NonNull Cache<UUID, Collection<VipItems>> cache;
+    private final @NotNull Executor executor;
+    private final @NotNull SQLExecutor sqlExecutor;
+    private final @NotNull Cache<UUID, Collection<VipItems>> cache;
 
-    private static final @NonNull String ITEMS_TABLE = "worldvip_itens";
+    private static final @NotNull String ITEMS_TABLE = "worldvip_itens";
 
     public SQLVipItemsRepository(
-        @NonNull Executor executor,
-        @NonNull SQLExecutor sqlExecutor,
-        @NonNull SchedulerBuilder scheduler
+        @NotNull Executor executor,
+        @NotNull SQLExecutor sqlExecutor,
+        @NotNull Scheduler scheduler
     ) {
         this.executor = executor;
         this.sqlExecutor = sqlExecutor;
-        this.cache = new ExpiringMap<>(scheduler, 60 * 15, 60 * 5, true);
+        this.cache = new BukkitExpiringCacheImplementor<>(
+            new SynchronizedExpiringCache<>(
+                new me.post.lib.database.cache.ExpiringMap<>(
+                    new HashMap<>(),
+                    120,
+                    120
+                )
+            ),
+            scheduler,
+            true
+        );
         createTable();
     }
 
@@ -47,7 +54,7 @@ public class SQLVipItemsRepository implements VipItemsRepository {
     }
 
     @Override
-    public @NonNull CompletableFuture<Collection<VipItems>> getItems(@NonNull UUID playerId) {
+    public @NotNull CompletableFuture<Collection<VipItems>> getItems(@NotNull UUID playerId) {
         if (cache.containsKey(playerId)) {
             return CompletableFuture.completedFuture(cache.get(playerId));
         }
@@ -55,7 +62,7 @@ public class SQLVipItemsRepository implements VipItemsRepository {
         return CompletableFuture
             .supplyAsync(() -> sqlExecutor.executeQuery(
                 "SELECT vip_id, amount FROM " + ITEMS_TABLE + "WHERE player_id=?",
-                statement -> statement.set(1, playerId.getBytes()),
+                statement -> statement.set(1, UUIDs.getBytes(playerId)),
                 result -> {
                     final Collection<VipItems> items = new ArrayList<>();
 
@@ -76,28 +83,28 @@ public class SQLVipItemsRepository implements VipItemsRepository {
     }
 
     @Override
-    public void addItems(@NonNull VipItems items) {
-        if (!cache.containsKey(items.getPlayerId())) {
-            cache.set(items.getPlayerId(), new ArrayList<>(1));
+    public void addItems(@NotNull VipItems items) {
+        if (!cache.containsKey(items.playerId())) {
+            cache.set(items.playerId(), new ArrayList<>(1));
         }
 
-        cache.get(items.getPlayerId()).add(items);
+        cache.get(items.playerId()).add(items);
 
         CompletableFuture.runAsync(() -> sqlExecutor.update(
             "INSERT INTO " + ITEMS_TABLE + "(player_id, vip_id, amount) VALUES(?,?,?)",
             statement -> {
-                statement.set(1, items.getPlayerId().getBytes());
-                statement.set(2, items.getVipId());
-                statement.set(3, items.getAmount());
+                statement.set(1, UUIDs.getBytes(items.playerId()));
+                statement.set(2, items.vipId());
+                statement.set(3, items.amount());
             }
         ), executor);
     }
 
     @Override
-    public void removeItems(@NonNull UUID playerId, byte vipId, short amount) {
+    public void removeItems(@NotNull UUID playerId, byte vipId, short amount) {
         if (cache.containsKey(playerId)) {
             cache.get(playerId).removeIf(items -> {
-                if (items.getVipId() != vipId) {
+                if (items.vipId() != vipId) {
                     return false;
                 }
 
@@ -105,7 +112,7 @@ public class SQLVipItemsRepository implements VipItemsRepository {
                     return true;
                 }
 
-                items.setAmount((short) (items.getAmount() - amount));
+                items.setAmount((short) (items.amount() - amount));
                 return false;
             });
         }
@@ -114,7 +121,7 @@ public class SQLVipItemsRepository implements VipItemsRepository {
             CompletableFuture.runAsync(() -> sqlExecutor.update(
                 "DELETE FROM " + ITEMS_TABLE + " WHERE player_id=? AND vip_id=?",
                 statement -> {
-                    statement.set(1, playerId.getBytes());
+                    statement.set(1, UUIDs.getBytes(playerId));
                     statement.set(2, vipId);
                 }
             ), executor);
@@ -125,7 +132,7 @@ public class SQLVipItemsRepository implements VipItemsRepository {
             "UPDATE " + ITEMS_TABLE + " SET amount=amount-? WHERE player_id=? AND vip_id=?",
             statement -> {
                 statement.set(1, amount);
-                statement.set(2, playerId.getBytes());
+                statement.set(2, UUIDs.getBytes(playerId));
                 statement.set(3, vipId);
             }
         ), executor);

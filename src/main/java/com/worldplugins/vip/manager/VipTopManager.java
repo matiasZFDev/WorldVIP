@@ -1,39 +1,53 @@
 package com.worldplugins.vip.manager;
 
-import com.worldplugins.lib.common.Updatable;
-import com.worldplugins.lib.util.cache.Cache;
 import com.worldplugins.vip.database.player.model.VipPlayer;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import me.post.lib.common.Updatable;
+import me.post.lib.database.cache.Cache;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 public class VipTopManager implements Updatable {
-    @RequiredArgsConstructor
-    @Getter
     public static class TopPlayer {
-        private final @NonNull UUID playerId;
+        private final @NotNull UUID playerId;
         private final double spent;
+
+        public TopPlayer(@NotNull UUID playerId, double spent) {
+            this.playerId = playerId;
+            this.spent = spent;
+        }
+
+        public @NotNull UUID playerId() {
+            return playerId;
+        }
+
+        public double spent() {
+            return spent;
+        }
     }
 
-    private final @NonNull Cache<UUID, VipPlayer> players;
+    private final @NotNull Cache<UUID, VipPlayer> players;
     private Collection<TopPlayer> topPlayers;
+
+    public VipTopManager(@NotNull Cache<UUID, VipPlayer> players) {
+        this.players = players;
+        this.topPlayers = new ArrayList<>();
+    }
 
     @Override
     public void update() {
         topPlayers = players.getValues().stream()
-            .sorted(Comparator.comparingDouble(VipPlayer::getSpent))
+            .sorted(Comparator.comparingDouble(VipPlayer::spent))
             .limit(10)
-            .map(vipPlayer -> new TopPlayer(vipPlayer.getId(), vipPlayer.getSpent()))
+            .map(vipPlayer -> new TopPlayer(vipPlayer.id(), vipPlayer.spent()))
             .collect(Collectors.toList());
     }
 
-    public @NonNull Collection<TopPlayer> getTop() {
+    public @NotNull Collection<TopPlayer> getTop() {
         return topPlayers;
     }
 }

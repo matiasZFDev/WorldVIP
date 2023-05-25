@@ -1,26 +1,16 @@
 package com.worldplugins.vip.command;
 
-import com.worldplugins.lib.command.CommandModule;
-import com.worldplugins.lib.command.annotation.Command;
-import com.worldplugins.vip.extension.ResponseExtensions;
-import lombok.NonNull;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.command.CommandModule;
+import me.post.lib.command.annotation.Command;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 
-@ExtensionMethod({
-    ResponseExtensions.class
-})
+import static com.worldplugins.vip.Response.respond;
 
 public class Help implements CommandModule {
-    @Command(
-        name = "vip ajuda",
-        usage = "&cArgumentos invalidos. Digite /vip ajuda."
-    )
+    @Command(name = "vip ajuda")
     @Override
-    public void execute(@NonNull CommandSender sender, @NonNull String[] args) {
-        if (sender.hasPermission("worldplugin.ajudastaff"))
-            sender.respond("Ajuda-staff");
-        else
-            sender.respond("Ajuda");
+    public void execute(@NotNull CommandSender sender, @NotNull String[] args) {
+        respond(sender, sender.hasPermission("worldplugin.ajudastaff") ? "Ajuda-staff" : "Ajuda");
     }
 }

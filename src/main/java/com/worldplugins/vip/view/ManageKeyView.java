@@ -1,97 +1,111 @@
 package com.worldplugins.vip.view;
 
-import com.worldplugins.lib.config.cache.ConfigCache;
-import com.worldplugins.lib.config.cache.menu.ItemProcessResult;
-import com.worldplugins.lib.config.cache.menu.MenuData;
-import com.worldplugins.lib.config.cache.menu.MenuItem;
-import com.worldplugins.lib.extension.GenericExtensions;
-import com.worldplugins.lib.extension.bukkit.ItemExtensions;
-import com.worldplugins.lib.util.ConversationProvider;
-import com.worldplugins.lib.util.MenuItemsUtils;
-import com.worldplugins.lib.view.MenuDataView;
-import com.worldplugins.lib.view.ViewContext;
-import com.worldplugins.lib.view.annotation.ViewSpec;
+import com.worldplugins.lib.config.model.MenuModel;
+import com.worldplugins.lib.util.ItemTransformer;
+import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.vip.config.data.VipData;
-import com.worldplugins.vip.config.menu.ManageKeyMenuContainer;
 import com.worldplugins.vip.controller.KeysController;
 import com.worldplugins.vip.conversation.KeyPostPriceConversation;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
 import com.worldplugins.vip.database.market.SellingKeyRepository;
-import com.worldplugins.vip.extension.ViewExtensions;
 import com.worldplugins.vip.key.KeyManagement;
 import com.worldplugins.vip.util.VipDuration;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.config.model.ConfigModel;
+import me.post.lib.util.ConversationProvider;
+import me.post.lib.view.View;
+import me.post.lib.view.Views;
+import me.post.lib.view.action.ViewClick;
+import me.post.lib.view.action.ViewClose;
+import me.post.lib.view.helper.ClickHandler;
+import me.post.lib.view.helper.ViewContext;
+import me.post.lib.view.helper.impl.MapViewContext;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-@ExtensionMethod(value = {
-    ItemExtensions.class,
-    GenericExtensions.class,
-    ViewExtensions.class
-}, suppressBaseMethods = false)
+import static java.util.Objects.requireNonNull;
+import static me.post.lib.util.Pairs.to;
 
-@RequiredArgsConstructor
-@ViewSpec(menuContainer = ManageKeyMenuContainer.class)
-public class ManageKeyView extends MenuDataView<ManageKeyView.Context> {
-    @RequiredArgsConstructor
-    @Getter
-    public static class Context implements ViewContext {
-        private final @NonNull ValidVipKey key;
+public class ManageKeyView implements View {
+    public static class Context {
+        private final @NotNull ValidVipKey key;
         private final int keysViewPage;
+
+        public Context(@NotNull ValidVipKey key, int keysViewPage) {
+            this.key = key;
+            this.keysViewPage = keysViewPage;
+        }
+
+        public @NotNull ValidVipKey key() {
+            return key;
+        }
+
+        public int keysViewPage() {
+            return keysViewPage;
+        }
     }
 
-    private final @NonNull KeysController keysController;
-    private final @NonNull KeyManagement keyManagement;
-    private final @NonNull ConversationProvider conversationProvider;
-    private final @NonNull SellingKeyRepository sellingKeyRepository;
-    private final @NonNull ValidKeyRepository validKeyRepository;
+    private final @NotNull ViewContext viewContext;
+    private final @NotNull MenuModel menuModel;
+    private final @NotNull KeysController keysController;
+    private final @NotNull KeyManagement keyManagement;
+    private final @NotNull ConversationProvider conversationProvider;
+    private final @NotNull SellingKeyRepository sellingKeyRepository;
+    private final @NotNull ValidKeyRepository validKeyRepository;
+    private final @NotNull ConfigModel<VipData> vipConfig;
 
-    private final @NonNull ConfigCache<VipData> vipConfig;
+    public ManageKeyView(
+        @NotNull MenuModel menuModel,
+        @NotNull KeysController keysController,
+        @NotNull KeyManagement keyManagement,
+        @NotNull ConversationProvider conversationProvider,
+        @NotNull SellingKeyRepository sellingKeyRepository,
+        @NotNull ValidKeyRepository validKeyRepository,
+        @NotNull ConfigModel<VipData> vipConfig
+    ) {
+        this.viewContext = new MapViewContext();
+        this.menuModel = menuModel;
+        this.keysController = keysController;
+        this.keyManagement = keyManagement;
+        this.conversationProvider = conversationProvider;
+        this.sellingKeyRepository = sellingKeyRepository;
+        this.validKeyRepository = validKeyRepository;
+        this.vipConfig = vipConfig;
+    }
 
     @Override
-    public @NonNull ItemProcessResult processItems(@NonNull Player player, Context context, @NonNull MenuData menuData) {
+    public void open(@NotNull Player player, @Nullable Object data) {
+        final Context context = (Context) requireNonNull(data);
         final ValidVipKey key = context.key;
-        final VipData.VIP configVip = vipConfig.data().getById(key.getVipId());
+        final VipData.VIP configVip = vipConfig.data().getById(key.vipId());
 
-        return MenuItemsUtils.newSession(menuData.getItems(), session ->
-            session.modify("Info", item ->
-                item
-                    .nameFormat("@vip".to(configVip.getDisplay()))
+        ConfigContextBuilder.withModel(menuModel)
+            .editMenuItem("Info", item ->
+                ItemTransformer.of(item)
+                    .nameFormat(to("@vip", configVip.display()))
                     .loreFormat(
-                        "@tipo".to(key.getVipType().getName().toUpperCase()),
-                        "@tempo".to(VipDuration.format(key)),
-                        "@usos".to(String.valueOf(key.getUsages()))
+                        to("@tipo", key.vipType().getName().toUpperCase()),
+                        to("@tempo", VipDuration.format(key)),
+                        to("@usos", String.valueOf(key.usages()))
                     )
             )
-        ).build();
-    }
-
-    @Override
-    public void onClick(@NonNull Player player, @NonNull MenuItem item, @NonNull InventoryClickEvent event) {
-        final Context context = getContext(player);
-
-        switch (item.getId()) {
-            case "Voltar": {
-                keysController.openView(player, context.keysViewPage);
-                return;
-            }
-
-            case "Ativar": {
-                keyManagement.manage(
+            .handleMenuItemClick(
+                "Voltar",
+                click -> keysController.openView(player, context.keysViewPage)
+            )
+            .handleMenuItemClick(
+                "Ativar",
+                click -> keyManagement.manage(
                     player,
-                    context.getKey().getCode(),
-                    context.getKeysViewPage(),
-                    key -> player.openView(ConfirmKeyActivationView.class)
-                );
-                return;
-            }
-
-            case "Vender": {
-                conversationProvider.create()
+                    key.code(),
+                    context.keysViewPage,
+                    $ -> Views.get().open(player, ConfirmKeyActivationView.class)
+                )
+            )
+            .handleMenuItemClick(
+                "Vender",
+                click -> conversationProvider.create()
                     .withFirstPrompt(new KeyPostPriceConversation(
                         context, keyManagement, conversationProvider, sellingKeyRepository,
                         validKeyRepository, vipConfig
@@ -99,8 +113,18 @@ public class ManageKeyView extends MenuDataView<ManageKeyView.Context> {
                     .withTimeout(20)
                     .withLocalEcho(false)
                     .buildConversation(player)
-                    .begin();
-            }
-        }
+                    .begin()
+            )
+            .build(viewContext, player, data);
+    }
+
+    @Override
+    public void onClick(@NotNull ViewClick click) {
+        ClickHandler.handleTopNonNull(viewContext, click);
+    }
+
+    @Override
+    public void onClose(@NotNull ViewClose close) {
+        viewContext.removeViewer(close.whoCloses().getUniqueId());
     }
 }

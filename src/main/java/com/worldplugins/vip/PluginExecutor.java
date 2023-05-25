@@ -1,13 +1,6 @@
 package com.worldplugins.vip;
 
-import com.worldplugins.lib.config.cache.ConfigCache;
-import com.worldplugins.lib.config.cache.impl.EffectsConfig;
-import com.worldplugins.lib.config.cache.impl.MessagesConfig;
-import com.worldplugins.lib.config.cache.impl.SoundsConfig;
-import com.worldplugins.lib.registry.CommandRegistry;
-import com.worldplugins.lib.registry.ViewRegistry;
-import com.worldplugins.lib.util.ConfigUtils;
-import com.worldplugins.lib.util.ConversationProvider;
+import com.worldplugins.lib.config.Updatables;
 import com.worldplugins.vip.command.*;
 import com.worldplugins.vip.command.key.*;
 import com.worldplugins.vip.command.vip.*;
@@ -15,24 +8,19 @@ import com.worldplugins.vip.config.MainConfig;
 import com.worldplugins.vip.config.ServerConfig;
 import com.worldplugins.vip.config.VipConfig;
 import com.worldplugins.vip.config.VipItemsConfig;
+import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.ServerData;
+import com.worldplugins.vip.config.data.VipData;
+import com.worldplugins.vip.config.data.VipItemsData;
+import com.worldplugins.vip.config.menu.VipTopMenuModel;
 import com.worldplugins.vip.controller.KeysController;
-import com.worldplugins.vip.controller.OwningVipsController;
 import com.worldplugins.vip.controller.VipItemsController;
 import com.worldplugins.vip.controller.VipKeyShopController;
 import com.worldplugins.vip.database.DatabaseAccessor;
+import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.handler.VipHandler;
 import com.worldplugins.vip.handler.OwningVipHandler;
-import com.worldplugins.vip.init.ConfigCacheInitializer;
-import com.worldplugins.lib.manager.config.ConfigCacheManager;
-import com.worldplugins.lib.manager.config.ConfigManager;
-import com.worldplugins.lib.manager.config.YamlConfigManager;
-import com.worldplugins.lib.manager.view.MenuContainerManager;
-import com.worldplugins.lib.manager.view.MenuContainerManagerImpl;
-import com.worldplugins.lib.manager.view.ViewManager;
-import com.worldplugins.lib.manager.view.ViewManagerImpl;
-import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.init.DatabaseInitializer;
 import com.worldplugins.vip.init.PermissionManagerInitializer;
 import com.worldplugins.vip.init.PointsInitializer;
@@ -42,77 +30,103 @@ import com.worldplugins.vip.key.VipKeyGenerator;
 import com.worldplugins.vip.manager.PermissionManager;
 import com.worldplugins.vip.manager.PointsManager;
 import com.worldplugins.vip.manager.VipTopManager;
+import com.worldplugins.vip.task.VipTimeConsumeTask;
 import com.worldplugins.vip.view.*;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.PluginManager;
+import me.post.lib.command.process.CommandRegistry;
+import me.post.lib.config.model.ConfigModel;
+import me.post.lib.config.wrapper.ConfigManager;
+import me.post.lib.config.wrapper.YamlConfigManager;
+import me.post.lib.util.Configurations;
+import me.post.lib.util.ConversationProvider;
+import me.post.lib.util.Scheduler;
+import me.post.lib.view.Views;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
-@RequiredArgsConstructor
+import java.util.Arrays;
+
 public class PluginExecutor {
-    private final @NonNull JavaPlugin plugin;
-    private final @NonNull SchedulerBuilder scheduler;
-    private final @NonNull ConfigManager configManager;
-    private final @NonNull ConfigCacheManager configCacheManager;
-    private final @NonNull MenuContainerManager menuContainerManager;
-    private final @NonNull ViewManager viewManager;
+    private final @NotNull JavaPlugin plugin;
+    private final @NotNull Scheduler scheduler;
+    private final @NotNull ConfigManager configManager;
 
-    private final @NonNull DatabaseAccessor databaseAccessor;
+    private final @NotNull Updatables updatables;
+    private final @NotNull ConfigModel<MainData> mainConfig;
+    private final @NotNull ConfigModel<VipData> vipConfig;
+    private final @NotNull ConfigModel<ServerData> serverConfig;
+    private final @NotNull ConfigModel<VipItemsData> vipItemsConfig;
+
+    private final @NotNull DatabaseAccessor databaseAccessor;
     private final VipKeyGenerator keyGenerator;
-    private final @NonNull PermissionManager permissionManager;
-    private final @NonNull PointsManager pointsManager;
-    private final @NonNull VipHandler vipHandler;
-    private final @NonNull OwningVipHandler owningVipHandler;
-    private final @NonNull VipTopManager topManager;
+    private final @NotNull PermissionManager permissionManager;
+    private final @NotNull PointsManager pointsManager;
+    private final @NotNull VipHandler vipHandler;
+    private final @NotNull OwningVipHandler owningVipHandler;
+    private final @NotNull VipTopManager topManager;
 
-    public PluginExecutor(@NonNull JavaPlugin plugin) {
+    public PluginExecutor(@NotNull JavaPlugin plugin) {
         this.plugin = plugin;
-        scheduler = new SchedulerBuilder(plugin);
+        scheduler = new Scheduler(plugin);
         configManager = new YamlConfigManager(plugin);
-        configCacheManager = new ConfigCacheInitializer(configManager).init();
-        menuContainerManager = new MenuContainerManagerImpl();
-        viewManager = new ViewManagerImpl();
+        loadConfiguration();
+
+        updatables = new Updatables();
+        mainConfig = updatables.include(new MainConfig(configManager.getWrapper("config")));
+        serverConfig = updatables.include(new ServerConfig(configManager.getWrapper("server")));
+        vipConfig = updatables.include(new VipConfig(configManager.getWrapper("vip")));
+        vipItemsConfig = updatables.include(new VipItemsConfig(configManager.getWrapper("itens_data")));
 
         databaseAccessor = new DatabaseInitializer(configManager, plugin, scheduler).init();
-        keyGenerator = new ConfigKeyGenerator(config(MainConfig.class));
+        keyGenerator = new ConfigKeyGenerator(mainConfig);
         permissionManager = new PermissionManagerInitializer().init();
         pointsManager = new PointsInitializer(plugin).init();
         owningVipHandler = new OwningVipHandler(
-            databaseAccessor.getPlayerService(), permissionManager, config(VipConfig.class),
-            config(MainConfig.class)
+            databaseAccessor.playerService(),
+            permissionManager,
+            vipConfig,
+            mainConfig
         );
         vipHandler = new VipHandler(
-            databaseAccessor.getPlayerService(), databaseAccessor.getVipItemsRepository(),
-            permissionManager, owningVipHandler, config(VipConfig.class),
-            config(MainConfig.class), config(VipItemsConfig.class)
+            databaseAccessor.playerService(),
+            databaseAccessor.vipItemsRepository(),
+            permissionManager,
+            owningVipHandler,
+            vipConfig,
+            mainConfig,
+            vipItemsConfig
         );
-        topManager = new VipTopManager(databaseAccessor.getPlayerCache());
+        topManager = new VipTopManager(databaseAccessor.playerCache());
+    }
+
+    private void loadConfiguration() {
+        Arrays
+            .asList(
+                "config", "itens_data", "vip", "server",
+                "menu/coletar_itens", "menu/confirmar_ativacao_key",
+                "menu/gerenciar_key", "menu/keys", "menu/mercado_comprar_key",
+                "menu/mercado_keys", "menu/top", "menu/vip", "menu/vips_secondarios",
+                "resposta/mensagens", "resposta/sons", "resposta/efeitos"
+            )
+            .forEach(configManager::load);
     }
 
     /**
-     * @return A runnable executed when disabling
+     * @return A runnable executed when disabling.
      * */
-    public @NonNull Runnable execute() {
-        prepareGlobalAccess();
+    public @NotNull Runnable execute() {
+        Response.setup(updatables, configManager);
+
         checkBasicVips();
-        registerListeners();
         registerCommands();
         registerViews();
         scheduleTasks();
+
+        updatables.update();
         return () -> {};
     }
 
-    private void prepareGlobalAccess() {
-        GlobalAccess.setMessages(config(MessagesConfig.class));
-        GlobalAccess.setSounds(config(SoundsConfig.class));
-        GlobalAccess.setEffects(config(EffectsConfig.class));
-        GlobalAccess.setViewManager(viewManager);
-    }
-
     private void checkBasicVips() {
-        final ConfigCache<ServerData> serverConfig = config(ServerConfig.class);
-        final long lastOnlineInstant = serverConfig.data().getLastOnlineInstant();
+        final long lastOnlineInstant = serverConfig.data().lastOnlineInstant();
 
         if (lastOnlineInstant == 0) {
             return;
@@ -120,29 +134,31 @@ public class PluginExecutor {
 
         final int elapsedSeconds = (int) ((System.nanoTime() - lastOnlineInstant) / 1000);
 
-        databaseAccessor.getPlayerCache().getValues().forEach(vipPlayer -> {
-            vipPlayer.getOwningVips().getVips().forEach(owningVip -> {
-                if (owningVip.getType() != VipType.BASIC) {
+        databaseAccessor.playerCache().getValues().forEach(vipPlayer -> {
+            vipPlayer.owningVips().vips().forEach(owningVip -> {
+                if (owningVip.type() != VipType.BASIC) {
                     return;
                 }
 
                 owningVip.decrementDuration(elapsedSeconds);
 
-                if (owningVip.getDuration() > -1) {
+                if (owningVip.duration() > -1) {
                     return;
                 }
 
                 owningVipHandler.remove(vipPlayer, owningVip);
             });
 
-            if (vipPlayer.getActiveVip() != null) {
-                if (vipPlayer.getActiveVip().getType() != VipType.BASIC) {
+            final VIP activeVip = vipPlayer.activeVip();
+
+            if (activeVip != null) {
+                if (activeVip.type() != VipType.BASIC) {
                     return;
                 }
 
-                vipPlayer.getActiveVip().decrementDuration(elapsedSeconds);
+                activeVip.decrementDuration(elapsedSeconds);
 
-                if (vipPlayer.getActiveVip().getDuration() > -1) {
+                if (activeVip.duration() > -1) {
                     return;
                 }
 
@@ -151,117 +167,133 @@ public class PluginExecutor {
         });
     }
 
-    private <T> @NonNull T config(@NonNull Class<? extends ConfigCache<?>> clazz) {
-        return configCacheManager.get(clazz);
-    }
-
-    private void regListeners(@NonNull Listener... listeners) {
-        final PluginManager pluginManager = plugin.getServer().getPluginManager();
-        for (final Listener listener : listeners) {
-            pluginManager.registerEvents(listener, plugin);
-        }
-    }
-
-    private void registerListeners() {
-    }
-
     private void registerCommands() {
-        final CommandRegistry registry = new CommandRegistry(plugin);
+        final CommandRegistry registry = CommandRegistry.on(plugin);
 
-        registry.command(
+        registry.addModules(
             new Help(),
-            new CreateKey(
-                keyGenerator, config(VipConfig.class), databaseAccessor.getValidKeyRepository(), scheduler
-            ),
-            new RemoveKey(databaseAccessor.getValidKeyRepository(), scheduler),
-            new SeeKeys(
-                scheduler, databaseAccessor.getValidKeyRepository(), config(VipConfig.class),
-                config(MainConfig.class)
-            ),
-            new VipDurationLeft(databaseAccessor.getPlayerService()),
-            new UseKey(databaseAccessor.getValidKeyRepository(), scheduler, vipHandler),
-            new GiveVip(databaseAccessor.getPendingVipRepository(), vipHandler, config(VipConfig.class)),
-            new SetVip(vipHandler, config(VipConfig.class)),
-            new RemoveVip(
-                config(VipConfig.class), databaseAccessor.getPlayerService(), vipHandler,
-                owningVipHandler
-            ),
+            new CreateKey(keyGenerator, vipConfig, databaseAccessor.validKeyRepository(), scheduler),
+            new RemoveKey(databaseAccessor.validKeyRepository(), scheduler),
+            new SeeKeys(scheduler, databaseAccessor.validKeyRepository(), vipConfig, mainConfig),
+            new VipDurationLeft(databaseAccessor.playerService()),
+            new UseKey(databaseAccessor.validKeyRepository(), scheduler, vipHandler),
+            new GiveVip(databaseAccessor.pendingVipRepository(), vipHandler, vipConfig),
+            new SetVip(vipHandler, vipConfig),
+            new RemoveVip(vipConfig, databaseAccessor.playerService(), vipHandler, owningVipHandler),
             new SwitchVip(
-                databaseAccessor.getPlayerService(), databaseAccessor.getPlayerCache(),
-                config(MainConfig.class), config(VipConfig.class), owningVipHandler, vipHandler
+                databaseAccessor.playerService(),
+                databaseAccessor.playerCache(),
+                mainConfig,
+                vipConfig,
+                owningVipHandler,
+                vipHandler
             ),
-            new RemovePendingVips(databaseAccessor.getPendingVipRepository()),
+            new RemovePendingVips(databaseAccessor.pendingVipRepository()),
             new VipTop(),
             new VipMenu()
-        );
-        registry.autoTabCompleter(
-            "criarkey", "removerkey", "verkeys", "usarkey", "tempovip", "darvip", "setarvip",
-            "removervip", "trocarvip", "vip"
         );
         registry.registerAll();
     }
 
     private void registerViews() {
-        final ViewRegistry registry = new ViewRegistry(viewManager, menuContainerManager, configManager);
         final KeysController keysController = new KeysController(
-            databaseAccessor.getValidKeyRepository(), scheduler, menuContainerManager
+            databaseAccessor.validKeyRepository(), scheduler
         );
         final VipItemsController vipItemsController = new VipItemsController(
-            databaseAccessor.getVipItemsRepository(), scheduler
-        );
-        final OwningVipsController owningVipsController = new OwningVipsController(
-            databaseAccessor.getPlayerService(), menuContainerManager
+            databaseAccessor.vipItemsRepository(), scheduler
         );
         final VipKeyShopController vipKeyShopController = new VipKeyShopController(
-            databaseAccessor.getSellingKeyRepository(), scheduler, menuContainerManager
+            databaseAccessor.sellingKeyRepository(), scheduler
         );
         final KeyManagement keyManagement = new KeyManagement(
-            databaseAccessor.getValidKeyRepository(), scheduler, keysController
+            databaseAccessor.validKeyRepository(), scheduler, keysController
         );
         final ConversationProvider conversationProvider = new ConversationProvider(plugin);
 
-        registry.register(
-            new VipItemsEditView(config(VipItemsConfig.class)),
-            new VipTopView(topManager),
+        Views.get().register(
+            new VipItemsEditView(vipItemsConfig),
+            new VipTopView(
+                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/top"))),
+                topManager
+            ),
             new VipMenuView(
-                databaseAccessor.getPlayerService(), keysController, vipItemsController,
-                owningVipsController, vipKeyShopController, config(VipConfig.class),
-                config(MainConfig.class)
+                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/vip"))),
+                databaseAccessor.playerService(),
+                keysController,
+                vipItemsController,
+                vipKeyShopController,
+                vipConfig,
+                mainConfig
             ),
             new VipItemsView(
-                databaseAccessor.getVipItemsRepository(), scheduler, vipItemsController,
-                config(MainConfig.class), config(VipConfig.class), config(VipItemsConfig.class)
+                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/coletar_itens"))),
+                databaseAccessor.vipItemsRepository(),
+                scheduler,
+                vipItemsController,
+                mainConfig,
+                vipConfig,
+                vipItemsConfig
             ),
-            new KeysView(keysController, keyManagement, config(VipConfig.class)),
-            new OwningVipsView(config(VipConfig.class), owningVipsController),
+            new KeysView(
+                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/keys"))),
+                keysController,
+                keyManagement,
+                vipConfig
+            ),
+            new OwningVipsView(
+                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/vips_secondarios"))),
+                databaseAccessor.playerService(),
+                vipConfig
+            ),
             new KeyMarketView(
-                databaseAccessor.getSellingKeyRepository(), scheduler, vipKeyShopController,
-                config(VipConfig.class)
+                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/mercado_keys"))),
+                databaseAccessor.sellingKeyRepository(),
+                scheduler,
+                vipKeyShopController,
+                vipConfig
             ),
             new KeyMarketPurchaseView(
-                vipKeyShopController, databaseAccessor.getSellingKeyRepository(), scheduler,
-                pointsManager, databaseAccessor.getValidKeyRepository(), keyGenerator,
-                config(VipConfig.class)
+                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/mercado_comprar_key"))),
+                vipKeyShopController,
+                databaseAccessor.sellingKeyRepository(),
+                scheduler,
+                pointsManager,
+                databaseAccessor.validKeyRepository(),
+                keyGenerator,
+                vipConfig
             ),
             new ManageKeyView(
-                keysController, keyManagement, conversationProvider, databaseAccessor.getSellingKeyRepository(),
-                databaseAccessor.getValidKeyRepository(), config(VipConfig.class)
+                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/gerenciar_key"))),
+                keysController,
+                keyManagement,
+                conversationProvider,
+                databaseAccessor.sellingKeyRepository(),
+                databaseAccessor.validKeyRepository(),
+                vipConfig
             ),
             new ConfirmKeyActivationView(
-                keyManagement, vipHandler, databaseAccessor.getValidKeyRepository(), config(VipConfig.class)
+                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/confirmar_ativacao_key"))),
+                keyManagement,
+                vipHandler,
+                databaseAccessor.validKeyRepository(),
+                vipConfig
             )
         );
     }
 
     private void scheduleTasks() {
-        scheduler.newTimer(() ->
-            ConfigUtils.update(config(ServerConfig.class), config ->
+        final VipTimeConsumeTask vipTimeConsumeTask = new VipTimeConsumeTask(
+            databaseAccessor.playerCache(),
+            vipHandler,
+            owningVipHandler,
+            mainConfig
+        );
+        scheduler.runTimer(20, 20, false, () ->
+            Configurations.update(serverConfig, config ->
                 config.set("Ultimo-instante-online", System.nanoTime())
             )
-        ).delay(0L).period(20L).run();
-        scheduler.newTimer(topManager::update)
-            .delay(0L)
-            .period(20 * 60 * 5)
-            .run();
+        );
+        scheduler.runTimer(20, 20 * 60 * 5, false, topManager::update);
+        scheduler.runTimer(20, 20, false, vipTimeConsumeTask);
     }
 }

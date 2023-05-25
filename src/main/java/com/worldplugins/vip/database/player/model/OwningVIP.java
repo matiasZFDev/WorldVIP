@@ -1,9 +1,9 @@
 package com.worldplugins.vip.database.player.model;
 
-import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 public class OwningVIP extends VIP {
-    public OwningVIP(byte id, @NonNull VipType type, int duration) {
+    public OwningVIP(byte id, @NotNull VipType type, int duration) {
         super(id, type, duration);
     }
 
@@ -12,6 +12,6 @@ public class OwningVIP extends VIP {
         if (!(other instanceof OwningVIP))
             return false;
 
-        return getId() == ((OwningVIP) other).getId() && getType() == ((OwningVIP) other).getType();
+        return id() == ((OwningVIP) other).id() && type() == ((OwningVIP) other).type();
     }
 }

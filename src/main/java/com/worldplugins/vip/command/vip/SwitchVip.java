@@ -1,13 +1,5 @@
 package com.worldplugins.vip.command.vip;
 
-import com.worldplugins.lib.command.ArgsCheck;
-import com.worldplugins.lib.command.CommandModule;
-import com.worldplugins.lib.command.CommandTarget;
-import com.worldplugins.lib.command.annotation.ArgsChecker;
-import com.worldplugins.lib.command.annotation.Command;
-import com.worldplugins.lib.config.cache.ConfigCache;
-import com.worldplugins.lib.extension.GenericExtensions;
-import com.worldplugins.lib.util.cache.Cache;
 import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.player.PlayerService;
@@ -15,53 +7,70 @@ import com.worldplugins.vip.database.player.model.OwningVIP;
 import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipPlayer;
 import com.worldplugins.vip.database.player.model.VipType;
-import com.worldplugins.vip.extension.ResponseExtensions;
 import com.worldplugins.vip.handler.VipHandler;
 import com.worldplugins.vip.handler.OwningVipHandler;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.command.CommandModule;
+import me.post.lib.command.annotation.Command;
+import me.post.lib.config.model.ConfigModel;
+import me.post.lib.database.cache.Cache;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@ExtensionMethod({
-    ResponseExtensions.class,
-    GenericExtensions.class
-})
+import static com.worldplugins.vip.Response.respond;
+import static java.util.Objects.requireNonNull;
+import static me.post.lib.util.Pairs.to;
 
-@RequiredArgsConstructor
 public class SwitchVip implements CommandModule {
-    private final @NonNull PlayerService playerService;
-    private final @NonNull Cache<UUID, VipPlayer> cache;
-    private final @NonNull ConfigCache<MainData> mainConfig;
-    private final @NonNull ConfigCache<VipData> vipConfig;
-    private final @NonNull OwningVipHandler owningVipHandler;
-    private final @NonNull VipHandler vipHandler;
+    private final @NotNull PlayerService playerService;
+    private final @NotNull Cache<UUID, VipPlayer> cache;
+    private final @NotNull ConfigModel<MainData> mainConfig;
+    private final @NotNull ConfigModel<VipData> vipConfig;
+    private final @NotNull OwningVipHandler owningVipHandler;
+    private final @NotNull VipHandler vipHandler;
 
-    private final @NonNull Map<UUID, Long> onDelay = new HashMap<>();
+    private final @NotNull Map<UUID, Long> onDelay = new HashMap<>();
 
-    @Command(
-        name = "trocarvip",
-        target = CommandTarget.PLAYER,
-        argsChecks = {
-            @ArgsChecker(check = ArgsCheck.GREATER_SIZE),
-            @ArgsChecker(size = 3, check = ArgsCheck.LOWER_SIZE)
-        },
-        usage = "&cArgumentos invalidos. Digite /trocarvip <vip> [tipo]"
-    )
+    public SwitchVip(
+        @NotNull PlayerService playerService,
+        @NotNull Cache<UUID, VipPlayer> cache,
+        @NotNull ConfigModel<MainData> mainConfig,
+        @NotNull ConfigModel<VipData> vipConfig,
+        @NotNull OwningVipHandler owningVipHandler,
+        @NotNull VipHandler vipHandler
+    ) {
+        this.playerService = playerService;
+        this.cache = cache;
+        this.mainConfig = mainConfig;
+        this.vipConfig = vipConfig;
+        this.owningVipHandler = owningVipHandler;
+        this.vipHandler = vipHandler;
+    }
+
+    @Command(name = "trocarvip")
     @Override
-    public void execute(@NonNull CommandSender sender, @NonNull String[] args) {
+    public void execute(@NotNull CommandSender sender, @NotNull String[] args) {
+        if (!(sender instanceof Player)) {
+            respond(sender, "Comando-jogador");
+            return;
+        }
+
+        if (!(args.length > 0 && args.length < 3)) {
+            respond(sender, "Trocar-vip-uso");
+            return;
+        }
+
         final Player player = (Player) sender;
 
         if (onDelay.containsKey(player.getUniqueId())) {
             final long now = System.nanoTime();
             final int secondsElapsed = (int) ((now - onDelay.get(player.getUniqueId())) / 1000);
 
-            if (secondsElapsed < mainConfig.data().getSwitchVipDelay()) {
-                player.respond("Trocar-vip-delay");
+            if (secondsElapsed < mainConfig.data().switchVipDelay()) {
+                respond(player, "Trocar-vip-delay");
                 return;
             }
 
@@ -72,30 +81,31 @@ public class SwitchVip implements CommandModule {
 
         if (configVip == null) {
             final Collection<String> vipList = vipConfig.data().all().stream()
-                .map(VipData.VIP::getName)
+                .map(VipData.VIP::name)
                 .collect(Collectors.toList());
-            sender.respond("Vip-inexistente", message -> message.replace(
-                "@nome".to(args[1]),
-                "@vips".to(vipList.toString())
+            respond(sender, "Vip-inexistente", message -> message.replace(
+                to("@nome", args[1]),
+                to("@vips", vipList.toString())
             ));
             return;
         }
 
         final VipPlayer vipPlayer = cache.get(player.getUniqueId());
 
-        if (vipPlayer == null || vipPlayer.getActiveVip() == null) {
-            player.respond("Trocar-vip-inexistente");
+        if (vipPlayer == null || vipPlayer.activeVip() == null) {
+            respond(player, "Trocar-vip-inexistente");
             return;
         }
 
+        final VIP activeVip = requireNonNull(vipPlayer.activeVip());
         final VipType vipType;
 
         if (args.length == 1) {
             vipType = getGreatestType(vipPlayer);
 
             if (vipType == null) {
-                sender.respond("Trocar-vip-sem-vips", message -> message.replace(
-                    "@vip".to(configVip.getDisplay())
+                respond(sender, "Trocar-vip-sem-vips", message -> message.replace(
+                    to("@vip", configVip.display())
                 ));
                 return;
             }
@@ -106,39 +116,38 @@ public class SwitchVip implements CommandModule {
                 final Collection<String> vipTypes = Arrays.stream(VipType.values())
                     .map(type -> type.getName().toUpperCase())
                     .collect(Collectors.toList());
-                sender.respond("Tipo-vip-inexistente", message -> message.replace(
-                    "@nome".to(args[2]),
-                    "@tipos".to(vipTypes.toString())
+                respond(sender, "Tipo-vip-inexistente", message -> message.replace(
+                    to("@nome", args[1]),
+                    to("@tipos", vipTypes.toString())
                 ));
                 return;
             }
         }
 
-        final VipData.VIP oldConfigVip = vipConfig.data().getById(vipPlayer.getActiveVip().getId());
-        final VIP newOwningVip = vipPlayer.getActiveVip();
-        final OwningVIP newPrimaryVip = vipPlayer.getOwningVips().get(configVip.getId(), vipType);
+        final VipData.VIP oldConfigVip = vipConfig.data().getById(activeVip.id());
+        final OwningVIP newPrimaryVip = vipPlayer.owningVips().get(configVip.id(), vipType);
 
         if (mainConfig.data().stackVips()) {
             playerService.removeOwningVip(player.getUniqueId(), newPrimaryVip);
             playerService.setVip(player.getUniqueId(), newPrimaryVip);
-            playerService.addOwningVip(player.getUniqueId(), newOwningVip);
+            playerService.addOwningVip(player.getUniqueId(), activeVip);
         } else {
             owningVipHandler.remove(vipPlayer, newPrimaryVip);
             vipHandler.activate(player.getUniqueId(), newPrimaryVip, false);
         }
 
-        player.respond("Vip-trocado", message -> message.replace(
-            "@atual-vip".to(oldConfigVip.getDisplay()),
-            "@atual-tipo".to(newOwningVip.getType().getName().toUpperCase()),
-            "@novo-vip".to(configVip.getDisplay()),
-            "@novo-tipo".to(vipType.getName().toUpperCase())
+        respond(player, "Vip-trocado", message -> message.replace(
+            to("@atual-vip", oldConfigVip.display()),
+            to("@atual-tipo", activeVip.type().getName().toUpperCase()),
+            to("@novo-vip", configVip.display()),
+            to("@novo-tipo", vipType.getName().toUpperCase())
         ));
     }
 
-    private VipType getGreatestType(@NonNull VipPlayer vipPlayer) {
-        return vipPlayer.getOwningVips().getVips().stream()
-            .max(Comparator.comparingInt(owningVip -> owningVip.getType().getPriority()))
-            .map(OwningVIP::getType)
+    private VipType getGreatestType(@NotNull VipPlayer vipPlayer) {
+        return vipPlayer.owningVips().vips().stream()
+            .max(Comparator.comparingInt(owningVip -> owningVip.type().priority()))
+            .map(OwningVIP::type)
             .orElse(null);
     }
 }

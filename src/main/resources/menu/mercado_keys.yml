@@ -83,7 +83,7 @@ Conteudo:
       - ''
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
-  Ordenar-maior-preco:
+  Ordenar-maior-preço:
     Slot: 40
     Id: 154
     Nome: '&cOrdenar'
@@ -97,7 +97,7 @@ Conteudo:
       - ''
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
-  Ordenar-menor-preco:
+  Ordenar-menor-preço:
     Slot: 40
     Id: 154
     Nome: '&cOrdenar'
@@ -167,7 +167,7 @@ Conteudo:
       - ''
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
-  Ordenar-postagem-recentes:
+  Ordenar-mais-recente:
     Slot: 40
     Id: 154
     Nome: '&cOrdenar'
@@ -181,7 +181,7 @@ Conteudo:
       - ''
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
-  Ordenar-postagem-antigas:
+  Ordenar-mais-antiga:
     Slot: 40
     Id: 154
     Nome: '&cOrdenar'

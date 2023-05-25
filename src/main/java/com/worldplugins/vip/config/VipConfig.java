@@ -1,31 +1,33 @@
 package com.worldplugins.vip.config;
 
-import com.worldplugins.lib.config.cache.InjectedConfigCache;
-import com.worldplugins.lib.config.cache.annotation.ConfigSpec;
-import com.worldplugins.lib.extension.bukkit.ConfigurationExtensions;
+import com.worldplugins.lib.util.ConfigSections;
 import com.worldplugins.vip.config.data.VipData;
-import lombok.NonNull;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.config.model.ConfigModel;
+import me.post.lib.config.wrapper.ConfigWrapper;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-@ExtensionMethod(value = {
-    ConfigurationExtensions.class
-})
+public class VipConfig implements ConfigModel<VipData> {
+    private @UnknownNullability VipData data;
+    private final @NotNull ConfigWrapper configWrapper;
 
-public class VipConfig implements InjectedConfigCache<VipData> {
-    @ConfigSpec(path = "vip")
-    public @NonNull VipData transform(@NonNull FileConfiguration config) {
-        return new VipData(config.map(section -> new VipData.VIP(
-            section.getByte("Id"),
+    public VipConfig(@NotNull ConfigWrapper configWrapper) {
+        this.configWrapper = configWrapper;
+    }
+
+    public void update() {
+        final FileConfiguration config = configWrapper.unwrap();
+        data = new VipData(ConfigSections.map(config, section -> new VipData.VIP(
+            (byte) section.getInt("Id"),
             section.getString("Nome"),
             section.getString("Display"),
             section.getString("Grupo"),
             section.getStringList("Comandos-ativacao"),
             new VipData.VIP.Pricing(
-                ((Stream<String>) section.section("Precos").getKeys(false).stream())
+                section.getConfigurationSection("Precos").getKeys(false).stream()
                     .map(key ->
                         new VipData.VIP.Pricing.PricePair(
                             key.equals("Permanente")
@@ -36,7 +38,17 @@ public class VipConfig implements InjectedConfigCache<VipData> {
                     )
                     .collect(Collectors.toList())
             ),
-            section.getItem("Iten")
+            ConfigSections.getItem(section.getConfigurationSection("Iten"))
         )));
+    }
+
+    @Override
+    public @NotNull VipData data() {
+        return data;
+    }
+
+    @Override
+    public @NotNull ConfigWrapper wrapper() {
+        return configWrapper;
     }
 }

@@ -1,13 +1,13 @@
 package com.worldplugins.vip.database.items;
 
-import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface VipItemsRepository {
-    @NonNull CompletableFuture<Collection<VipItems>> getItems(@NonNull UUID playerId);
-    void addItems(@NonNull VipItems items);
-    void removeItems(@NonNull UUID playerId, byte vipId, short amount);
+    @NotNull CompletableFuture<Collection<VipItems>> getItems(@NotNull UUID playerId);
+    void addItems(@NotNull VipItems items);
+    void removeItems(@NotNull UUID playerId, byte vipId, short amount);
 }

@@ -1,28 +1,25 @@
 package com.worldplugins.vip.command;
 
-import com.worldplugins.lib.command.CommandModule;
-import com.worldplugins.lib.command.CommandTarget;
-import com.worldplugins.lib.command.annotation.Command;
-import com.worldplugins.vip.extension.ViewExtensions;
 import com.worldplugins.vip.view.VipTopView;
-import lombok.NonNull;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.command.CommandModule;
+import me.post.lib.command.annotation.Command;
+import me.post.lib.view.Views;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
-@ExtensionMethod({
-    ViewExtensions.class
-})
+import static com.worldplugins.vip.Response.respond;
 
 public class VipTop implements CommandModule {
-    @Command(
-        name = "vip top",
-        target = CommandTarget.PLAYER,
-        usage = "&cArgumentos invalidos. Digite /vip top"
-    )
+    @Command(name = "vip top")
     @Override
-    public void execute(@NonNull CommandSender sender, @NonNull String[] args) {
+    public void execute(@NotNull CommandSender sender, @NotNull String[] args) {
+        if (!(sender instanceof Player)) {
+            respond(sender, "Comando-jogador");
+            return;
+        }
+
         final Player player = (Player) sender;
-        player.openView(VipTopView.class);
+        Views.get().open(player, VipTopView.class);
     }
 }

@@ -1,11 +1,11 @@
 package com.worldplugins.vip.util;
 
-import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
 public class CommandParameters {
-    public static @NonNull CommandParams of(@NonNull String[] args, int offset) {
+    public static @NotNull CommandParams of(@NotNull String[] args, int offset) {
         return new CommandParams(Arrays.copyOfRange(args, offset, args.length));
     }
 }

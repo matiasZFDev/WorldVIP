@@ -1,13 +1,13 @@
 package com.worldplugins.vip.database.market;
 
-import lombok.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.UUID;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface SellingKeyRepository {
-    @NonNull CompletableFuture<Collection<SellingKey>> getAllKeys();
-    void addKey(@NonNull SellingKey key);
-    void removeKey(@NonNull SellingKey key);
+    @NotNull CompletableFuture<List<SellingKey>> getAllKeys();
+    void addKey(@NotNull SellingKey key);
+    void removeKey(@NotNull SellingKey key);
 }

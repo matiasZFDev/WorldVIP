@@ -1,65 +1,71 @@
 package com.worldplugins.vip.command.key;
 
-import com.worldplugins.lib.command.CommandModule;
-import com.worldplugins.lib.command.CommandTarget;
-import com.worldplugins.lib.command.annotation.ArgsChecker;
-import com.worldplugins.lib.command.annotation.Command;
-import com.worldplugins.lib.extension.GenericExtensions;
-import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.player.model.VIP;
-import com.worldplugins.vip.extension.ResponseExtensions;
 import com.worldplugins.vip.handler.VipHandler;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.command.CommandModule;
+import me.post.lib.command.annotation.Command;
+import me.post.lib.util.Scheduler;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
-@ExtensionMethod({
-    ResponseExtensions.class,
-    GenericExtensions.class
-})
+import static com.worldplugins.vip.Response.respond;
+import static me.post.lib.util.Pairs.to;
 
-@RequiredArgsConstructor
 public class UseKey implements CommandModule {
-    private final @NonNull ValidKeyRepository validKeyRepository;
-    private final @NonNull SchedulerBuilder scheduler;
-    private final @NonNull VipHandler activationHandler;
+    private final @NotNull ValidKeyRepository validKeyRepository;
+    private final @NotNull Scheduler scheduler;
+    private final @NotNull VipHandler activationHandler;
 
-    @Command(
-        name = "usarkey",
-        target = CommandTarget.PLAYER,
-        usage = "&cArgumentos invalidos. Digite /usarkey <key>",
-        argsChecks = {@ArgsChecker(size = 1)}
-    )
+    public UseKey(
+        @NotNull ValidKeyRepository validKeyRepository,
+        @NotNull Scheduler scheduler,
+        @NotNull VipHandler activationHandler
+    ) {
+        this.validKeyRepository = validKeyRepository;
+        this.scheduler = scheduler;
+        this.activationHandler = activationHandler;
+    }
+
+    @Command(name = "usarkey")
     @Override
-    public void execute(@NonNull CommandSender sender, @NonNull String[] args) {
+    public void execute(@NotNull CommandSender sender, @NotNull String[] args) {
+        if (!(sender instanceof Player)) {
+            respond(sender, "Comando-jogador");
+            return;
+        }
+
+        if (args.length != 1) {
+            respond(sender, "Usar-key-uso");
+            return;
+        }
+
         final Player player = (Player) sender;
         final String code = args[0];
 
         validKeyRepository.getKeyByCode(code).thenAccept(key ->
-            scheduler.newTask(() -> {
+            scheduler.runTask(0, false, () -> {
                 if (!player.isOnline()) {
                     return;
                 }
 
                 if (key == null) {
-                    sender.respond("Key-inexistente", message -> message.replace(
-                        "@key".to(code)
+                    respond(sender, "Key-inexistente", message -> message.replace(
+                        to("@key", code)
                     ));
                     return;
                 }
 
-                final VIP vip = new VIP(key.getVipId(), key.getVipType(), key.getVipDuration());
+                final VIP vip = new VIP(key.vipId(), key.vipType(), key.vipDuration());
                 activationHandler.activate(player.getUniqueId(), vip, true);
 
-                if (key.getUsages() > 1) {
+                if (key.usages() > 1) {
                     validKeyRepository.consumeKey(key);
                 } else {
                     validKeyRepository.removeKey(key);
                 }
-            }).run()
+            })
         );
     }
 }

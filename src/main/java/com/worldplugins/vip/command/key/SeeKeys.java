@@ -1,126 +1,128 @@
 package com.worldplugins.vip.command.key;
 
-import com.worldplugins.lib.command.CommandModule;
-import com.worldplugins.lib.command.CommandTarget;
-import com.worldplugins.lib.command.annotation.Command;
-import com.worldplugins.lib.config.cache.ConfigCache;
-import com.worldplugins.lib.extension.GenericExtensions;
-import com.worldplugins.lib.extension.ReplaceExtensions;
-import com.worldplugins.lib.extension.TimeExtensions;
-import com.worldplugins.lib.extension.bukkit.ColorExtensions;
-import com.worldplugins.lib.util.SchedulerBuilder;
+import com.worldplugins.lib.util.Strings;
 import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
-import com.worldplugins.vip.extension.ResponseExtensions;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.command.CommandModule;
+import me.post.lib.command.annotation.Command;
+import me.post.lib.config.model.ConfigModel;
+import me.post.lib.util.Colors;
+import me.post.lib.util.Scheduler;
+import me.post.lib.util.Time;
 import net.md_5.bungee.api.chat.*;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-@ExtensionMethod({
-    ResponseExtensions.class,
-    GenericExtensions.class,
-    ReplaceExtensions.class,
-    TimeExtensions.class,
-    ColorExtensions.class
-})
+import static com.worldplugins.vip.Response.respond;
+import static me.post.lib.util.Pairs.to;
 
-@RequiredArgsConstructor
 public class SeeKeys implements CommandModule {
-    private final @NonNull SchedulerBuilder scheduler;
-    private final @NonNull ValidKeyRepository validKeyRepository;
-    private final @NonNull ConfigCache<VipData> vipConfig;
-    private final @NonNull ConfigCache<MainData> mainConfig;
+    private final @NotNull Scheduler scheduler;
+    private final @NotNull ValidKeyRepository validKeyRepository;
+    private final @NotNull ConfigModel<VipData> vipConfig;
+    private final @NotNull ConfigModel<MainData> mainConfig;
 
-    @Command(
-        name = "verkeys",
-        target = CommandTarget.PLAYER,
-        usage = "&cArgumentos invalidos. Digite /verkeys [jogador]"
-    )
+    public SeeKeys(
+        @NotNull Scheduler scheduler,
+        @NotNull ValidKeyRepository validKeyRepository,
+        @NotNull ConfigModel<VipData> vipConfig,
+        @NotNull ConfigModel<MainData> mainConfig
+    ) {
+        this.scheduler = scheduler;
+        this.validKeyRepository = validKeyRepository;
+        this.vipConfig = vipConfig;
+        this.mainConfig = mainConfig;
+    }
+
+    @Command(name = "verkeys")
     @Override
-    public void execute(@NonNull CommandSender sender, @NonNull String[] args) {
+    public void execute(@NotNull CommandSender sender, @NotNull String[] args) {
+        if (!(sender instanceof Player)) {
+            respond(sender, "Comando-jogador");
+            return;
+        }
+
         final Player player = (Player) sender;
 
-        if (args.length == 1) {
+        if (args.length > 1) {
             if (!player.hasPermission("worldvip.verkeys")) {
-                player.respond("Comando-sem-permissoes");
+                respond(player, "Comando-sem-permissoes");
                 return;
             }
 
             final Player keysPlayer = Bukkit.getPlayer(args[0]);
 
             if (keysPlayer == null) {
-                player.respond("Jogador-offline");
+                respond(player, "Jogador-offline");
                 return;
             }
 
-            validKeyRepository.getKeys(keysPlayer.getName()).thenAccept(keys -> scheduler.newTask(() -> {
-                if (keys.isEmpty()) {
-                    player.respond("Jogador-sem-keys", message -> message.replace(
-                        "@jogador".to(player.getName())
-                    ));
-                    return;
-                }
+            validKeyRepository
+                .getKeys(keysPlayer.getName())
+                .thenAccept(keys -> scheduler.runTask(0, false, () -> {
+                    if (keys.isEmpty()) {
+                        respond(player, "Jogador-sem-keys", message -> message.replace(
+                            to("@jogador", player.getName())
+                        ));
+                        return;
+                    }
 
-                messageKeyList(keysPlayer, keys, true);
-            }).run());
+                    messageKeyList(keysPlayer, keys, true);
+                }));
             return;
         }
 
-        validKeyRepository.getKeys(player.getName()).thenAccept(keys -> scheduler.newTask(() -> {
+        validKeyRepository.getKeys(player.getName()).thenAccept(keys -> scheduler.runTask(0, false, () -> {
             if (keys.isEmpty()) {
-                sender.respond("Ver-keys-vazio");
+                respond(sender, "Ver-keys-vazio");
                 return;
             }
 
             messageKeyList(player, keys, false);
-        }).run());
+        }));
     }
 
     private void messageKeyList(
-        @NonNull Player player,
-        @NonNull Collection<ValidVipKey> keys,
+        @NotNull Player player,
+        @NotNull Collection<ValidVipKey> keys,
         boolean playerKeys
     ) {
         final List<String> messageList = playerKeys
-            ? mainConfig.data().getKeyListing().getPlayerKeysMessage()
-            : mainConfig.data().getKeyListing().getOwnKeysMessages();
-
+            ? mainConfig.data().keyListing().playerKeysMessage()
+            : mainConfig.data().keyListing().ownKeysMessages();
         final BaseComponent[] keyList = keys.stream()
             .map(key -> {
-                final VipData.VIP configVip = vipConfig.data().getById(key.getVipId());
-                final String durationFormat = key.getVipDuration() == -1
-                    ? ((Integer) key.getVipDuration()).toTime()
+                final VipData.VIP configVip = vipConfig.data().getById(key.vipId());
+                final String durationFormat = key.vipDuration() == -1
+                    ? Time.toFormat(key.vipDuration())
                     : GlobalValues.PERMANENT_DURATION;
-                final String line = mainConfig.data().getKeyListing().getKeyFormat()
-                    .formatReplace(
-                        "@key".to(key.getCode()),
-                        "@vip".to(configVip.getDisplay()),
-                        "@tipo".to(key.getVipType().getName().toUpperCase()),
-                        "@duracao".to(durationFormat),
-                        "@usos".to(String.valueOf(key.getUsages()))
-                    )
-                    .color();
-                return new ComponentBuilder(line)
+                final String line = Strings.replace(
+                    mainConfig.data().keyListing().keyFormat(),
+                    to("@key", key.code()),
+                    to("@vip", configVip.display()),
+                    to("@tipo", key.vipType().getName().toUpperCase()),
+                    to("@duracao", durationFormat),
+                    to("@usos", String.valueOf(key.usages()))
+                );
+                return new ComponentBuilder(Colors.color(line))
                     .event(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,
                         new BaseComponent[] {
-                            new TextComponent(mainConfig.data().getKeyListing().getHoverMessage())
+                            new TextComponent(mainConfig.data().keyListing().hoverMessage())
                         }
                     ))
                     .event(new ClickEvent(
                         ClickEvent.Action.SUGGEST_COMMAND,
-                        "/usarkey " + key.getCode()
+                        "/usarkey " + key.code()
                     ))
                     .create();
             })
@@ -142,7 +144,7 @@ public class SeeKeys implements CommandModule {
                 continue;
             }
 
-            message[j] = new TextComponent(messageList.get(i).color());
+            message[j] = new TextComponent(Colors.color(messageList.get(i)));
         }
 
         player.spigot().sendMessage(message);

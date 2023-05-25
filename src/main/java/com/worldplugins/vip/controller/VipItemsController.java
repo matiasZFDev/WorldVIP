@@ -1,32 +1,30 @@
 package com.worldplugins.vip.controller;
 
-import com.worldplugins.lib.util.SchedulerBuilder;
 import com.worldplugins.vip.database.items.VipItemsRepository;
-import com.worldplugins.vip.extension.ViewExtensions;
 import com.worldplugins.vip.view.VipItemsView;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.ExtensionMethod;
+import me.post.lib.util.Scheduler;
+import me.post.lib.view.Views;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
-@ExtensionMethod({
-    ViewExtensions.class
-})
-
-@RequiredArgsConstructor
 public class VipItemsController {
-    private final @NonNull VipItemsRepository vipItemsRepository;
-    private final @NonNull SchedulerBuilder scheduler;
+    private final @NotNull VipItemsRepository vipItemsRepository;
+    private final @NotNull Scheduler scheduler;
 
-    public void openView(@NonNull Player player) {
+    public VipItemsController(@NotNull VipItemsRepository vipItemsRepository, @NotNull Scheduler scheduler) {
+        this.vipItemsRepository = vipItemsRepository;
+        this.scheduler = scheduler;
+    }
+
+    public void openView(@NotNull Player player) {
         vipItemsRepository.getItems(player.getUniqueId()).thenAccept(itemList ->
-            scheduler.newTask(() -> {
+            scheduler.runTask(0, false, () -> {
                 if (!player.isOnline()) {
                     return;
                 }
 
-                player.openView(VipItemsView.class, new VipItemsView.Context(itemList));
-            }).run()
+                Views.get().open(player, VipItemsView.class, new VipItemsView.Context(itemList));
+            })
         );
     }
 }

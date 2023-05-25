@@ -1,26 +1,27 @@
 package com.worldplugins.vip.config;
 
-import com.worldplugins.lib.config.cache.InjectedConfigCache;
-import com.worldplugins.lib.config.cache.annotation.ConfigSpec;
-import com.worldplugins.lib.extension.bukkit.ColorExtensions;
-import com.worldplugins.lib.extension.bukkit.ConfigurationExtensions;
 import com.worldplugins.vip.config.data.MainData;
-import lombok.NonNull;
-import lombok.experimental.ExtensionMethod;
-import org.bukkit.configuration.ConfigurationSection;
+import me.post.lib.config.model.ConfigModel;
+import me.post.lib.config.wrapper.ConfigWrapper;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
-@ExtensionMethod({
-    ConfigurationExtensions.class,
-    ColorExtensions.class
-})
+import static me.post.lib.util.Colors.color;
 
-public class MainConfig implements InjectedConfigCache<MainData> {
-    @ConfigSpec(path = "config")
-    public @NonNull MainData transform(@NonNull FileConfiguration config) {
-        return new MainData(
+public class MainConfig implements ConfigModel<MainData> {
+    private @UnknownNullability MainData data;
+    private final @NotNull ConfigWrapper configWrapper;
+
+    public MainConfig(@NotNull ConfigWrapper configWrapper) {
+        this.configWrapper = configWrapper;
+    }
+
+    public void update() {
+        final FileConfiguration config = configWrapper.unwrap();
+        data = new MainData(
             new MainData.KeyGenOptions(
-                config.getByte("Geracao-key.Tamanho"),
+                (byte) config.getInt("Geracao-key.Tamanho"),
                 config.getBoolean("Geracao-key.Numeros"),
                 config.getBoolean("Geracao-key.Letras-minusculas"),
                 config.getBoolean("Geracao-key.Letras-maiusculas")
@@ -29,12 +30,22 @@ public class MainConfig implements InjectedConfigCache<MainData> {
                 config.getStringList("Ver-keys.Mensagem-jogador"),
                 config.getStringList("Ver-keys.Mensagem-pessoal"),
                 config.getString("Formato-key"),
-                config.getString("Mensagem-hover").color()
+                color(config.getString("Mensagem-hover"))
             ),
-            config.getOrDefault("Stackar-vips", ConfigurationSection::getBoolean, false),
-            config.getOrDefault("Coleta-de-itens", ConfigurationSection::getBoolean, false),
+            config.getBoolean("Stackar-vips"),
+            config.getBoolean("Coleta-de-itens"),
             config.getInt("Delay-trocar-vip"),
-            config.getOrDefault("Reducao-simultanea", ConfigurationSection::getBoolean, false)
+            config.getBoolean("Reducao-simultanea")
         );
+    }
+
+    @Override
+    public @NotNull MainData data() {
+        return data;
+    }
+
+    @Override
+    public @NotNull ConfigWrapper wrapper() {
+        return configWrapper;
     }
 }
