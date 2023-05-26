@@ -268,9 +268,11 @@ public class PluginExecutor {
                 keysController,
                 keyManagement,
                 conversationProvider,
+                scheduler,
                 databaseAccessor.sellingKeyRepository(),
                 databaseAccessor.validKeyRepository(),
-                vipConfig
+                vipConfig,
+                mainConfig
             ),
             new ConfirmKeyActivationView(
                 updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/confirmar_ativacao_key"))),

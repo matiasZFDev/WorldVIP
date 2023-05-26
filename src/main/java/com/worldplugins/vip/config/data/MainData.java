@@ -5,14 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class MainData {
-    public MainData(@NotNull KeyGenOptions keyGen, @NotNull KeyListingOptions keyListing, boolean stackVips, boolean storeItems, int switchVipDelay, boolean simultaneousReduction) {
-        this.keyGen = keyGen;
-        this.keyListing = keyListing;
-        this.stackVips = stackVips;
-        this.storeItems = storeItems;
-        this.switchVipDelay = switchVipDelay;
-        this.simultaneousReduction = simultaneousReduction;
-    }
+
 
     public static class KeyGenOptions {
         private final byte length;
@@ -91,6 +84,25 @@ public class MainData {
     private final boolean storeItems;
     private final int switchVipDelay;
     private final boolean simultaneousReduction;
+    private final int maxSellingKeysPerPlayer;
+
+    public MainData(
+        @NotNull KeyGenOptions keyGen,
+        @NotNull KeyListingOptions keyListing,
+        boolean stackVips,
+        boolean storeItems,
+        int switchVipDelay,
+        boolean simultaneousReduction,
+        int maxSellingKeysPerPlayer
+    ) {
+        this.keyGen = keyGen;
+        this.keyListing = keyListing;
+        this.stackVips = stackVips;
+        this.storeItems = storeItems;
+        this.switchVipDelay = switchVipDelay;
+        this.simultaneousReduction = simultaneousReduction;
+        this.maxSellingKeysPerPlayer = maxSellingKeysPerPlayer;
+    }
 
     public @NotNull KeyGenOptions keyGen() {
         return keyGen;
@@ -114,5 +126,9 @@ public class MainData {
 
     public boolean simultaneousReduction() {
         return simultaneousReduction;
+    }
+
+    public int maxSellingKeysPerPlayer() {
+        return maxSellingKeysPerPlayer;
     }
 }

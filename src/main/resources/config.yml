@@ -59,3 +59,7 @@ Delay-trocar-vip: 10
 # contar o tempo do vip inativos como os inativos.
 # Caso esteja em false, o único vip que ira contar é o primario.
 Reducao-simultanea: false
+
+# O limite de keys que podem estar na venda de forma
+# simultânea por um jogador.
+Limite-de-keys-na-venda-por-jogador: 50

@@ -3,6 +3,7 @@ package com.worldplugins.vip.view;
 import com.worldplugins.lib.config.model.MenuModel;
 import com.worldplugins.lib.util.ItemTransformer;
 import com.worldplugins.lib.view.ConfigContextBuilder;
+import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.controller.KeysController;
 import com.worldplugins.vip.conversation.KeyPostPriceConversation;
@@ -13,6 +14,7 @@ import com.worldplugins.vip.key.KeyManagement;
 import com.worldplugins.vip.util.VipDuration;
 import me.post.lib.config.model.ConfigModel;
 import me.post.lib.util.ConversationProvider;
+import me.post.lib.util.Scheduler;
 import me.post.lib.view.View;
 import me.post.lib.view.Views;
 import me.post.lib.view.action.ViewClick;
@@ -51,27 +53,33 @@ public class ManageKeyView implements View {
     private final @NotNull KeysController keysController;
     private final @NotNull KeyManagement keyManagement;
     private final @NotNull ConversationProvider conversationProvider;
+    private final @NotNull Scheduler scheduler;
     private final @NotNull SellingKeyRepository sellingKeyRepository;
     private final @NotNull ValidKeyRepository validKeyRepository;
     private final @NotNull ConfigModel<VipData> vipConfig;
+    private final @NotNull ConfigModel<MainData> mainConfig;
 
     public ManageKeyView(
         @NotNull MenuModel menuModel,
         @NotNull KeysController keysController,
         @NotNull KeyManagement keyManagement,
         @NotNull ConversationProvider conversationProvider,
+        @NotNull Scheduler scheduler,
         @NotNull SellingKeyRepository sellingKeyRepository,
         @NotNull ValidKeyRepository validKeyRepository,
-        @NotNull ConfigModel<VipData> vipConfig
+        @NotNull ConfigModel<VipData> vipConfig,
+        @NotNull ConfigModel<MainData> mainConfig
     ) {
         this.viewContext = new MapViewContext();
         this.menuModel = menuModel;
         this.keysController = keysController;
         this.keyManagement = keyManagement;
         this.conversationProvider = conversationProvider;
+        this.scheduler = scheduler;
         this.sellingKeyRepository = sellingKeyRepository;
         this.validKeyRepository = validKeyRepository;
         this.vipConfig = vipConfig;
+        this.mainConfig = mainConfig;
     }
 
     @Override
@@ -107,8 +115,14 @@ public class ManageKeyView implements View {
                 "Vender",
                 click -> conversationProvider.create()
                     .withFirstPrompt(new KeyPostPriceConversation(
-                        context, keyManagement, conversationProvider, sellingKeyRepository,
-                        validKeyRepository, vipConfig
+                        context,
+                        keyManagement,
+                        conversationProvider,
+                        scheduler,
+                        sellingKeyRepository,
+                        validKeyRepository,
+                        vipConfig,
+                        mainConfig
                     ))
                     .withTimeout(20)
                     .withLocalEcho(false)

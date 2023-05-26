@@ -1,5 +1,6 @@
 package com.worldplugins.vip.conversation;
 
+import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
@@ -10,6 +11,7 @@ import com.worldplugins.vip.view.ManageKeyView;
 import me.post.lib.config.model.ConfigModel;
 import me.post.lib.util.ConversationProvider;
 import me.post.lib.util.NumberFormats;
+import me.post.lib.util.Scheduler;
 import me.post.lib.view.Views;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.Prompt;
@@ -24,24 +26,30 @@ public class KeyPostPriceConversation extends StringPrompt {
     private final @NotNull ManageKeyView.Context manageKeyViewContext;
     private final @NotNull KeyManagement keyManagement;
     private final @NotNull ConversationProvider conversationProvider;
+    private final @NotNull Scheduler scheduler;
     private final @NotNull SellingKeyRepository sellingKeyRepository;
     private final @NotNull ValidKeyRepository validKeyRepository;
     private final @NotNull ConfigModel<VipData> vipConfig;
+    private final @NotNull ConfigModel<MainData> mainConfig;
 
     public KeyPostPriceConversation(
         @NotNull ManageKeyView.Context manageKeyViewContext,
         @NotNull KeyManagement keyManagement,
         @NotNull ConversationProvider conversationProvider,
+        @NotNull Scheduler scheduler,
         @NotNull SellingKeyRepository sellingKeyRepository,
         @NotNull ValidKeyRepository validKeyRepository,
-        @NotNull ConfigModel<VipData> vipConfig
+        @NotNull ConfigModel<VipData> vipConfig,
+        @NotNull ConfigModel<MainData> mainConfig
     ) {
         this.manageKeyViewContext = manageKeyViewContext;
         this.keyManagement = keyManagement;
         this.conversationProvider = conversationProvider;
+        this.scheduler = scheduler;
         this.sellingKeyRepository = sellingKeyRepository;
         this.validKeyRepository = validKeyRepository;
         this.vipConfig = vipConfig;
+        this.mainConfig = mainConfig;
     }
 
     @Override
@@ -84,8 +92,14 @@ public class KeyPostPriceConversation extends StringPrompt {
             manageKeyViewContext.keysViewPage(),
             key -> conversationProvider.create()
                 .withFirstPrompt(new KeyPostConfirmConversation(
-                    keyManagement, price, manageKeyViewContext, sellingKeyRepository,
-                    validKeyRepository, vipConfig
+                    keyManagement,
+                    price,
+                    manageKeyViewContext,
+                    scheduler,
+                    sellingKeyRepository,
+                    validKeyRepository,
+                    vipConfig,
+                    mainConfig
                 ))
                 .withTimeout(20)
                 .withLocalEcho(false)

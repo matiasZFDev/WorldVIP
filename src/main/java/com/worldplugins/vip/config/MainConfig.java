@@ -35,7 +35,8 @@ public class MainConfig implements ConfigModel<MainData> {
             config.getBoolean("Stackar-vips"),
             config.getBoolean("Coleta-de-itens"),
             config.getInt("Delay-trocar-vip"),
-            config.getBoolean("Reducao-simultanea")
+            config.getBoolean("Reducao-simultanea"),
+            config.getInt("Limite-de-keys-na-venda-por-jogador")
         );
     }
 
