@@ -105,6 +105,7 @@ public class PluginExecutor {
                 "menu/coletar_itens", "menu/confirmar_ativacao_key",
                 "menu/gerenciar_key", "menu/keys", "menu/mercado_comprar_key",
                 "menu/mercado_keys", "menu/top", "menu/vip", "menu/vips_secondarios",
+                "menu/mercado_gerenciar_keys",
                 "resposta/mensagens", "resposta/sons", "resposta/efeitos"
             )
             .forEach(configManager::load);
@@ -276,6 +277,12 @@ public class PluginExecutor {
                 keyManagement,
                 vipHandler,
                 databaseAccessor.validKeyRepository(),
+                vipConfig
+            ),
+            new ManageSellingKeysView(
+                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/mercado_gerenciar_keys"))),
+                databaseAccessor.sellingKeyRepository(),
+                scheduler,
                 vipConfig
             )
         );
