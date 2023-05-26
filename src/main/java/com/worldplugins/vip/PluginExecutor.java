@@ -124,6 +124,8 @@ public class PluginExecutor {
     }
 
     private void checkBasicVips() {
+        serverConfig.update();
+
         final long lastOnlineInstant = serverConfig.data().lastOnlineInstant();
 
         if (lastOnlineInstant == 0) {
