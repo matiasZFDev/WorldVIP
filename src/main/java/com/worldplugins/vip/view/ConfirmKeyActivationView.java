@@ -8,7 +8,7 @@ import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
 import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.handler.VipHandler;
-import com.worldplugins.vip.key.KeyManagement;
+import com.worldplugins.vip.key.KeyGeneratorMatcher;
 import com.worldplugins.vip.util.VipDuration;
 import me.post.lib.config.model.ConfigModel;
 import me.post.lib.view.View;
@@ -28,21 +28,21 @@ import static me.post.lib.util.Pairs.to;
 public class ConfirmKeyActivationView implements View {
     private final @NotNull ViewContext viewContext;
     private final @NotNull MenuModel menuModel;
-    private final @NotNull KeyManagement keyManagement;
+    private final @NotNull KeyGeneratorMatcher keyGeneratorMatcher;
     private final @NotNull VipHandler vipHandler;
     private final @NotNull ValidKeyRepository validKeyRepository;
     private final @NotNull ConfigModel<VipData> vipConfig;
 
     public ConfirmKeyActivationView(
         @NotNull MenuModel menuModel,
-        @NotNull KeyManagement keyManagement,
+        @NotNull KeyGeneratorMatcher keyGeneratorMatcher,
         @NotNull VipHandler vipHandler,
         @NotNull ValidKeyRepository validKeyRepository,
         @NotNull ConfigModel<VipData> vipConfig
     ) {
         this.viewContext = new MapViewContext();
         this.menuModel = menuModel;
-        this.keyManagement = keyManagement;
+        this.keyGeneratorMatcher = keyGeneratorMatcher;
         this.vipHandler = vipHandler;
         this.validKeyRepository = validKeyRepository;
         this.vipConfig = vipConfig;
@@ -66,7 +66,7 @@ public class ConfirmKeyActivationView implements View {
             )
             .handleMenuItemClick(
                 "Cancelar",
-                click -> keyManagement.manage(
+                click -> keyGeneratorMatcher.tryMatch(
                     player,
                     context.key().code(),
                     context.keysViewPage(),
@@ -75,7 +75,7 @@ public class ConfirmKeyActivationView implements View {
             )
             .handleMenuItemClick(
                 "Confirmar",
-                click -> keyManagement.manage(
+                click -> keyGeneratorMatcher.tryMatch(
                     player,
                     context.key().code(),
                     context.keysViewPage(),

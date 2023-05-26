@@ -9,7 +9,7 @@ import com.worldplugins.vip.conversation.KeyPostPriceConversation;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
 import com.worldplugins.vip.database.market.SellingKeyRepository;
-import com.worldplugins.vip.key.KeyManagement;
+import com.worldplugins.vip.key.KeyGeneratorMatcher;
 import com.worldplugins.vip.util.VipDuration;
 import me.post.lib.config.model.ConfigModel;
 import me.post.lib.util.ConversationProvider;
@@ -49,7 +49,7 @@ public class ManageKeyView implements View {
 
     private final @NotNull ViewContext viewContext;
     private final @NotNull MenuModel menuModel;
-    private final @NotNull KeyManagement keyManagement;
+    private final @NotNull KeyGeneratorMatcher keyGeneratorMatcher;
     private final @NotNull ConversationProvider conversationProvider;
     private final @NotNull Scheduler scheduler;
     private final @NotNull SellingKeyRepository sellingKeyRepository;
@@ -59,7 +59,7 @@ public class ManageKeyView implements View {
 
     public ManageKeyView(
         @NotNull MenuModel menuModel,
-        @NotNull KeyManagement keyManagement,
+        @NotNull KeyGeneratorMatcher keyGeneratorMatcher,
         @NotNull ConversationProvider conversationProvider,
         @NotNull Scheduler scheduler,
         @NotNull SellingKeyRepository sellingKeyRepository,
@@ -69,7 +69,7 @@ public class ManageKeyView implements View {
     ) {
         this.viewContext = new MapViewContext();
         this.menuModel = menuModel;
-        this.keyManagement = keyManagement;
+        this.keyGeneratorMatcher = keyGeneratorMatcher;
         this.conversationProvider = conversationProvider;
         this.scheduler = scheduler;
         this.sellingKeyRepository = sellingKeyRepository;
@@ -104,7 +104,7 @@ public class ManageKeyView implements View {
             )
             .handleMenuItemClick(
                 "Ativar",
-                click -> keyManagement.manage(
+                click -> keyGeneratorMatcher.tryMatch(
                     player,
                     key.code(),
                     context.keysViewPage,
@@ -116,7 +116,7 @@ public class ManageKeyView implements View {
                 click -> conversationProvider.create()
                     .withFirstPrompt(new KeyPostPriceConversation(
                         context,
-                        keyManagement,
+                        keyGeneratorMatcher,
                         conversationProvider,
                         scheduler,
                         sellingKeyRepository,

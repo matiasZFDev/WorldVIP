@@ -22,7 +22,7 @@ import com.worldplugins.vip.init.DatabaseInitializer;
 import com.worldplugins.vip.init.PermissionManagerInitializer;
 import com.worldplugins.vip.init.PointsInitializer;
 import com.worldplugins.vip.key.ConfigKeyGenerator;
-import com.worldplugins.vip.key.KeyManagement;
+import com.worldplugins.vip.key.KeyGeneratorMatcher;
 import com.worldplugins.vip.key.VipKeyGenerator;
 import com.worldplugins.vip.manager.PermissionManager;
 import com.worldplugins.vip.manager.PointsManager;
@@ -200,7 +200,7 @@ public class PluginExecutor {
     }
 
     private void registerViews() {
-        final KeyManagement keyManagement = new KeyManagement(
+        final KeyGeneratorMatcher keyGeneratorMatcher = new KeyGeneratorMatcher(
             databaseAccessor.validKeyRepository(), scheduler
         );
         final ConversationProvider conversationProvider = new ConversationProvider(plugin);
@@ -229,7 +229,7 @@ public class PluginExecutor {
                 updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/keys"))),
                 databaseAccessor.validKeyRepository(),
                 scheduler,
-                keyManagement,
+                keyGeneratorMatcher,
                 vipConfig
             ),
             new OwningVipsView(
@@ -254,7 +254,7 @@ public class PluginExecutor {
             ),
             new ManageKeyView(
                 updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/gerenciar_key"))),
-                keyManagement,
+                keyGeneratorMatcher,
                 conversationProvider,
                 scheduler,
                 databaseAccessor.sellingKeyRepository(),
@@ -264,7 +264,7 @@ public class PluginExecutor {
             ),
             new ConfirmKeyActivationView(
                 updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/confirmar_ativacao_key"))),
-                keyManagement,
+                keyGeneratorMatcher,
                 vipHandler,
                 databaseAccessor.validKeyRepository(),
                 vipConfig
@@ -285,6 +285,7 @@ public class PluginExecutor {
             owningVipHandler,
             mainConfig
         );
+
         scheduler.runTimer(20, 20, false, () ->
             Configurations.update(serverConfig, config ->
                 config.set("Ultimo-instante-online", System.nanoTime())

@@ -9,7 +9,7 @@ import com.worldplugins.lib.view.PageConfigContextBuilder;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
-import com.worldplugins.vip.key.KeyManagement;
+import com.worldplugins.vip.key.KeyGeneratorMatcher;
 import com.worldplugins.vip.util.VipDuration;
 import me.post.deps.nbt_api.nbtapi.NBTCompound;
 import me.post.lib.config.model.ConfigModel;
@@ -44,7 +44,7 @@ public class KeysView implements View {
     private final @NotNull ViewContext viewContext;
     private final @NotNull ValidKeyRepository validKeyRepository;
     private final @NotNull Scheduler scheduler;
-    private final @NotNull KeyManagement keyManagement;
+    private final @NotNull KeyGeneratorMatcher keyGeneratorMatcher;
     private final @NotNull ConfigModel<VipData> vipConfig;
 
     public static final @NotNull String KEY_CODE_TAG = "wvip_view_key_code";
@@ -53,14 +53,14 @@ public class KeysView implements View {
         @NotNull MenuModel menuModel,
         @NotNull ValidKeyRepository validKeyRepository,
         @NotNull Scheduler scheduler,
-        @NotNull KeyManagement keyManagement,
+        @NotNull KeyGeneratorMatcher keyGeneratorMatcher,
         @NotNull ConfigModel<VipData> vipConfig
     ) {
         this.menuModel = menuModel;
         this.viewContext = new MapViewContext();
         this.validKeyRepository = validKeyRepository;
         this.scheduler = scheduler;
-        this.keyManagement = keyManagement;
+        this.keyGeneratorMatcher = keyGeneratorMatcher;
         this.vipConfig = vipConfig;
     }
 
@@ -139,7 +139,7 @@ public class KeysView implements View {
                         NBTCompound::getString
                     );
 
-                    keyManagement.manage(player, keyCode, page, key ->
+                    keyGeneratorMatcher.tryMatch(player, keyCode, page, key ->
                         Views.get().open(
                             player,
                             ManageKeyView.class,

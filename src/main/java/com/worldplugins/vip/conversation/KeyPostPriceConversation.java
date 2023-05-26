@@ -5,7 +5,7 @@ import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
 import com.worldplugins.vip.database.market.SellingKeyRepository;
-import com.worldplugins.vip.key.KeyManagement;
+import com.worldplugins.vip.key.KeyGeneratorMatcher;
 import com.worldplugins.vip.util.VipDuration;
 import com.worldplugins.vip.view.ManageKeyView;
 import me.post.lib.config.model.ConfigModel;
@@ -24,7 +24,7 @@ import static me.post.lib.util.Pairs.to;
 
 public class KeyPostPriceConversation extends StringPrompt {
     private final @NotNull ManageKeyView.Context manageKeyViewContext;
-    private final @NotNull KeyManagement keyManagement;
+    private final @NotNull KeyGeneratorMatcher keyGeneratorMatcher;
     private final @NotNull ConversationProvider conversationProvider;
     private final @NotNull Scheduler scheduler;
     private final @NotNull SellingKeyRepository sellingKeyRepository;
@@ -34,7 +34,7 @@ public class KeyPostPriceConversation extends StringPrompt {
 
     public KeyPostPriceConversation(
         @NotNull ManageKeyView.Context manageKeyViewContext,
-        @NotNull KeyManagement keyManagement,
+        @NotNull KeyGeneratorMatcher keyGeneratorMatcher,
         @NotNull ConversationProvider conversationProvider,
         @NotNull Scheduler scheduler,
         @NotNull SellingKeyRepository sellingKeyRepository,
@@ -43,7 +43,7 @@ public class KeyPostPriceConversation extends StringPrompt {
         @NotNull ConfigModel<MainData> mainConfig
     ) {
         this.manageKeyViewContext = manageKeyViewContext;
-        this.keyManagement = keyManagement;
+        this.keyGeneratorMatcher = keyGeneratorMatcher;
         this.conversationProvider = conversationProvider;
         this.scheduler = scheduler;
         this.sellingKeyRepository = sellingKeyRepository;
@@ -71,7 +71,7 @@ public class KeyPostPriceConversation extends StringPrompt {
         final Player player = (Player) context.getForWhom();
 
         if (value.equalsIgnoreCase("CANCELAR")) {
-            keyManagement.manage(
+            keyGeneratorMatcher.tryMatch(
                 player,
                 manageKeyViewContext.key().code(),
                 manageKeyViewContext.keysViewPage(),
@@ -86,13 +86,13 @@ public class KeyPostPriceConversation extends StringPrompt {
 
         final double price = Double.parseDouble(NumberFormats.numerify(value));
 
-        keyManagement.manage(
+        keyGeneratorMatcher.tryMatch(
             player,
             manageKeyViewContext.key().code(),
             manageKeyViewContext.keysViewPage(),
             key -> conversationProvider.create()
                 .withFirstPrompt(new KeyPostConfirmConversation(
-                    keyManagement,
+                    keyGeneratorMatcher,
                     price,
                     manageKeyViewContext,
                     scheduler,

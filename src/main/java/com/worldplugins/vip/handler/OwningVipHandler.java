@@ -42,6 +42,7 @@ public class OwningVipHandler {
         }
 
         final VipData.VIP configVip = vipConfig.data().getById(owningVip.id());
+
         permissionManager.removeGroup(vipPlayer.id(), configVip.group());
     }
 }

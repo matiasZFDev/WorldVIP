@@ -12,23 +12,20 @@ import java.util.function.Consumer;
 
 import static com.worldplugins.vip.Response.respond;
 
-public class KeyManagement {
+public class KeyGeneratorMatcher {
     private final @NotNull ValidKeyRepository validKeyRepository;
     private final @NotNull Scheduler scheduler;
 
-    public KeyManagement(
-        @NotNull ValidKeyRepository validKeyRepository,
-        @NotNull Scheduler scheduler
-    ) {
+    public KeyGeneratorMatcher(@NotNull ValidKeyRepository validKeyRepository, @NotNull Scheduler scheduler) {
         this.validKeyRepository = validKeyRepository;
         this.scheduler = scheduler;
     }
 
-    public void manage(
+    public void tryMatch(
         @NotNull Player player,
         @NotNull String keyCode,
         int keysViewPage,
-        @NotNull Consumer<ValidVipKey> onSuccess
+        @NotNull Consumer<ValidVipKey> onMatch
     ) {
         validKeyRepository.getKeyByCode(keyCode).thenAccept(key -> scheduler.runTask(0, false, () -> {
             if (!player.isOnline()) {
@@ -41,7 +38,7 @@ public class KeyManagement {
                 return;
             }
 
-            onSuccess.accept(key);
+            onMatch.accept(key);
         }));
     }
 }

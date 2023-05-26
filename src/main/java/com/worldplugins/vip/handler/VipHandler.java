@@ -59,6 +59,7 @@ public class VipHandler {
                 null,
                 new OwningVIPs(new ArrayList<>(0))
             );
+
             setVip(newVipPlayer, vip, announceAndBenefits);
             return;
         }
@@ -70,19 +71,18 @@ public class VipHandler {
 
         if (vip.type() == VipType.PERMANENT) {
             switchVips(vipPlayer, vip);
-        } else {
-            final OwningVIP matchingVip = vipPlayer.owningVips().vips().stream()
-                .filter(owningVip ->
-                    owningVip.id() == vip.id() && owningVip.type() == vip.type()
-                )
-                .findFirst()
-                .orElse(null);
+            return;
+        }
 
-            if (matchingVip == null) {
-                switchVips(vipPlayer, vip);
-            } else {
-                mergeAndSwitchVips(vipPlayer, vip, matchingVip);
-            }
+        final OwningVIP matchingVip = vipPlayer.owningVips().vips().stream()
+            .filter(owningVip -> owningVip.id() == vip.id() && owningVip.type() == vip.type())
+            .findFirst()
+            .orElse(null);
+
+        if (matchingVip == null) {
+            switchVips(vipPlayer, vip);
+        } else {
+            mergeAndSwitchVips(vipPlayer, vip, matchingVip);
         }
     }
 
@@ -94,10 +94,6 @@ public class VipHandler {
         }
 
         final VipData.VIP configVip = vipConfig.data().getById(activeVip.id());
-
-        if (configVip == null) {
-            return;
-        }
 
         permissionManager.removeGroup(vipPlayer.id(), configVip.group());
         playerService.removeVip(vipPlayer.id());
@@ -120,11 +116,13 @@ public class VipHandler {
 
     private void setVip(VipPlayer vipPlayer, @NotNull VIP vip, boolean announceAndBenefits) {
         final VIP oldVip = vipPlayer.activeVip();
+
         playerService.setVip(vipPlayer.id(), vip);
         setGroup(vipPlayer.id(), oldVip, vip);
 
         if (announceAndBenefits) {
             final Player player = Bukkit.getPlayer(vipPlayer.id());
+
             announce(player, vip);
             giveBenefits(player, vipPlayer);
         }
@@ -133,18 +131,10 @@ public class VipHandler {
     private void setGroup(@NotNull UUID playerId, VIP oldVip, @NotNull VIP vip) {
         final VipData.VIP configVip = vipConfig.data().getById(vip.id());
 
-        if (configVip == null) {
-            return;
-        }
-
         permissionManager.addGroup(playerId, configVip.group());
 
         if (!mainConfig.data().stackVips() && oldVip != null) {
             final VipData.VIP configOldVip = vipConfig.data().getById(oldVip.id());
-
-            if (configOldVip == null) {
-                return;
-            }
 
             permissionManager.removeGroup(playerId, configOldVip.group());
         }
@@ -155,10 +145,6 @@ public class VipHandler {
         final String durationDisplay = vip.type() == VipType.PERMANENT
             ? GlobalValues.PERMANENT_DURATION
             : Time.toFormat(vip.duration());
-
-        if (configVip == null) {
-            return;
-        }
 
         respond(player, "Vip-ativado", message -> message.replace(
             to("@jogador", player.getName()),
@@ -177,10 +163,6 @@ public class VipHandler {
 
         final VipData.VIP configVip = vipConfig.data().getById(activeVip.id());
 
-        if (configVip == null) {
-            return;
-        }
-
         configVip.activationCommands().forEach(command ->
             Bukkit.dispatchCommand(
                 Bukkit.getConsoleSender(),
@@ -190,6 +172,7 @@ public class VipHandler {
 
         if (mainConfig.data().storeItems()) {
             final VipItems items = new VipItems(vipPlayer.id(), activeVip.id(), (short) 1);
+
             vipItemsRepository.addItems(items);
         } else {
             Players.giveItems(player, vipItemsConfig.data().getByName(configVip.name()).data());
@@ -203,16 +186,13 @@ public class VipHandler {
             return;
         }
 
-        final VipData.VIP owningConfigVIp = vipConfig.data().getById(currentActiveVip.id());
+        final VipData.VIP owningConfigVip = vipConfig.data().getById(currentActiveVip.id());
+
         setVip(vipPlayer, vip, true);
         playerService.addOwningVip(vipPlayer.id(), currentActiveVip);
 
-        if (owningConfigVIp == null) {
-            return;
-        }
-
         if (!mainConfig.data().stackVips()) {
-            permissionManager.removeGroup(vipPlayer.id(), owningConfigVIp.group());
+            permissionManager.removeGroup(vipPlayer.id(), owningConfigVip.group());
         }
     }
 
@@ -223,6 +203,7 @@ public class VipHandler {
     ) {
         final int newDuration = primaryVip.duration() + matchingVip.duration();
         final VIP mergedVip = new VIP(primaryVip.id(), primaryVip.type(), newDuration);
+
         owningVipHandler.remove(vipPlayer, matchingVip);
         switchVips(vipPlayer, mergedVip);
     }
