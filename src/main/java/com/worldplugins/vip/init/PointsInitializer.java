@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.UUID;
 
+import static me.post.lib.util.Colors.color;
+
 public class PointsInitializer {
     private enum PointsSupport {
         PLAYER_POINTS("PlayerPoints") {
@@ -83,8 +85,8 @@ public class PointsInitializer {
             .orElse(null);
 
         if (manager == null) {
-            Bukkit.getConsoleSender().sendMessage("[WorldVIP] Plugin de cash não encontrado.");
-            Bukkit.getConsoleSender().sendMessage("[WorldVIP] Desligando plugin...");
+            Bukkit.getConsoleSender().sendMessage(color("&b[WorldVIP] Plugin de pontos não encontrado."));
+            Bukkit.getConsoleSender().sendMessage(color("&b[WorldVIP] Desligando plugin..."));
             plugin.getServer().getPluginManager().disablePlugin(plugin);
             return null;
         }

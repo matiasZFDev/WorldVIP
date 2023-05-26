@@ -29,8 +29,8 @@ public class MainConfig implements ConfigModel<MainData> {
             new MainData.KeyListingOptions(
                 config.getStringList("Ver-keys.Mensagem-jogador"),
                 config.getStringList("Ver-keys.Mensagem-pessoal"),
-                config.getString("Formato-key"),
-                color(config.getString("Mensagem-hover"))
+                config.getString("Ver-keys.Formato-key"),
+                color(config.getString("Ver-keys.Mensagem-hover"))
             ),
             config.getBoolean("Stackar-vips"),
             config.getBoolean("Coleta-de-itens"),
