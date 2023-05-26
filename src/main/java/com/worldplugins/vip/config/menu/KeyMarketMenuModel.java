@@ -6,7 +6,6 @@ import com.worldplugins.lib.util.ConfigSections;
 import com.worldplugins.lib.util.MenuContents;
 import com.worldplugins.lib.util.MenuModels;
 import me.post.lib.config.wrapper.ConfigWrapper;
-import me.post.lib.util.Items;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
