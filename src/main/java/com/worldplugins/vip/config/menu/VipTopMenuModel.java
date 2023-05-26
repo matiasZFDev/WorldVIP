@@ -25,10 +25,7 @@ public class VipTopMenuModel implements MenuModel {
             .getData(dataSection -> new HashMap<String, Object>() {{
                 System.out.println(dataSection.getKeys(false));
                 put("Slots", dataSection.getIntegerList("Slots"));
-                put(
-                    "Display-top",
-                    ConfigSections.itemDisplay(dataSection.getConfigurationSection("Display-top"))
-                );
+                put("Display-top", ConfigSections.itemDisplay(dataSection, "Display-top"));
             }})
             .build();
     }

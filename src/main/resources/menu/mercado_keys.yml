@@ -46,7 +46,8 @@ Conteudo:
     Data: 10
     Nome: '&aPágina anterior'
     Lore: ''
-  ## ITENS DE ORDENAMENTO
+
+  # ITENS DE ORDENAMENTO
   Ordenar-nenhum:
     Slot: 40
     Id: 154

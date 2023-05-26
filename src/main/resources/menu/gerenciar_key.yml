@@ -19,7 +19,7 @@ Conteudo:
       - ''
   Ativar:
     Slot: 13
-    Material: ENDER_EYE
+    Material: ENDER_PEARL
     Nome: '&aAtivar'
     Lore:
       - '&7Clique para ativar'

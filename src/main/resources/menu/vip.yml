@@ -5,12 +5,14 @@ Data:
   Formato-vip-inativo: '&cNenhum'
 Conteudo:
   Perfil:
-    Skull-url: '@Dinamico' # Caveça do jogador
+    Slot: 13
+    Context-skull: true # Caveça do jogador
     Nome: '&6&lP&6erfil'
     Lore:
       - '&fVIP: @estado-vip'
       - '&fGasto: &b@gasto'
-  Coletar-itens: # Apagar caso não estiver habilitado
+  Coletar-itens: # Apagar seção caso a coleta de itens não estiver habilitada
+    Slot: 25
     Material: CHEST
     Nome: '&aColetar itens'
     Lore:
@@ -18,6 +20,7 @@ Conteudo:
       - ''
       - '&aClique para resgatar'
   Vips-secondarios:
+    Slot: 24
     Id: 342
     Nome: '&aSeus VIPs'
     Lore:
@@ -27,6 +30,7 @@ Conteudo:
       - ''
       - '&aClique para visualizar'
   Keys:
+    Slot: 20
     Id: 131
     Nome: '&aKeys'
     Lore:
@@ -36,6 +40,7 @@ Conteudo:
       - ''
       - '&aClique para gerenciar'
   Top-vip:
+    Slot: 19
     Material: EMERALD
     Nome: '&bTop VIP'
     Lore:
@@ -44,6 +49,7 @@ Conteudo:
       - ''
       - '&bClique para visualizar'
   Mercado-vip:
+    Slot: 29
     Material: ENDER_PORTAL_FRAME
     Nome: '&bMercado VIP'
     Lore:
