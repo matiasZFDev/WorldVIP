@@ -13,6 +13,7 @@ import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipPlayer;
 import com.worldplugins.vip.database.player.model.VipType;
 import me.post.lib.config.model.ConfigModel;
+import me.post.lib.util.Heads;
 import me.post.lib.util.Numbers;
 import me.post.lib.util.Time;
 import me.post.lib.view.View;
@@ -28,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static com.worldplugins.vip.Response.respond;
 import static java.util.Objects.requireNonNull;
+import static me.post.lib.util.Colors.color;
 import static me.post.lib.util.Pairs.to;
 
 public class VipMenuView implements View {
@@ -53,7 +55,7 @@ public class VipMenuView implements View {
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
         final VipPlayer vipPlayer = playerService.getById(player.getUniqueId());
-        final String vipState = getVipState(vipPlayer);
+        final String vipState = color(getVipState(vipPlayer));
         final String spentValue = vipPlayer == null
             ? "0"
             : Numbers.plainFormat(vipPlayer.spent());
@@ -61,7 +63,7 @@ public class VipMenuView implements View {
         ConfigContextBuilder.withModel(menuModel)
             .editMenuItem("Perfil", item ->
                 ItemBuilding.loreFormat(
-                    item,
+                    Heads.fromOwner(player.getName(), item),
                     to("@estado-vip", vipState),
                     to("@gasto", spentValue)
                 )
