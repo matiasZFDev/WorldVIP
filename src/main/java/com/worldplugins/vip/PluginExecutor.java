@@ -173,7 +173,13 @@ public class PluginExecutor {
 
         registry.addModules(
             new Help(),
-            new CreateKey(keyGenerator, vipConfig, databaseAccessor.validKeyRepository(), scheduler),
+            new CreateKey(
+                keyGenerator,
+                vipConfig,
+                scheduler,
+                databaseAccessor.validKeyRepository(),
+                databaseAccessor.sellingKeyRepository()
+            ),
             new RemoveKey(databaseAccessor.validKeyRepository(), scheduler),
             new SeeKeys(scheduler, databaseAccessor.validKeyRepository(), vipConfig, mainConfig),
             new VipDurationLeft(databaseAccessor.playerService()),
