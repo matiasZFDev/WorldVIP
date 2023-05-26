@@ -86,7 +86,7 @@ public class VipMenuView implements View {
                 click -> Views.get().open(player, KeysView.class)
             )
             .handleMenuItemClick(
-                "Top-click",
+                "Top-vip",
                 click -> Views.get().open(player, VipTopView.class)
             )
             .handleMenuItemClick(
