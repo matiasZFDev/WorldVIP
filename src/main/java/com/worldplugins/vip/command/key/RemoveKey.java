@@ -20,7 +20,6 @@ public class RemoveKey implements CommandModule {
         this.scheduler = scheduler;
     }
 
-    // usage = "&cArgumentos invalidos. Digite /removerkey <key>"
     @Command(name = "removerkey")
     @Override
     public void execute(@NotNull CommandSender sender, @NotNull String[] args) {
