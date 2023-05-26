@@ -4,7 +4,6 @@ import com.worldplugins.lib.config.model.MenuModel;
 import com.worldplugins.lib.util.ItemBuilding;
 import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.vip.config.data.VipData;
-import com.worldplugins.vip.controller.VipKeyShopController;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
 import com.worldplugins.vip.database.market.SellingKey;
@@ -18,6 +17,7 @@ import me.post.lib.util.NumberFormats;
 import me.post.lib.util.Scheduler;
 import me.post.lib.util.Time;
 import me.post.lib.view.View;
+import me.post.lib.view.Views;
 import me.post.lib.view.action.ViewClick;
 import me.post.lib.view.action.ViewClose;
 import me.post.lib.view.helper.ClickHandler;
@@ -37,9 +37,9 @@ import static me.post.lib.util.Pairs.to;
 public class KeyMarketPurchaseView implements View {
     public static class Context {
         private final @NotNull SellingKey key;
-        private final @NotNull KeyMarketView.OutContext marketContext;
+        private final @NotNull KeyMarketView.Context marketContext;
 
-        public Context(@NotNull SellingKey key, @NotNull KeyMarketView.OutContext marketContext) {
+        public Context(@NotNull SellingKey key, @NotNull KeyMarketView.Context marketContext) {
             this.key = key;
             this.marketContext = marketContext;
         }
@@ -47,7 +47,6 @@ public class KeyMarketPurchaseView implements View {
 
     private final @NotNull ViewContext viewContext;
     private final @NotNull MenuModel menuModel;
-    private final @NotNull VipKeyShopController vipKeyShopController;
     private final @NotNull SellingKeyRepository sellingKeyRepository;
     private final @NotNull Scheduler scheduler;
     private final @NotNull PointsManager pointsManager;
@@ -57,7 +56,6 @@ public class KeyMarketPurchaseView implements View {
 
     public KeyMarketPurchaseView(
         @NotNull MenuModel menuModel,
-        @NotNull VipKeyShopController vipKeyShopController,
         @NotNull SellingKeyRepository sellingKeyRepository,
         @NotNull Scheduler scheduler,
         @NotNull PointsManager pointsManager,
@@ -67,7 +65,6 @@ public class KeyMarketPurchaseView implements View {
     ) {
         this.viewContext = new MapViewContext();
         this.menuModel = menuModel;
-        this.vipKeyShopController = vipKeyShopController;
         this.sellingKeyRepository = sellingKeyRepository;
         this.scheduler = scheduler;
         this.pointsManager = pointsManager;
@@ -96,9 +93,7 @@ public class KeyMarketPurchaseView implements View {
             )
             .handleMenuItemClick(
                 "Cancelar",
-                click -> vipKeyShopController.openView(
-                    player, context.marketContext.page(), context.marketContext.order()
-                )
+                click -> Views.get().open(player, KeyMarketView.class, context.marketContext)
             )
             .handleMenuItemClick("Confirmar", click -> handleKeyPurchase(click, context))
             .build(viewContext, player, data);
@@ -119,11 +114,7 @@ public class KeyMarketPurchaseView implements View {
 
             if (!hasKey) {
                 respond(player, "Mercado-key-inexistente");
-                vipKeyShopController.openView(
-                    player,
-                    context.marketContext.page(),
-                    context.marketContext.order()
-                );
+                Views.get().open(player, KeyMarketView.class, context.marketContext);
                 return;
             }
 
@@ -150,11 +141,7 @@ public class KeyMarketPurchaseView implements View {
 
                     if (validKey != null) {
                         respond(player, "Key-gerada-duplicada");
-                        vipKeyShopController.openView(
-                            player,
-                            context.marketContext.page(),
-                            context.marketContext.order()
-                        );
+                        Views.get().open(player, KeyMarketView.class, context.marketContext);
                         return;
                     }
 

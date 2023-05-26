@@ -12,6 +12,12 @@ Data:
       - ''
       - '&cClique para &nretirar&c.'
 Conteudo:
+  Carregando: # Mostrado quando as keys ainda não foram carregadas.
+    Slot: 22
+    Material: COMPASS
+    Nome: '&cCarregando...'
+    Lore:
+      - '&7Espere um momento.'
   Voltar:
     Slot: 45
     Material: ARROW
@@ -19,12 +25,6 @@ Conteudo:
     Lore:
       - '&7Clique para voltar'
       - '&7ao menu principal.'
-  Carregando: # Mostrado quando o mercado ainda não foi carregado.
-    Slot: 22
-    Material: COMPASS
-    Nome: '&cCarregando...'
-    Lore:
-      - '&7Espere um momento.'
   Pagina-seguinte:
     Slot: 41
     Material: INK_SACK

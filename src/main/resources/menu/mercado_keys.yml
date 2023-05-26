@@ -14,6 +14,12 @@ Data:
       - ''
       - 'Postado &8@data-postagem atrás.'
 Conteudo:
+  Carregando: # Mostrado quando o mercado ainda não foi carregado.
+    Slot: 22
+    Material: COMPASS
+    Nome: '&cCarregando...'
+    Lore:
+      - '&7Espere um momento.'
   Voltar:
     Slot: 36
     Material: ARROW

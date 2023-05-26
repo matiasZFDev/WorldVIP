@@ -7,14 +7,10 @@ import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
-import com.worldplugins.vip.controller.KeysController;
-import com.worldplugins.vip.controller.VipItemsController;
-import com.worldplugins.vip.controller.VipKeyShopController;
 import com.worldplugins.vip.database.player.PlayerService;
 import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipPlayer;
 import com.worldplugins.vip.database.player.model.VipType;
-import com.worldplugins.vip.view.data.KeyMarketOrder;
 import me.post.lib.config.model.ConfigModel;
 import me.post.lib.util.Numbers;
 import me.post.lib.util.Time;
@@ -37,27 +33,18 @@ public class VipMenuView implements View {
     private final @NotNull ViewContext viewContext;
     private final @NotNull MenuModel menuModel;
     private final @NotNull PlayerService playerService;
-    private final @NotNull KeysController keysController;
-    private final @NotNull VipItemsController vipItemsController;
-    private final @NotNull VipKeyShopController vipKeyShopController;
     private final @NotNull ConfigModel<VipData> vipConfig;
     private final @NotNull ConfigModel<MainData> mainConfig;
 
     public VipMenuView(
         @NotNull MenuModel menuModel,
         @NotNull PlayerService playerService,
-        @NotNull KeysController keysController,
-        @NotNull VipItemsController vipItemsController,
-        @NotNull VipKeyShopController vipKeyShopController,
         @NotNull ConfigModel<VipData> vipConfig,
         @NotNull ConfigModel<MainData> mainConfig
     ) {
         this.viewContext = new MapViewContext();
         this.menuModel = menuModel;
         this.playerService = playerService;
-        this.keysController = keysController;
-        this.vipItemsController = vipItemsController;
-        this.vipKeyShopController = vipKeyShopController;
         this.vipConfig = vipConfig;
         this.mainConfig = mainConfig;
     }
@@ -85,15 +72,15 @@ public class VipMenuView implements View {
                     return;
                 }
 
-                vipItemsController.openView(player);
+                Views.get().open(player, VipItemsView.class);
             })
             .handleMenuItemClick(
                 "Vips-secondarios",
-                click -> Views.get().open(player, OwningVipsView.class, new OwningVipsView.Context(0))
+                click -> Views.get().open(player, OwningVipsView.class)
             )
             .handleMenuItemClick(
                 "Keys",
-                click -> keysController.openView(player, 0)
+                click -> Views.get().open(player, KeysView.class)
             )
             .handleMenuItemClick(
                 "Top-click",
@@ -101,7 +88,7 @@ public class VipMenuView implements View {
             )
             .handleMenuItemClick(
                 "Mercado-vip",
-                click -> vipKeyShopController.openView(player, 0, KeyMarketOrder.NONE)
+                click -> Views.get().open(player, KeyMarketView.class)
             )
             .build(viewContext, player, data);
     }

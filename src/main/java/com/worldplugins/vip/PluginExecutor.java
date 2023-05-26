@@ -13,9 +13,6 @@ import com.worldplugins.vip.config.data.ServerData;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.config.data.VipItemsData;
 import com.worldplugins.vip.config.menu.VipTopMenuModel;
-import com.worldplugins.vip.controller.KeysController;
-import com.worldplugins.vip.controller.VipItemsController;
-import com.worldplugins.vip.controller.VipKeyShopController;
 import com.worldplugins.vip.database.DatabaseAccessor;
 import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipType;
@@ -203,17 +200,8 @@ public class PluginExecutor {
     }
 
     private void registerViews() {
-        final KeysController keysController = new KeysController(
-            databaseAccessor.validKeyRepository(), scheduler
-        );
-        final VipItemsController vipItemsController = new VipItemsController(
-            databaseAccessor.vipItemsRepository(), scheduler
-        );
-        final VipKeyShopController vipKeyShopController = new VipKeyShopController(
-            databaseAccessor.sellingKeyRepository(), scheduler
-        );
         final KeyManagement keyManagement = new KeyManagement(
-            databaseAccessor.validKeyRepository(), scheduler, keysController
+            databaseAccessor.validKeyRepository(), scheduler
         );
         final ConversationProvider conversationProvider = new ConversationProvider(plugin);
 
@@ -226,9 +214,6 @@ public class PluginExecutor {
             new VipMenuView(
                 updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/vip"))),
                 databaseAccessor.playerService(),
-                keysController,
-                vipItemsController,
-                vipKeyShopController,
                 vipConfig,
                 mainConfig
             ),
@@ -236,14 +221,14 @@ public class PluginExecutor {
                 updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/coletar_itens"))),
                 databaseAccessor.vipItemsRepository(),
                 scheduler,
-                vipItemsController,
                 mainConfig,
                 vipConfig,
                 vipItemsConfig
             ),
             new KeysView(
                 updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/keys"))),
-                keysController,
+                databaseAccessor.validKeyRepository(),
+                scheduler,
                 keyManagement,
                 vipConfig
             ),
@@ -256,12 +241,10 @@ public class PluginExecutor {
                 updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/mercado_keys"))),
                 databaseAccessor.sellingKeyRepository(),
                 scheduler,
-                vipKeyShopController,
                 vipConfig
             ),
             new KeyMarketPurchaseView(
                 updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/mercado_comprar_key"))),
-                vipKeyShopController,
                 databaseAccessor.sellingKeyRepository(),
                 scheduler,
                 pointsManager,
@@ -271,7 +254,6 @@ public class PluginExecutor {
             ),
             new ManageKeyView(
                 updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/gerenciar_key"))),
-                keysController,
                 keyManagement,
                 conversationProvider,
                 scheduler,

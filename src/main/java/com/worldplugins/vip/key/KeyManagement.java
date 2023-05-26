@@ -1,9 +1,10 @@
 package com.worldplugins.vip.key;
 
-import com.worldplugins.vip.controller.KeysController;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
+import com.worldplugins.vip.view.KeysView;
 import me.post.lib.util.Scheduler;
+import me.post.lib.view.Views;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,16 +15,13 @@ import static com.worldplugins.vip.Response.respond;
 public class KeyManagement {
     private final @NotNull ValidKeyRepository validKeyRepository;
     private final @NotNull Scheduler scheduler;
-    private final @NotNull KeysController keysController;
 
     public KeyManagement(
         @NotNull ValidKeyRepository validKeyRepository,
-        @NotNull Scheduler scheduler,
-        @NotNull KeysController keysController
+        @NotNull Scheduler scheduler
     ) {
         this.validKeyRepository = validKeyRepository;
         this.scheduler = scheduler;
-        this.keysController = keysController;
     }
 
     public void manage(
@@ -37,20 +35,8 @@ public class KeyManagement {
                 return;
             }
 
-            if (key == null) {
-                keysController.openView(player, keysViewPage);
-                respond(player, "Gerenciar-key-error");
-                return;
-            }
-
-            if (key.generatorName() == null) {
-                keysController.openView(player, keysViewPage);
-                respond(player, "Gerenciar-key-error");
-                return;
-            }
-
-            if (!player.getName().equals(key.generatorName())) {
-                keysController.openView(player, keysViewPage);
+            if (key == null || key.generatorName() == null || !player.getName().equals(key.generatorName())) {
+                Views.get().open(player, KeysView.class, new KeysView.Context(keysViewPage));
                 respond(player, "Gerenciar-key-error");
                 return;
             }

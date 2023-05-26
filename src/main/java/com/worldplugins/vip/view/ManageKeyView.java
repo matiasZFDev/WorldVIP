@@ -5,7 +5,6 @@ import com.worldplugins.lib.util.ItemTransformer;
 import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
-import com.worldplugins.vip.controller.KeysController;
 import com.worldplugins.vip.conversation.KeyPostPriceConversation;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
 import com.worldplugins.vip.database.key.ValidVipKey;
@@ -50,7 +49,6 @@ public class ManageKeyView implements View {
 
     private final @NotNull ViewContext viewContext;
     private final @NotNull MenuModel menuModel;
-    private final @NotNull KeysController keysController;
     private final @NotNull KeyManagement keyManagement;
     private final @NotNull ConversationProvider conversationProvider;
     private final @NotNull Scheduler scheduler;
@@ -61,7 +59,6 @@ public class ManageKeyView implements View {
 
     public ManageKeyView(
         @NotNull MenuModel menuModel,
-        @NotNull KeysController keysController,
         @NotNull KeyManagement keyManagement,
         @NotNull ConversationProvider conversationProvider,
         @NotNull Scheduler scheduler,
@@ -72,7 +69,6 @@ public class ManageKeyView implements View {
     ) {
         this.viewContext = new MapViewContext();
         this.menuModel = menuModel;
-        this.keysController = keysController;
         this.keyManagement = keyManagement;
         this.conversationProvider = conversationProvider;
         this.scheduler = scheduler;
@@ -100,7 +96,11 @@ public class ManageKeyView implements View {
             )
             .handleMenuItemClick(
                 "Voltar",
-                click -> keysController.openView(player, context.keysViewPage)
+                click -> Views.get().open(
+                    player,
+                    KeysView.class,
+                    new KeysView.Context(context.keysViewPage)
+                )
             )
             .handleMenuItemClick(
                 "Ativar",

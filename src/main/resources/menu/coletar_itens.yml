@@ -9,6 +9,12 @@ Data:
       - ''
       - '&aClique para abrir &n1&a.'
 Conteudo:
+  Carregando: # Mostrado quando os itens não foram carregados ainda.
+    Slot: 13
+    Material: COMPASS
+    Nome: '&cCarregando...'
+    Lore:
+      - '&7Espere um momento.'
   Voltar:
     Slot: 27
     Material: ARROW

@@ -55,7 +55,9 @@ public class OwningVipsView implements View {
 
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
-        final Context context = (Context) requireNonNull(data);
+        final Context context = data == null
+            ? new Context(0)
+            : (Context) requireNonNull(data);
         final List<Integer> slots = menuModel.data().getData("Slots");
         final ItemDisplay vipDisplay = menuModel.data().getData("Display-vip");
         final VipPlayer vipPlayer = playerService.getById(player.getUniqueId());

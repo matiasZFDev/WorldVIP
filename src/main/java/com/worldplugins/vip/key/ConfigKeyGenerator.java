@@ -26,9 +26,13 @@ public class ConfigKeyGenerator implements VipKeyGenerator {
 
         private final @NotNull Supplier<Character> charSupplier;
         private final @NotNull Function<MainData.KeyGenOptions, Boolean> option;
-        private static final @NotNull List<CharGen> list = Arrays.asList(values());
 
-        CharGen(@NotNull Supplier<Character> charSupplier, @NotNull Function<MainData.KeyGenOptions, Boolean> option) {
+        private static final @NotNull List<CharGen> charGenerations = Arrays.asList(values());
+
+        CharGen(
+            @NotNull Supplier<Character> charSupplier,
+            @NotNull Function<MainData.KeyGenOptions, Boolean> option
+        ) {
             this.charSupplier = charSupplier;
             this.option = option;
         }
@@ -42,7 +46,7 @@ public class ConfigKeyGenerator implements VipKeyGenerator {
         }
 
         public static @NotNull List<CharGen> list() {
-            return list;
+            return charGenerations;
         }
     }
 

@@ -3,11 +3,11 @@ package com.worldplugins.vip.view;
 import com.worldplugins.lib.config.common.ItemDisplay;
 import com.worldplugins.lib.config.model.MenuModel;
 import com.worldplugins.lib.util.ItemTransformer;
+import com.worldplugins.lib.util.Strings;
 import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.config.data.VipItemsData;
-import com.worldplugins.vip.controller.VipItemsController;
 import com.worldplugins.vip.database.items.VipItems;
 import com.worldplugins.vip.database.items.VipItemsRepository;
 import me.post.deps.nbt_api.nbtapi.NBTCompound;
@@ -36,19 +36,10 @@ import static java.util.Objects.requireNonNull;
 import static me.post.lib.util.Pairs.to;
 
 public class VipItemsView implements View {
-    public static class Context {
-        private final @NotNull Collection<VipItems> itemsList;
-
-        public Context(@NotNull Collection<VipItems> itemsList) {
-            this.itemsList = itemsList;
-        }
-    }
-
     private final @NotNull ViewContext viewContext;
     private final @NotNull MenuModel menuModel;
     private final @NotNull VipItemsRepository vipItemsRepository;
     private final @NotNull Scheduler scheduler;
-    private final @NotNull VipItemsController vipItemsController;
     private final @NotNull ConfigModel<MainData> mainConfig;
     private final @NotNull ConfigModel<VipData> vipConfig;
     private final @NotNull ConfigModel<VipItemsData> vipItemsConfig;
@@ -59,7 +50,6 @@ public class VipItemsView implements View {
         @NotNull MenuModel menuModel,
         @NotNull VipItemsRepository vipItemsRepository,
         @NotNull Scheduler scheduler,
-        @NotNull VipItemsController vipItemsController,
         @NotNull ConfigModel<MainData> mainConfig,
         @NotNull ConfigModel<VipData> vipConfig,
         @NotNull ConfigModel<VipItemsData> vipItemsConfig
@@ -68,7 +58,6 @@ public class VipItemsView implements View {
         this.menuModel = menuModel;
         this.vipItemsRepository = vipItemsRepository;
         this.scheduler = scheduler;
-        this.vipItemsController = vipItemsController;
         this.mainConfig = mainConfig;
         this.vipConfig = vipConfig;
         this.vipItemsConfig = vipItemsConfig;
@@ -76,17 +65,44 @@ public class VipItemsView implements View {
 
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
-        final Context context = (Context) requireNonNull(data);
+        ConfigContextBuilder.withModel(menuModel)
+            .editTitle(title ->
+                Strings.replace(
+                    title,
+                    to("@atual", "?"),
+                    to("@totais", "?")
+                )
+            )
+            .removeMenuItem("Voltar", "Pagina-seguinte", "Pagina-anterior")
+            .build(viewContext, player, null);
+
+        vipItemsRepository
+            .getItems(player.getUniqueId())
+            .thenAccept(itemsList -> scheduler.runTask(0, false, () -> {
+                if (viewContext.getViewer(player.getUniqueId()) == null) {
+                    return;
+                }
+
+                openWithItems(player, data, itemsList);
+            }));
+    }
+
+    public void openWithItems(
+        @NotNull Player player,
+        @Nullable Object data,
+        @NotNull Collection<VipItems> itemsList
+    ) {
         final List<Integer> slots = menuModel.data().getData("Slots");
         final ItemDisplay itemsDisplay = menuModel.data().getData("Display-itens");
 
         ConfigContextBuilder.withModel(menuModel)
+            .removeMenuItem("Carregando")
             .handleMenuItemClick(
                 "Voltar",
                 click -> Views.get().open(click.whoClicked(), VipMenuView.class)
             )
             .apply(builder ->
-                CollectionHelpers.zip(context.itemsList, slots).forEach(itemsPair -> {
+                CollectionHelpers.zip(itemsList, slots).forEach(itemsPair -> {
                     final VipData.VIP configVip = requireNonNull(
                         vipConfig.data().getById(itemsPair.first().vipId())
                     );
@@ -125,7 +141,7 @@ public class VipItemsView implements View {
 
                 if (matchingItems == null) {
                     respond(player, "Vip-itens-inexistentes");
-                    vipItemsController.openView(player);
+                    Views.get().open(player, VipItemsView.class);
                     return;
                 }
 
@@ -143,7 +159,7 @@ public class VipItemsView implements View {
 
                 respond(player, "Vip-itens-colhidos");
                 vipItemsRepository.removeItems(player.getUniqueId(), vipId, amountReduced);
-                vipItemsController.openView(player);
+                Views.get().open(player, VipItemsView.class);
             }));
     }
 

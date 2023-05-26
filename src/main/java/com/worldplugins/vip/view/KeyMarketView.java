@@ -4,9 +4,9 @@ import com.worldplugins.lib.config.common.ItemDisplay;
 import com.worldplugins.lib.config.model.MenuModel;
 import com.worldplugins.lib.util.ItemTransformer;
 import com.worldplugins.lib.util.Strings;
+import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.lib.view.PageConfigContextBuilder;
 import com.worldplugins.vip.config.data.VipData;
-import com.worldplugins.vip.controller.VipKeyShopController;
 import com.worldplugins.vip.database.market.SellingKey;
 import com.worldplugins.vip.database.market.SellingKeyRepository;
 import com.worldplugins.vip.util.BukkitUtils;
@@ -38,23 +38,11 @@ import static java.util.Objects.requireNonNull;
 import static me.post.lib.util.Pairs.to;
 
 public class KeyMarketView implements View {
-    public static class InContext {
-        private final int page;
-        private final @NotNull KeyMarketOrder order;
-        private final @NotNull List<SellingKey> keys;
-
-        public InContext(int page, @NotNull KeyMarketOrder order, @NotNull List<SellingKey> keys) {
-            this.page = page;
-            this.order = order;
-            this.keys = keys;
-        }
-    }
-
-    public static class OutContext {
+    public static class Context {
         private final int page;
         private final @NotNull KeyMarketOrder order;
 
-        public OutContext(int page, @NotNull KeyMarketOrder order) {
+        public Context(int page, @NotNull KeyMarketOrder order) {
             this.page = page;
             this.order = order;
         }
@@ -72,7 +60,6 @@ public class KeyMarketView implements View {
     private final @NotNull MenuModel menuModel;
     private final @NotNull SellingKeyRepository sellingKeyRepository;
     private final @NotNull Scheduler scheduler;
-    private final @NotNull VipKeyShopController vipKeyShopController;
     private final @NotNull ConfigModel<VipData> vipConfig;
 
     private static final @NotNull String SELLING_KEY_TAG = "wvip_selling_key_code";
@@ -81,27 +68,51 @@ public class KeyMarketView implements View {
         @NotNull MenuModel menuModel,
         @NotNull SellingKeyRepository sellingKeyRepository,
         @NotNull Scheduler scheduler,
-        @NotNull VipKeyShopController vipKeyShopController,
         @NotNull ConfigModel<VipData> vipConfig
     ) {
         this.viewContext = new MapViewContext();
         this.menuModel = menuModel;
         this.sellingKeyRepository = sellingKeyRepository;
         this.scheduler = scheduler;
-        this.vipKeyShopController = vipKeyShopController;
         this.vipConfig = vipConfig;
     }
 
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
-        final InContext context = (InContext) requireNonNull(data);
-        final OutContext outContext = new OutContext(context.page, context.order);
+        ConfigContextBuilder.withModel(menuModel)
+            .editTitle(title ->
+                Strings.replace(
+                    title,
+                    to("@atual", "?"),
+                    to("@totais", "?")
+                )
+            )
+            .removeMenuItem("Voltar", "Pagina-seguinte", "Pagina-anterior")
+            .build(viewContext, player, null);
+
+        sellingKeyRepository.getAllKeys().thenAccept(keys -> scheduler.runTask(0, false, () -> {
+            if (viewContext.getViewer(player.getUniqueId()) == null) {
+                return;
+            }
+
+            openMarketView(player, data, keys);
+        }));
+    }
+
+    public void openMarketView(
+        @NotNull Player player,
+        @Nullable Object data,
+        @NotNull List<SellingKey> sellingKeys
+    ) {
+        final Context context = data == null
+            ? new Context(0, KeyMarketOrder.NONE)
+            : (Context) data;
         final List<Integer> slots = menuModel.data().getData("Slots");
         final ItemDisplay keyDisplay = menuModel.data().getData("Display-key");
 
         PageConfigContextBuilder.of(
                 menuModel,
-                page -> vipKeyShopController.openView(player, page, context.order),
+                page -> Views.get().open(player, KeyMarketView.class, context),
                 context.page
             )
             .editTitle((pageInfo, title) ->
@@ -111,27 +122,33 @@ public class KeyMarketView implements View {
                     to("@totais",String.valueOf(pageInfo.totalPages()))
                 )
             )
+            .removeMenuItem("Carregando")
             .handleMenuItemClick(
                 "Voltar",
                 click -> Views.get().open(click.whoClicked(), VipMenuView.class)
             )
             .apply(builder -> {
                 final Collection<KeyMarketOrder> orders = KeyMarketOrder.orders();
+
                 orders.remove(context.order);
                 orders.forEach(order -> builder.removeMenuItem(order.configItemId()));
                 builder.handleMenuItemClick(
                     context.order.configItemId(),
                     click -> {
                         if (click.clickType().isRightClick()) {
-                            vipKeyShopController.openView(
-                                player.getPlayer(), context.page, context.order.next()
+                            Views.get().open(
+                                player.getPlayer(),
+                                KeyMarketView.class,
+                                new Context(context.page, context.order.next())
                             );
                             return;
                         }
 
                         if (click.clickType().isLeftClick()) {
-                            vipKeyShopController.openView(
-                                player.getPlayer(), context.page, context.order.alternate()
+                            Views.get().open(
+                                player.getPlayer(),
+                                KeyMarketView.class,
+                                new Context(context.page, context.order.alternate())
                             );
                         }
                     }
@@ -141,7 +158,7 @@ public class KeyMarketView implements View {
             .previousPageButtonAs("Pagina-anterior")
             .withSlots(slots)
             .fill(
-                context.keys,
+                sellingKeys,
                 key -> {
                     final VipData.VIP configVip = vipConfig.data().getById(key.vipId());
                     final int postTimeElapsed = (int) TimeUnit
@@ -178,19 +195,19 @@ public class KeyMarketView implements View {
 
                             if (matchingKey == null) {
                                 respond(player, "Mercado-key-inexistente");
-                                vipKeyShopController.openView(player, context.page, context.order);
+                                Views.get().open(player, KeyMarketView.class, context);
                                 return;
                             }
 
                             Views.get().open(
                                 player,
                                 KeyMarketPurchaseView.class,
-                                new KeyMarketPurchaseView.Context(matchingKey, outContext)
+                                new KeyMarketPurchaseView.Context(matchingKey, context)
                             );
                         }));
                 }
             )
-            .build(viewContext, player, outContext);
+            .build(viewContext, player, null);
     }
 
 
