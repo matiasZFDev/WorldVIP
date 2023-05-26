@@ -30,7 +30,7 @@ public class SetVip implements CommandModule {
         this.vipConfig = vipConfig;
     }
 
-    @Command(name = "setvip")
+    @Command(name = "setarvip")
     @Override
     public void execute(@NotNull CommandSender sender, @NotNull String[] args) {
         if (!sender.hasPermission("worldvip.darvip")) {
