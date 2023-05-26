@@ -23,8 +23,12 @@ public class VipTopMenuModel implements MenuModel {
         data = MenuModels.fetch(configWrapper.unwrap())
             .modifyItems(MenuContents::colorItems)
             .getData(dataSection -> new HashMap<String, Object>() {{
+                System.out.println(dataSection.getKeys(false));
                 put("Slots", dataSection.getIntegerList("Slots"));
-                put("Iten-top", ConfigSections.getItem(dataSection.getConfigurationSection("Iten-top")));
+                put(
+                    "Display-top",
+                    ConfigSections.itemDisplay(dataSection.getConfigurationSection("Display-top"))
+                );
             }})
             .build();
     }

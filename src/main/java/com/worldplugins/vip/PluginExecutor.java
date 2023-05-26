@@ -12,7 +12,7 @@ import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.ServerData;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.config.data.VipItemsData;
-import com.worldplugins.vip.config.menu.VipTopMenuModel;
+import com.worldplugins.vip.config.menu.*;
 import com.worldplugins.vip.database.DatabaseAccessor;
 import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipType;
@@ -215,13 +215,13 @@ public class PluginExecutor {
                 topManager
             ),
             new VipMenuView(
-                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/vip"))),
+                updatables.include(new VipMenuModel(configManager.getWrapper("menu/vip"))),
                 databaseAccessor.playerService(),
                 vipConfig,
                 mainConfig
             ),
             new VipItemsView(
-                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/coletar_itens"))),
+                updatables.include(new VipItemsMenuModel(configManager.getWrapper("menu/coletar_itens"))),
                 databaseAccessor.vipItemsRepository(),
                 scheduler,
                 mainConfig,
@@ -229,25 +229,25 @@ public class PluginExecutor {
                 vipItemsConfig
             ),
             new KeysView(
-                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/keys"))),
+                updatables.include(new KeysMenuModel(configManager.getWrapper("menu/keys"))),
                 databaseAccessor.validKeyRepository(),
                 scheduler,
                 keyGeneratorMatcher,
                 vipConfig
             ),
             new OwningVipsView(
-                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/vips_secondarios"))),
+                updatables.include(new OwningVipsMenuModel(configManager.getWrapper("menu/vips_secondarios"))),
                 databaseAccessor.playerService(),
                 vipConfig
             ),
             new KeyMarketView(
-                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/mercado_keys"))),
+                updatables.include(new KeyMarketMenuModel(configManager.getWrapper("menu/mercado_keys"))),
                 databaseAccessor.sellingKeyRepository(),
                 scheduler,
                 vipConfig
             ),
             new KeyMarketPurchaseView(
-                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/mercado_comprar_key"))),
+                updatables.include(new KeyMarketPurchaseMenuModel(configManager.getWrapper("menu/mercado_comprar_key"))),
                 databaseAccessor.sellingKeyRepository(),
                 scheduler,
                 pointsManager,
@@ -256,7 +256,7 @@ public class PluginExecutor {
                 vipConfig
             ),
             new ManageKeyView(
-                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/gerenciar_key"))),
+                updatables.include(new ManageKeyMenuModel(configManager.getWrapper("menu/gerenciar_key"))),
                 keyGeneratorMatcher,
                 conversationProvider,
                 scheduler,
@@ -266,14 +266,16 @@ public class PluginExecutor {
                 mainConfig
             ),
             new ConfirmKeyActivationView(
-                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/confirmar_ativacao_key"))),
+                updatables.include(new ConfirmKeyActivationMenuModel(
+                    configManager.getWrapper("menu/confirmar_ativacao_key")
+                )),
                 keyGeneratorMatcher,
                 vipHandler,
                 databaseAccessor.validKeyRepository(),
                 vipConfig
             ),
             new ManageSellingKeysView(
-                updatables.include(new VipTopMenuModel(configManager.getWrapper("menu/mercado_gerenciar_keys"))),
+                updatables.include(new ManageSellingKeysMenuModel(configManager.getWrapper("menu/mercado_gerenciar_keys"))),
                 databaseAccessor.sellingKeyRepository(),
                 scheduler,
                 vipConfig
