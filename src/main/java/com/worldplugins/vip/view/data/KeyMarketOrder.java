@@ -4,9 +4,11 @@ import com.worldplugins.vip.database.market.SellingKey;
 import com.worldplugins.vip.database.player.model.VipType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.stream.Collectors;
 
 public enum KeyMarketOrder {
     NONE(
@@ -167,7 +169,9 @@ public enum KeyMarketOrder {
     private final @NotNull String configItemId;
     private final @NotNull Comparator<SellingKey> comparator;
 
-    private static final @NotNull Collection<KeyMarketOrder> orders = Arrays.asList(values());
+    private static final @NotNull Collection<KeyMarketOrder> orders = Arrays
+        .stream(values())
+        .collect(Collectors.toList());
 
     KeyMarketOrder(@NotNull String configItemId, @NotNull Comparator<SellingKey> comparator) {
         this.configItemId = configItemId;

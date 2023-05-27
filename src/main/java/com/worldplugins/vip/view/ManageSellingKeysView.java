@@ -65,17 +65,6 @@ public class ManageSellingKeysView implements View {
 
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
-        ConfigContextBuilder.withModel(menuModel)
-            .editTitle(title ->
-                Strings.replace(
-                    title,
-                    to("@atual", "?"),
-                    to("@totais", "?")
-                )
-            )
-            .removeMenuItem("Voltar", "Vazio", "Pagina-seguinte", "Pagina-anterior")
-            .build(viewContext, player, null);
-
         sellingKeyRepository.getAllKeys().thenAccept(sellingKeys -> scheduler.runTask(0, false, () -> {
             if (!player.isOnline()) {
                 return;
@@ -96,7 +85,9 @@ public class ManageSellingKeysView implements View {
     }
 
     private void openWithKeys(@NotNull Player player, @Nullable Object data, @NotNull List<SellingKey> keys) {
-        final Context context = (Context) requireNonNull(data);
+        final Context context = data == null
+            ? new Context(0)
+            : (Context) data;
         final List<Integer> slots = menuModel.data().getData("Slots");
         final ItemDisplay keyDisplay = menuModel.data().getData("Display-key");
 
@@ -112,7 +103,6 @@ public class ManageSellingKeysView implements View {
                     to("@totais", String.valueOf(pageInfo.totalPages()))
                 )
             )
-            .removeMenuItem("Carregando")
             .apply(builder -> {
                 if (keys.isEmpty()) {
                     return;
@@ -120,6 +110,10 @@ public class ManageSellingKeysView implements View {
 
                 builder.removeMenuItem("Vazio");
             })
+            .handleMenuItemClick(
+                "Voltar",
+                click -> Views.get().open(player, KeyMarketView.class)
+            )
             .nextPageButtonAs("Pagina-seguinte")
             .previousPageButtonAs("Pagina-anterior")
             .withSlots(slots)

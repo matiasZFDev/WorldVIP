@@ -8,6 +8,7 @@ Data:
       - '&fGasto: &b$@gasto'
 Conteudo:
   Voltar:
+    Slot: 27
     Material: ARROW
     Nome: '&eVoltar'
     Lore:

@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.worldplugins.vip.Response.respond;
 import static java.util.Objects.requireNonNull;
@@ -45,14 +46,6 @@ public class KeyMarketView implements View {
         public Context(int page, @NotNull KeyMarketOrder order) {
             this.page = page;
             this.order = order;
-        }
-
-        public int page() {
-            return page;
-        }
-
-        public @NotNull KeyMarketOrder order() {
-            return order;
         }
     }
 
@@ -79,17 +72,6 @@ public class KeyMarketView implements View {
 
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
-        ConfigContextBuilder.withModel(menuModel)
-            .editTitle(title ->
-                Strings.replace(
-                    title,
-                    to("@atual", "?"),
-                    to("@totais", "?")
-                )
-            )
-            .removeMenuItem("Voltar", "Vazio", "Pagina-seguinte", "Pagina-anterior")
-            .build(viewContext, player, null);
-
         sellingKeyRepository.getAllKeys().thenAccept(keys -> scheduler.runTask(0, false, () -> {
             if (viewContext.getViewer(player.getUniqueId()) == null) {
                 return;
@@ -122,7 +104,6 @@ public class KeyMarketView implements View {
                     to("@totais",String.valueOf(pageInfo.totalPages()))
                 )
             )
-            .removeMenuItem("Carregando")
             .apply(builder -> {
                 if (sellingKeys.isEmpty()) {
                     return;
@@ -130,6 +111,10 @@ public class KeyMarketView implements View {
 
                 builder.removeMenuItem("Vazio");
             })
+            .handleMenuItemClick(
+                "Minhas-keys",
+                click -> Views.get().open(player, ManageSellingKeysView.class)
+            )
             .handleMenuItemClick(
                 "Voltar",
                 click -> Views.get().open(click.whoClicked(), VipMenuView.class)
@@ -165,7 +150,9 @@ public class KeyMarketView implements View {
             .previousPageButtonAs("Pagina-anterior")
             .withSlots(slots)
             .fill(
-                sellingKeys,
+                sellingKeys.stream()
+                    .sorted(context.order.comparator())
+                    .collect(Collectors.toList()),
                 key -> {
                     final VipData.VIP configVip = vipConfig.data().getById(key.vipId());
                     final int postTimeElapsed = (int) TimeUnit

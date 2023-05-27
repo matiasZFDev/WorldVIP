@@ -12,12 +12,6 @@ Data:
       - ''
       - '&cClique para &nretirar&c.'
 Conteudo:
-  Carregando: # Mostrado quando as keys ainda não foram carregadas.
-    Slot: 22
-    Material: COMPASS
-    Nome: '&cCarregando...'
-    Lore:
-      - '&7Espere um momento.'
   Voltar:
     Slot: 45
     Material: ARROW

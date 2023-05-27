@@ -65,17 +65,6 @@ public class VipItemsView implements View {
 
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
-        ConfigContextBuilder.withModel(menuModel)
-            .editTitle(title ->
-                Strings.replace(
-                    title,
-                    to("@atual", "?"),
-                    to("@totais", "?")
-                )
-            )
-            .removeMenuItem("Voltar", "Vazio")
-            .build(viewContext, player, null);
-
         vipItemsRepository
             .getItems(player.getUniqueId())
             .thenAccept(itemsList -> scheduler.runTask(0, false, () -> {
@@ -96,7 +85,6 @@ public class VipItemsView implements View {
         final ItemDisplay itemsDisplay = menuModel.data().getData("Display-itens");
 
         ConfigContextBuilder.withModel(menuModel)
-            .removeMenuItem("Carregando")
             .handleMenuItemClick(
                 "Voltar",
                 click -> Views.get().open(click.whoClicked(), VipMenuView.class)

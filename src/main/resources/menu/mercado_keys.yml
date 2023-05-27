@@ -1,7 +1,7 @@
 Nome: 'Loja de keys VIP'
 Linhas: 6
 Data:
-  Slots: [19,20,21,22,23,24,25,28,29,30,31,32,33,34,37,38,39,40,41,42,43]
+  Slots: [19,20,21,22,23,24,25, 28,29,30,31,32,33,34, 37,38,39,40,41,42,43]
   Display-key:
     Nome: '&bKey @vip'
     Lore:
@@ -14,14 +14,8 @@ Data:
       - ''
       - 'Postado &8@data-postagem atrás.'
 Conteudo:
-  Carregando: # Mostrado quando o mercado ainda não foi carregado.
-    Slot: 22
-    Material: COMPASS
-    Nome: '&cCarregando...'
-    Lore:
-      - '&7Espere um momento.'
   Voltar:
-    Slot: 36
+    Slot: 45
     Material: ARROW
     Nome: '&eVoltar'
     Lore:
@@ -55,7 +49,7 @@ Conteudo:
 
   # ITENS DE ORDENAMENTO
   Ordenar-nenhum:
-    Slot: 40
+    Slot: 49
     Id: 154
     Nome: '&cOrdenar'
     Lore:
@@ -69,7 +63,7 @@ Conteudo:
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
   Ordenar-melhor-tipo:
-    Slot: 40
+    Slot: 49
     Id: 154
     Nome: '&cOrdenar'
     Lore:
@@ -83,7 +77,7 @@ Conteudo:
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
   Ordenar-pior-tipo:
-    Slot: 40
+    Slot: 49
     Id: 154
     Nome: '&cOrdenar'
     Lore:
@@ -97,7 +91,7 @@ Conteudo:
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
   Ordenar-maior-preço:
-    Slot: 40
+    Slot: 49
     Id: 154
     Nome: '&cOrdenar'
     Lore:
@@ -111,7 +105,7 @@ Conteudo:
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
   Ordenar-menor-preço:
-    Slot: 40
+    Slot: 49
     Id: 154
     Nome: '&cOrdenar'
     Lore:
@@ -125,7 +119,7 @@ Conteudo:
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
   Ordenar-mais-usos:
-    Slot: 40
+    Slot: 49
     Id: 154
     Nome: '&cOrdenar'
     Lore:
@@ -139,7 +133,7 @@ Conteudo:
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
   Ordenar-menos-usos:
-    Slot: 40
+    Slot: 49
     Id: 154
     Nome: '&cOrdenar'
     Lore:
@@ -153,7 +147,7 @@ Conteudo:
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
   Ordenar-maior-tempo:
-    Slot: 40
+    Slot: 49
     Id: 154
     Nome: '&cOrdenar'
     Lore:
@@ -167,7 +161,7 @@ Conteudo:
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
   Ordenar-menor-tempo:
-    Slot: 40
+    Slot: 49
     Id: 154
     Nome: '&cOrdenar'
     Lore:
@@ -181,7 +175,7 @@ Conteudo:
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
   Ordenar-mais-recente:
-    Slot: 40
+    Slot: 49
     Id: 154
     Nome: '&cOrdenar'
     Lore:
@@ -195,7 +189,7 @@ Conteudo:
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
   Ordenar-mais-antiga:
-    Slot: 40
+    Slot: 49
     Id: 154
     Nome: '&cOrdenar'
     Lore:

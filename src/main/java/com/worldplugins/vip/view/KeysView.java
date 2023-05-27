@@ -4,7 +4,6 @@ import com.worldplugins.lib.config.common.ItemDisplay;
 import com.worldplugins.lib.config.model.MenuModel;
 import com.worldplugins.lib.util.ItemTransformer;
 import com.worldplugins.lib.util.Strings;
-import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.lib.view.PageConfigContextBuilder;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
@@ -66,17 +65,6 @@ public class KeysView implements View {
 
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
-        ConfigContextBuilder.withModel(menuModel)
-            .editTitle(title ->
-                Strings.replace(
-                    title,
-                    to("@atual", "?"),
-                    to("@totais", "?")
-                )
-            )
-            .removeMenuItem("Voltar", "Vazio", "Pagina-seguinte", "Pagina-anterior")
-            .build(viewContext, player, null);
-
         validKeyRepository.getKeys(player.getName()).thenAccept(keys -> scheduler.runTask(0, false, () -> {
             if (viewContext.getViewer(player.getUniqueId()) == null) {
                 return;
@@ -93,7 +81,7 @@ public class KeysView implements View {
     ) {
         final Context context = data == null
             ? new Context(0)
-            : (Context) requireNonNull(data);
+            : (Context) data;
         final int page = context.page;
         final List<Integer> slots = menuModel.data().getData("Slots");
         final ItemDisplay keyDisplay = menuModel.data().getData("Display-key");
@@ -110,7 +98,6 @@ public class KeysView implements View {
                     to("@totais", String.valueOf(pageInfo.totalPages()))
                 )
             )
-            .removeMenuItem("Carregando")
             .apply(builder -> {
                 if (keys.isEmpty()) {
                     return;
@@ -118,8 +105,9 @@ public class KeysView implements View {
 
                 builder.removeMenuItem("Vazio");
             })
-            .handleMenuItemClick("Voltar", click ->
-                Views.get().open(click.whoClicked(), VipMenuView.class)
+            .handleMenuItemClick(
+                "Voltar",
+                click -> Views.get().open(click.whoClicked(), VipMenuView.class)
             )
             .previousPageButtonAs("Pagina-anterior")
             .nextPageButtonAs("Pagina-seguinte")
