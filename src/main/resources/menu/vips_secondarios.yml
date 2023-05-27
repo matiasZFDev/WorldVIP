@@ -15,6 +15,12 @@ Conteudo:
     Lore:
       - '&7Clique para voltar'
       - '&7ao menu principal.'
+  Vazio:
+    Slot: 13
+    Material: WEB
+    Nome: '&cVazio'
+    Lore:
+      - '&7Não há nada por aqui.'
   Pagina-seguinte:
     Slot: 32
     Material: INK_SACK

@@ -87,7 +87,7 @@ public class KeyMarketView implements View {
                     to("@totais", "?")
                 )
             )
-            .removeMenuItem("Voltar", "Pagina-seguinte", "Pagina-anterior")
+            .removeMenuItem("Voltar", "Vazio", "Pagina-seguinte", "Pagina-anterior")
             .build(viewContext, player, null);
 
         sellingKeyRepository.getAllKeys().thenAccept(keys -> scheduler.runTask(0, false, () -> {
@@ -123,6 +123,13 @@ public class KeyMarketView implements View {
                 )
             )
             .removeMenuItem("Carregando")
+            .apply(builder -> {
+                if (sellingKeys.isEmpty()) {
+                    return;
+                }
+
+                builder.removeMenuItem("Vazio");
+            })
             .handleMenuItemClick(
                 "Voltar",
                 click -> Views.get().open(click.whoClicked(), VipMenuView.class)

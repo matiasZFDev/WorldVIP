@@ -79,6 +79,13 @@ public class OwningVipsView implements View {
                 "Voltar",
                 click -> Views.get().open(click.whoClicked(), VipMenuView.class)
             )
+            .apply(builder -> {
+                if (owningVips.isEmpty()) {
+                    return;
+                }
+
+                builder.removeMenuItem("Vazio");
+            })
             .nextPageButtonAs("Pagina-seguinte")
             .previousPageButtonAs("Pagina-anterior")
             .withSlots(slots)

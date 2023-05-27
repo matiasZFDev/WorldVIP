@@ -27,6 +27,12 @@ Conteudo:
     Lore:
       - '&7Clique para voltar'
       - '&7ao menu principal.'
+  Vazio:
+    Slot: 31
+    Material: WEB
+    Nome: '&cVazio'
+    Lore:
+      - '&7Não há nada por aqui.'
   Minhas-keys:
     Slot: 4
     Material: CHEST

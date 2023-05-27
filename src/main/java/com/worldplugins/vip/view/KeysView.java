@@ -74,7 +74,7 @@ public class KeysView implements View {
                     to("@totais", "?")
                 )
             )
-            .removeMenuItem("Voltar", "Pagina-seguinte", "Pagina-anterior")
+            .removeMenuItem("Voltar", "Vazio", "Pagina-seguinte", "Pagina-anterior")
             .build(viewContext, player, null);
 
         validKeyRepository.getKeys(player.getName()).thenAccept(keys -> scheduler.runTask(0, false, () -> {
@@ -111,6 +111,13 @@ public class KeysView implements View {
                 )
             )
             .removeMenuItem("Carregando")
+            .apply(builder -> {
+                if (keys.isEmpty()) {
+                    return;
+                }
+
+                builder.removeMenuItem("Vazio");
+            })
             .handleMenuItemClick("Voltar", click ->
                 Views.get().open(click.whoClicked(), VipMenuView.class)
             )

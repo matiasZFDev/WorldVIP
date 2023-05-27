@@ -73,7 +73,7 @@ public class ManageSellingKeysView implements View {
                     to("@totais", "?")
                 )
             )
-            .removeMenuItem("Voltar", "Pagina-seguinte", "Pagina-anterior")
+            .removeMenuItem("Voltar", "Vazio", "Pagina-seguinte", "Pagina-anterior")
             .build(viewContext, player, null);
 
         sellingKeyRepository.getAllKeys().thenAccept(sellingKeys -> scheduler.runTask(0, false, () -> {
@@ -113,6 +113,13 @@ public class ManageSellingKeysView implements View {
                 )
             )
             .removeMenuItem("Carregando")
+            .apply(builder -> {
+                if (keys.isEmpty()) {
+                    return;
+                }
+
+                builder.removeMenuItem("Vazio");
+            })
             .nextPageButtonAs("Pagina-seguinte")
             .previousPageButtonAs("Pagina-anterior")
             .withSlots(slots)

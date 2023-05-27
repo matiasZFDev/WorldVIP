@@ -8,14 +8,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
-public class TemporaryDataSet<E> {
+public class ExpiringList<E> {
     private final @NotNull List<E> data;
     private final int expireAfterWrite;
     private final int expireAfterAccess;
 
     private int expireIn = -1;
 
-    public TemporaryDataSet(
+    public ExpiringList(
         @NotNull Scheduler scheduler,
         int expireAfterWrite,
         int expireAfterAccess,
@@ -42,15 +42,7 @@ public class TemporaryDataSet<E> {
     }
 
     public boolean expired() {
-        if (expireIn == -1) {
-            return true;
-        }
-
-        if (expireIn < expireAfterAccess) {
-            expireIn = expireAfterAccess;
-        }
-
-        return false;
+        return expireIn == -1;
     }
 
     public void add(E element) {

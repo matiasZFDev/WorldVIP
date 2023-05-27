@@ -73,7 +73,7 @@ public class VipItemsView implements View {
                     to("@totais", "?")
                 )
             )
-            .removeMenuItem("Voltar", "Pagina-seguinte", "Pagina-anterior")
+            .removeMenuItem("Voltar", "Vazio")
             .build(viewContext, player, null);
 
         vipItemsRepository
@@ -101,7 +101,12 @@ public class VipItemsView implements View {
                 "Voltar",
                 click -> Views.get().open(click.whoClicked(), VipMenuView.class)
             )
-            .apply(builder ->
+            .apply(builder -> {
+                if (!itemsList.isEmpty()) {
+                    builder.removeMenuItem("Vazio");
+                    return;
+                }
+
                 CollectionHelpers.zip(itemsList, slots).forEach(itemsPair -> {
                     final VipData.VIP configVip = requireNonNull(
                         vipConfig.data().getById(itemsPair.first().vipId())
@@ -112,8 +117,8 @@ public class VipItemsView implements View {
                         .addNBT(ITEMS_TAG, configVip.id())
                         .transform();
                     builder.item(itemsPair.second(), item, this::handleVipItemsClick);
-                })
-            )
+                });
+            })
             .build(viewContext, player, data);
     }
 
