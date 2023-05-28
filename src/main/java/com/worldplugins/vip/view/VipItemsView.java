@@ -30,6 +30,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.worldplugins.vip.Response.respond;
 import static java.util.Objects.requireNonNull;
@@ -106,7 +109,6 @@ public class VipItemsView implements View {
             .apply(builder -> {
                 if (!itemsList.isEmpty()) {
                     builder.removeMenuItem("Vazio");
-                    return;
                 }
 
                 CollectionHelpers.zip(itemsList, slots).forEach(itemsPair -> {
@@ -115,7 +117,9 @@ public class VipItemsView implements View {
                     );
                     final ItemStack item = ItemTransformer.of(configVip.item())
                         .display(itemsDisplay)
+                        .nameFormat(to("@vip", configVip.display()))
                         .loreFormat(to("@quantia", String.valueOf(itemsPair.first().amount())))
+                        .colorMeta()
                         .addNBT(ITEMS_TAG, configVip.id())
                         .transform();
                     builder.item(itemsPair.second(), item, this::handleVipItemsClick);
@@ -153,9 +157,16 @@ public class VipItemsView implements View {
                 }
 
                 final VipData.VIP configVip = vipConfig.data().getById(vipId);
-                final ItemStack[] vipItems = vipItemsConfig.data().getByName(configVip.name()).data();
+                final VipItemsData.VipItems vipItems = vipItemsConfig.data().getByName(configVip.name());
+                final ItemStack[] itemsContent = vipItems == null
+                    ? new ItemStack[0]
+                    : Stream
+                        .of(vipItems.data())
+                        .filter(Objects::nonNull)
+                        .map(ItemStack::clone)
+                        .toArray(ItemStack[]::new);
 
-                if (Players.giveItemsChecking(player, vipItems)) {
+                if (Players.giveItemsChecking(player, itemsContent)) {
                     respond(player, "Vip-itens-inventario-cheio");
                     return;
                 }
@@ -164,9 +175,9 @@ public class VipItemsView implements View {
                     ? (short) -1
                     : 1;
 
-                respond(player, "Vip-itens-colhidos");
                 vipItemsRepository.removeItems(player.getUniqueId(), vipId, amountReduced);
                 Views.get().open(player, VipItemsView.class);
+                respond(player, "Vip-itens-colhidos");
             }));
     }
 

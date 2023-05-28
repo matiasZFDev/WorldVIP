@@ -20,7 +20,7 @@ public class VipItemsData {
             return vipName;
         }
 
-        public @NotNull ItemStack[] data() {
+        public @Nullable ItemStack @NotNull [] data() {
             return data;
         }
     }
