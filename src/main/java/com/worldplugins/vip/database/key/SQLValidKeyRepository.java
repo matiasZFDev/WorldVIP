@@ -108,11 +108,12 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
 
         return CompletableFuture
             .supplyAsync(() -> sqlExecutor.executeQuery(
-                "SELECT generator_name, usages FROM " + KEYS_TABLE + " WHERE code=?",
+                "SELECT generator_name, vip_id, vip_type, duration, usages FROM "
+                    + KEYS_TABLE + " WHERE code=?",
                 statement -> statement.set(1, code),
                 result -> result.next()
                     ? new ValidVipKey(
-                        result.get("generator_anem"), code, result.get("vip_id"),
+                        result.get("generator_name"), code, result.get("vip_id"),
                         VipType.fromId(result.get("vip_type")), result.get("duration"),
                         result.get("usages")
                     )

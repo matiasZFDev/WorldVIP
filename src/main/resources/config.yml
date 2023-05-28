@@ -21,6 +21,7 @@ Database:
 
 # Opções de geração de key do comando /gerarkey.
 Geracao-key:
+  Tamanho: 12
   Numeros: true
   Letras-minusculas: true
   Letras-maiusculas: true
