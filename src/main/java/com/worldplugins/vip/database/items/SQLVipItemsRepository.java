@@ -61,7 +61,7 @@ public class SQLVipItemsRepository implements VipItemsRepository {
 
         return CompletableFuture
             .supplyAsync(() -> sqlExecutor.executeQuery(
-                "SELECT vip_id, amount FROM " + ITEMS_TABLE + "WHERE player_id=?",
+                "SELECT vip_id, amount FROM " + ITEMS_TABLE + " WHERE player_id=?",
                 statement -> statement.set(1, UUIDs.getBytes(playerId)),
                 result -> {
                     final Collection<VipItems> items = new ArrayList<>();

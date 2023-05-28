@@ -23,6 +23,7 @@ public class VipItemsMenuModel implements MenuModel {
         data = MenuModels.fetch(configWrapper.unwrap())
             .modifyItems(MenuContents::colorItems)
             .getData(dataSection -> new HashMap<String, Object>() {{
+                put("Slots", dataSection.getIntegerList("Slots"));
                 put("Display-itens", ConfigSections.itemDisplay(dataSection, "Display-itens"));
             }})
             .build();

@@ -77,7 +77,6 @@ public class KeysView implements View {
             )
             .removeMenuItem("Voltar", "Vazio", "Pagina-seguinte", "Pagina-anterior")
             .build(viewContext, player, null);
-        System.out.println("view??");
 
         validKeyRepository.getKeys(player.getName()).thenAccept(keys -> scheduler.runTask(0, false, () -> {
             if (viewContext.getViewer(player.getUniqueId()) == null) {

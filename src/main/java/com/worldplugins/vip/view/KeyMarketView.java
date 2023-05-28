@@ -228,7 +228,6 @@ public class KeyMarketView implements View {
 
     @Override
     public void onClose(@NotNull ViewClose close) {
-        System.out.println("closen :3");
         viewContext.removeViewer(close.whoCloses().getUniqueId());
     }
 }
