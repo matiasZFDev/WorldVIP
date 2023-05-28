@@ -48,6 +48,10 @@ public class VipTopView implements View {
                 click -> Views.get().open(click.whoClicked(), VipMenuView.class)
             )
             .apply(builder -> {
+                if (!topManager.getTop().isEmpty()) {
+                    builder.removeMenuItem("Vazio");
+                }
+
                 final AtomicInteger position = new AtomicInteger(0);
                 CollectionHelpers.zip(topManager.getTop(), slots).forEach(topPair -> {
                     final String playerName = BukkitUtils.getPlayerName(topPair.first().playerId());

@@ -11,6 +11,12 @@ Data:
       - ''
       - '&aClique para gerenciar'
 Conteudo:
+  Carregando:
+    Slot: 13
+    Material: COMPASS
+    Nome: '&cCarregando...'
+    Lore:
+      - 'Espere um momento'
   Voltar:
     Slot: 27
     Material: ARROW

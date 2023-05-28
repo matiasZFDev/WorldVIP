@@ -3,6 +3,7 @@ package com.worldplugins.vip.view;
 import com.worldplugins.lib.config.common.ItemDisplay;
 import com.worldplugins.lib.config.model.MenuModel;
 import com.worldplugins.lib.util.ItemTransformer;
+import com.worldplugins.lib.util.Strings;
 import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.vip.config.data.MainData;
 import com.worldplugins.vip.config.data.VipData;
@@ -64,6 +65,18 @@ public class VipItemsView implements View {
 
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
+        ConfigContextBuilder.withModel(menuModel)
+            .asViewState()
+            .editTitle(title ->
+                Strings.replace(
+                    title,
+                    to("@atual", "?"),
+                    to("@totais", "?")
+                )
+            )
+            .removeMenuItem("Voltar", "Vazio")
+            .build(viewContext, player, null);
+
         vipItemsRepository
             .getItems(player.getUniqueId())
             .thenAccept(itemsList -> scheduler.runTask(0, false, () -> {
@@ -84,6 +97,8 @@ public class VipItemsView implements View {
         final ItemDisplay itemsDisplay = menuModel.data().getData("Display-itens");
 
         ConfigContextBuilder.withModel(menuModel)
+            .asViewState()
+            .removeMenuItem("Carregando")
             .handleMenuItemClick(
                 "Voltar",
                 click -> Views.get().open(click.whoClicked(), VipMenuView.class)

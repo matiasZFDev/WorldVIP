@@ -4,6 +4,7 @@ import com.worldplugins.lib.config.common.ItemDisplay;
 import com.worldplugins.lib.config.model.MenuModel;
 import com.worldplugins.lib.util.ItemTransformer;
 import com.worldplugins.lib.util.Strings;
+import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.lib.view.PageConfigContextBuilder;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
@@ -65,6 +66,19 @@ public class KeysView implements View {
 
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
+        ConfigContextBuilder.withModel(menuModel)
+            .asViewState()
+            .editTitle(title ->
+                Strings.replace(
+                    title,
+                    to("@atual", "?"),
+                    to("@totais", "?")
+                )
+            )
+            .removeMenuItem("Voltar", "Vazio", "Pagina-seguinte", "Pagina-anterior")
+            .build(viewContext, player, null);
+        System.out.println("view??");
+
         validKeyRepository.getKeys(player.getName()).thenAccept(keys -> scheduler.runTask(0, false, () -> {
             if (viewContext.getViewer(player.getUniqueId()) == null) {
                 return;
@@ -91,6 +105,7 @@ public class KeysView implements View {
                 currentPage -> Views.get().open(player, KeysView.class, new Context(currentPage)),
                 context.page
             )
+            .asViewState()
             .editTitle((pageInfo, title) ->
                 Strings.replace(
                     title,
@@ -98,6 +113,7 @@ public class KeysView implements View {
                     to("@totais", String.valueOf(pageInfo.totalPages()))
                 )
             )
+            .removeMenuItem("Carregando")
             .apply(builder -> {
                 if (keys.isEmpty()) {
                     return;

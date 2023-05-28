@@ -14,3 +14,9 @@ Conteudo:
     Lore:
       - '&7Clique para voltar'
       - '&7ao menu principal.'
+  Vazio:
+    Slot: 13
+    Material: GOLD_INDO
+    Nome: '&cVazio'
+    Lore:
+      - '&7Nenhum top no momento.'

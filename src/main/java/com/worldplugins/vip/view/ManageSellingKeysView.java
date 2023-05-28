@@ -4,6 +4,7 @@ import com.worldplugins.lib.config.common.ItemDisplay;
 import com.worldplugins.lib.config.model.MenuModel;
 import com.worldplugins.lib.util.ItemTransformer;
 import com.worldplugins.lib.util.Strings;
+import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.lib.view.PageConfigContextBuilder;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.market.SellingKey;
@@ -64,6 +65,18 @@ public class ManageSellingKeysView implements View {
 
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
+        ConfigContextBuilder.withModel(menuModel)
+            .asViewState()
+            .editTitle(title ->
+                Strings.replace(
+                    title,
+                    to("@atual", "?"),
+                    to("@totais", "?")
+                )
+            )
+            .removeMenuItem("Voltar", "Vazio", "Pagina-seguinte", "Pagina-anterior")
+            .build(viewContext, player, null);
+
         sellingKeyRepository.getAllKeys().thenAccept(sellingKeys -> scheduler.runTask(0, false, () -> {
             if (!player.isOnline()) {
                 return;
@@ -95,6 +108,7 @@ public class ManageSellingKeysView implements View {
                 page -> Views.get().open(player, ManageSellingKeysView.class, context),
                 context.page
             )
+            .asViewState()
             .editTitle((pageInfo, title) ->
                 Strings.replace(
                     title,
@@ -102,6 +116,7 @@ public class ManageSellingKeysView implements View {
                     to("@totais", String.valueOf(pageInfo.totalPages()))
                 )
             )
+            .removeMenuItem("Carregando")
             .apply(builder -> {
                 if (keys.isEmpty()) {
                     return;
