@@ -134,12 +134,19 @@ public class SQLPlayerService implements PlayerService {
 
     @Override
     public void addSpent(@NotNull UUID playerId, double value) {
-        players.get(playerId).incrementSpent(value);
+        final VipPlayer playerCache = players.get(playerId);
+
+        if (playerCache == null) {
+            return;
+        }
+
+        playerCache.incrementSpent(value);
+        final double totalSpent = playerCache.spent();
 
         CompletableFuture.runAsync(() -> sqlExecutor.update(
-            "UPDATE " + SPENT_TABLE + " SET spent=? WHERE player_id=?",
+            "REPLACE INTO " + SPENT_TABLE + "(player_id, spent) VALUES(?,?)",
             statement -> {
-                statement.set(1, value);
+                statement.set(1, totalSpent);
                 statement.set(2, UUIDs.getBytes(playerId));
             }
         ), executor);
@@ -159,13 +166,6 @@ public class SQLPlayerService implements PlayerService {
                 new OwningVIPs(new ArrayList<>(0))
             );
             players.set(playerId, vipPlayer);
-            CompletableFuture.runAsync(() -> sqlExecutor.update(
-                "INSERT INTO " + SPENT_TABLE + "(player_id, spent) VALUES(?,?)",
-                statement -> {
-                    statement.set(1, UUIDs.getBytes(playerId));
-                    statement.set(2, vipPlayer.spent());
-                }
-            ), executor);
         }
 
         CompletableFuture.runAsync(() -> sqlExecutor.update(
@@ -193,7 +193,7 @@ public class SQLPlayerService implements PlayerService {
         CompletableFuture.runAsync(() -> sqlExecutor.update(
             "DELETE FROM " + PLAYER_TABLE + " WHERE player_id=?",
             statement -> statement.set(1, UUIDs.getBytes(playerId))
-        ));
+        ), executor);
     }
 
     @Override

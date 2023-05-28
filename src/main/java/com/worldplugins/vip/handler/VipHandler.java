@@ -18,9 +18,9 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static com.worldplugins.vip.Response.respond;
-import static java.util.Objects.requireNonNull;
 import static me.post.lib.util.Pairs.to;
 
 public class VipHandler {
@@ -50,7 +50,11 @@ public class VipHandler {
         this.vipItemsConfig = vipItemsConfig;
     }
 
-    public void activate(@NotNull UUID playerId, @NotNull VIP vip, boolean announceAndBenefits) {
+    public void activate(
+        @NotNull UUID playerId,
+        @NotNull VIP vip,
+        boolean announceAndBenefits
+    ) {
         final VipPlayer vipPlayer = playerService.getById(playerId);
 
         if (vipPlayer == null) {
@@ -117,10 +121,9 @@ public class VipHandler {
 
         if (announceAndBenefits) {
             final Player player = Bukkit.getPlayer(playerId);
-            final VipPlayer registeredPlayer = requireNonNull(playerService.getById(playerId));
 
             announce(player, vip);
-            giveBenefits(player, registeredPlayer);
+            giveBenefits(player);
         }
     }
 
@@ -150,7 +153,13 @@ public class VipHandler {
         ));
     }
 
-    private void giveBenefits(@NotNull Player player, @NotNull VipPlayer vipPlayer) {
+    private void giveBenefits(@NotNull Player player) {
+        final VipPlayer vipPlayer = playerService.getById(player.getUniqueId());
+
+        if (vipPlayer == null) {
+            return;
+        }
+
         final VIP activeVip = vipPlayer.activeVip();
 
         if (activeVip == null) {
@@ -178,6 +187,15 @@ public class VipHandler {
 
             Players.giveItems(player, itemsContent);
         }
+
+        final int vipDaysDuration = (int) TimeUnit.SECONDS.toDays(activeVip.duration());
+        final Double vipPrice = configVip.pricing().getPrice(vipDaysDuration);
+
+        if (vipPrice == null || vipPrice == 0) {
+            return;
+        }
+
+        playerService.addSpent(player.getUniqueId(), vipPrice);
     }
 
     private void switchVips(@NotNull VipPlayer vipPlayer, @NotNull VIP vip) {

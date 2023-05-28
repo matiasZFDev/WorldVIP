@@ -2,6 +2,7 @@ package com.worldplugins.vip.command.vip;
 
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.player.PlayerService;
+import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipPlayer;
 import com.worldplugins.vip.database.player.model.VipType;
 import com.worldplugins.vip.handler.OwningVipHandler;
@@ -74,6 +75,7 @@ public class RemoveVip implements CommandModule {
             }
 
             vipHandler.remove(vipPlayer);
+            respond(sender, "Vip-primario-removido");
             return;
         }
 
@@ -132,10 +134,11 @@ public class RemoveVip implements CommandModule {
             }
         });
 
+        final VIP primaryVip = vipPlayer.activeVip();
         final boolean removePrimaryVip =
-            vipPlayer.activeVip() != null &&
-            vipPlayer.activeVip().id() == configVip.id() &&
-            (type == null || vipPlayer.activeVip().type() == type);
+            primaryVip != null &&
+            primaryVip.id() == configVip.id() &&
+            (type == null || primaryVip.type() == type);
         final String typeFormat = type == null
             ? "-/-"
             : type.getName().toUpperCase();
