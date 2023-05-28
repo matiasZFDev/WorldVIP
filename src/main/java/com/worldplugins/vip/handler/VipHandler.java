@@ -14,12 +14,13 @@ import me.post.lib.util.Players;
 import me.post.lib.util.Time;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 import static com.worldplugins.vip.Response.respond;
+import static java.util.Objects.requireNonNull;
 import static me.post.lib.util.Pairs.to;
 
 public class VipHandler {
@@ -53,19 +54,12 @@ public class VipHandler {
         final VipPlayer vipPlayer = playerService.getById(playerId);
 
         if (vipPlayer == null) {
-            final VipPlayer newVipPlayer = new VipPlayer(
-                playerId,
-                0,
-                null,
-                new OwningVIPs(new ArrayList<>(0))
-            );
-
-            setVip(newVipPlayer, vip, announceAndBenefits);
+            setVip(playerId, vip, announceAndBenefits);
             return;
         }
 
         if (vipPlayer.activeVip() == null) {
-            setVip(vipPlayer, vip, announceAndBenefits);
+            setVip(vipPlayer.id(), vip, announceAndBenefits);
             return;
         }
 
@@ -114,17 +108,19 @@ public class VipHandler {
             .orElse(null);
     }
 
-    private void setVip(VipPlayer vipPlayer, @NotNull VIP vip, boolean announceAndBenefits) {
-        final VIP oldVip = vipPlayer.activeVip();
+    private void setVip(@NotNull UUID playerId, @NotNull VIP vip, boolean announceAndBenefits) {
+        final VipPlayer vipPlayer = playerService.getById(playerId);
+        final VIP oldVip = vipPlayer == null ? null : vipPlayer.activeVip();
 
-        playerService.setVip(vipPlayer.id(), vip); // WORKING
-        setGroup(vipPlayer.id(), oldVip, vip); // WORKING
+        playerService.setVip(playerId, vip);
+        setGroup(playerId, oldVip, vip);
 
         if (announceAndBenefits) {
-            final Player player = Bukkit.getPlayer(vipPlayer.id());
+            final Player player = Bukkit.getPlayer(playerId);
+            final VipPlayer registeredPlayer = requireNonNull(playerService.getById(playerId));
 
-            announce(player, vip); // NOT WORKING
-            giveBenefits(player, vipPlayer);
+            announce(player, vip);
+            giveBenefits(player, registeredPlayer);
         }
     }
 
@@ -175,7 +171,12 @@ public class VipHandler {
 
             vipItemsRepository.addItems(items);
         } else {
-            Players.giveItems(player, vipItemsConfig.data().getByName(configVip.name()).data());
+            final VipItemsData.VipItems configItems = vipItemsConfig.data().getByName(configVip.name());
+            final ItemStack[] itemsContent = configItems == null
+                ? new ItemStack[0]
+                : configItems.data();
+
+            Players.giveItems(player, itemsContent);
         }
     }
 
@@ -188,7 +189,7 @@ public class VipHandler {
 
         final VipData.VIP owningConfigVip = vipConfig.data().getById(currentActiveVip.id());
 
-        setVip(vipPlayer, vip, true);
+        setVip(vipPlayer.id(), vip, true);
         playerService.addOwningVip(vipPlayer.id(), currentActiveVip);
 
         if (!mainConfig.data().stackVips()) {
