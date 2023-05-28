@@ -38,9 +38,10 @@ public class VipItemsEditView implements View {
 
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
-        final ItemStack[] vipItems = player.getOpenInventory().getTopInventory().getContents();
+        final Context context = (Context) requireNonNull(data);
+        final ItemStack[] vipItems = vipItemsConfig.data().getByName(context.vipName).data();
 
-        ContextBuilder.of(6)
+        ContextBuilder.of(6, "Editar itens")
             .apply(builder -> {
                 for (int slot = 0; slot < vipItems.length; slot++) {
                     if (vipItems[slot] == null) {
@@ -64,7 +65,7 @@ public class VipItemsEditView implements View {
         final Context context = (Context) requireNonNull(
             viewContext.getViewer(player.getUniqueId()).data()
         );
-        final ItemStack[] vipItems = player.getOpenInventory().getTopInventory().getContents();
+        final ItemStack[] vipItems = close.closedView().getTopInventory().getContents();
 
         Configurations.update(vipItemsConfig, config ->
             config.set(context.vipName, BukkitSerializer.serialize(vipItems))
