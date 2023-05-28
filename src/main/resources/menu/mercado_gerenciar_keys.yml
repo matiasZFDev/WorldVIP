@@ -17,7 +17,7 @@ Conteudo:
     Material: COMPASS
     Nome: '&cCarregando...'
     Lore:
-      - 'Espere um momento'
+      - '&7Espere um momento'
   Voltar:
     Slot: 45
     Material: ARROW

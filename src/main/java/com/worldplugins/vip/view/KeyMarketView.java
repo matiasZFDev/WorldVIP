@@ -24,11 +24,13 @@ import me.post.lib.view.action.ViewClick;
 import me.post.lib.view.action.ViewClose;
 import me.post.lib.view.context.ClickHandler;
 import me.post.lib.view.context.ViewContext;
+import me.post.lib.view.context.Viewer;
 import me.post.lib.view.context.impl.MapViewContext;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -81,7 +83,12 @@ public class KeyMarketView implements View {
                     to("@totais", "?")
                 )
             )
-            .removeMenuItem("Voltar", "Vazio", "Pagina-seguinte", "Pagina-anterior")
+            .apply(builder -> {
+                builder.removeMenuItem(
+                    "Voltar", "Vazio", "Pagina-seguinte", "Pagina-anterior", "Minhas-keys"
+                );
+                KeyMarketOrder.orders().forEach(order -> builder.removeMenuItem(order.configItemId()));
+            })
             .build(viewContext, player, null);
 
         sellingKeyRepository.getAllKeys().thenAccept(keys -> scheduler.runTask(0, false, () -> {
@@ -106,7 +113,7 @@ public class KeyMarketView implements View {
 
         PageConfigContextBuilder.of(
                 menuModel,
-                page -> Views.get().open(player, KeyMarketView.class, context),
+                page -> open(player, new Context(page, context.order)),
                 context.page
             )
             .asViewState()
@@ -118,13 +125,6 @@ public class KeyMarketView implements View {
                 )
             )
             .removeMenuItem("Carregando")
-            .apply(builder -> {
-                if (sellingKeys.isEmpty()) {
-                    return;
-                }
-
-                builder.removeMenuItem("Vazio");
-            })
             .handleMenuItemClick(
                 "Minhas-keys",
                 click -> Views.get().open(player, ManageSellingKeysView.class)
@@ -134,26 +134,28 @@ public class KeyMarketView implements View {
                 click -> Views.get().open(click.whoClicked(), VipMenuView.class)
             )
             .apply(builder -> {
-                final Collection<KeyMarketOrder> orders = KeyMarketOrder.orders();
+                if (!sellingKeys.isEmpty()) {
+                    builder.removeMenuItem("Vazio");
+                }
+
+                final Collection<KeyMarketOrder> orders = new ArrayList<>(KeyMarketOrder.orders());
 
                 orders.remove(context.order);
                 orders.forEach(order -> builder.removeMenuItem(order.configItemId()));
                 builder.handleMenuItemClick(
                     context.order.configItemId(),
                     click -> {
-                        if (click.clickType().isRightClick()) {
-                            Views.get().open(
+                        if (click.clickType().isLeftClick()) {
+                            open(
                                 player.getPlayer(),
-                                KeyMarketView.class,
                                 new Context(context.page, context.order.next())
                             );
                             return;
                         }
 
-                        if (click.clickType().isLeftClick()) {
-                            Views.get().open(
+                        if (click.clickType().isRightClick()) {
+                            open(
                                 player.getPlayer(),
-                                KeyMarketView.class,
                                 new Context(context.page, context.order.alternate())
                             );
                         }
@@ -226,6 +228,7 @@ public class KeyMarketView implements View {
 
     @Override
     public void onClose(@NotNull ViewClose close) {
+        System.out.println("closen :3");
         viewContext.removeViewer(close.whoCloses().getUniqueId());
     }
 }

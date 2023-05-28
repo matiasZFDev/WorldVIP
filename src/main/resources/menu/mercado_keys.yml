@@ -19,7 +19,7 @@ Conteudo:
     Material: COMPASS
     Nome: '&cCarregando...'
     Lore:
-      - 'Espere um momento'
+      - '&7Espere um momento'
   Voltar:
     Slot: 45
     Material: ARROW
@@ -73,7 +73,7 @@ Conteudo:
     Id: 154
     Nome: '&cOrdenar'
     Lore:
-      - '&8> &fNenhum'
+      - '&8> &8Nenhum'
       - '&7> &fTipo &8[&bMelhor &8┃ Pior]'
       - '&8> Preço [Maior ┃ Menor]'
       - '&8> Usos [Mais ┃ Menos]'
@@ -87,7 +87,7 @@ Conteudo:
     Id: 154
     Nome: '&cOrdenar'
     Lore:
-      - '&8> &fNenhum'
+      - '&8> &8Nenhum'
       - '&7> &fTipo &8[Melhor ┃ &bPior&8]'
       - '&8> Preço [Maior ┃ Menor]'
       - '&8> Usos [Mais ┃ Menos]'
@@ -101,7 +101,7 @@ Conteudo:
     Id: 154
     Nome: '&cOrdenar'
     Lore:
-      - '&8> &fNenhum'
+      - '&8> &8Nenhum'
       - '&8> Tipo [Melhor ┃ Pior]'
       - '&7> &fPreço &8[&bMaior &8┃ Menor]'
       - '&8> Usos [Mais ┃ Menos]'
@@ -115,7 +115,7 @@ Conteudo:
     Id: 154
     Nome: '&cOrdenar'
     Lore:
-      - '&8> &fNenhum'
+      - '&8> &8Nenhum'
       - '&8> Tipo [Melhor ┃ Pior]'
       - '&7> &fPreço &8[Maior ┃ &bMenor&8]'
       - '&8> Usos [Mais ┃ Menos]'
@@ -129,7 +129,7 @@ Conteudo:
     Id: 154
     Nome: '&cOrdenar'
     Lore:
-      - '&8> &fNenhum'
+      - '&8> &8Nenhum'
       - '&8> Tipo [Melhor ┃ Pior]'
       - '&8> Preço [Maior ┃ Menor]'
       - '&7> &fUsos &8[&bMais &8┃ Menos]'
@@ -143,7 +143,7 @@ Conteudo:
     Id: 154
     Nome: '&cOrdenar'
     Lore:
-      - '&8> &fNenhum'
+      - '&8> &8Nenhum'
       - '&8> Tipo [Melhor ┃ Pior]'
       - '&8> Preço [Maior ┃ Menor]'
       - '&7> &fUsos &8[Mais ┃ &bMenos&8]'
@@ -152,12 +152,12 @@ Conteudo:
       - ''
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
-  Ordenar-maior-tempo:
+  Ordenar-maior-duração:
     Slot: 49
     Id: 154
     Nome: '&cOrdenar'
     Lore:
-      - '&8> &fNenhum'
+      - '&8> &8Nenhum'
       - '&8> Tipo [Melhor ┃ Pior]'
       - '&8> Preço [Maior ┃ Menor]'
       - '&8> Usos [Mais ┃ Menos]'
@@ -166,12 +166,12 @@ Conteudo:
       - ''
       - '&fB. direito: &7Alternar'
       - '&fB. esquerdo: &7Avançar'
-  Ordenar-menor-tempo:
+  Ordenar-menor-duração:
     Slot: 49
     Id: 154
     Nome: '&cOrdenar'
     Lore:
-      - '&8> &fNenhum'
+      - '&8> &8Nenhum'
       - '&8> Tipo [Melhor ┃ Pior]'
       - '&8> Preço [Maior ┃ Menor]'
       - '&8> Usos [Mais ┃ Menos]'
@@ -185,7 +185,7 @@ Conteudo:
     Id: 154
     Nome: '&cOrdenar'
     Lore:
-      - '&8> &fNenhum'
+      - '&8> &8Nenhum'
       - '&8> Tipo [Melhor ┃ Pior]'
       - '&8> Preço [Maior ┃ Menor]'
       - '&8> Usos [Mais ┃ Menos]'
@@ -199,7 +199,7 @@ Conteudo:
     Id: 154
     Nome: '&cOrdenar'
     Lore:
-      - '&8> &fNenhum'
+      - '&8> &8Nenhum'
       - '&8> Tipo [Melhor ┃ Pior]'
       - '&8> Preço [Maior ┃ Menor]'
       - '&8> Usos [Mais ┃ Menos]'

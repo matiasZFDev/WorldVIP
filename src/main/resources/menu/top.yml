@@ -16,7 +16,7 @@ Conteudo:
       - '&7ao menu principal.'
   Vazio:
     Slot: 13
-    Material: GOLD_INDO
+    Material: GOLD_INGOT
     Nome: '&cVazio'
     Lore:
       - '&7Nenhum top no momento.'
