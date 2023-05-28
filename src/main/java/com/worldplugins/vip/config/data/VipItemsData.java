@@ -2,6 +2,7 @@ package com.worldplugins.vip.config.data;
 
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
@@ -34,7 +35,7 @@ public class VipItemsData {
         return items;
     }
 
-    public VipItems getByName(@NotNull String vipName) {
+    public @Nullable VipItems getByName(@NotNull String vipName) {
         return items.stream()
             .filter(vipItems -> vipItems.vipName.equals(vipName))
             .findFirst()

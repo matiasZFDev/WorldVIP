@@ -117,13 +117,13 @@ public class VipHandler {
     private void setVip(VipPlayer vipPlayer, @NotNull VIP vip, boolean announceAndBenefits) {
         final VIP oldVip = vipPlayer.activeVip();
 
-        playerService.setVip(vipPlayer.id(), vip);
-        setGroup(vipPlayer.id(), oldVip, vip);
+        playerService.setVip(vipPlayer.id(), vip); // WORKING
+        setGroup(vipPlayer.id(), oldVip, vip); // WORKING
 
         if (announceAndBenefits) {
             final Player player = Bukkit.getPlayer(vipPlayer.id());
 
-            announce(player, vip);
+            announce(player, vip); // NOT WORKING
             giveBenefits(player, vipPlayer);
         }
     }

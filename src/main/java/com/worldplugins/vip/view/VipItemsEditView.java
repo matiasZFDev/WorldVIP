@@ -39,7 +39,8 @@ public class VipItemsEditView implements View {
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
         final Context context = (Context) requireNonNull(data);
-        final ItemStack[] vipItems = vipItemsConfig.data().getByName(context.vipName).data();
+        final VipItemsData.VipItems items = vipItemsConfig.data().getByName(context.vipName);
+        final ItemStack[] vipItems = items == null ? new ItemStack[0] : items.data();
 
         ContextBuilder.of(6, "Editar itens")
             .apply(builder -> {
