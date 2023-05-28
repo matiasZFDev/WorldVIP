@@ -43,8 +43,8 @@ public class SQLPendingVipRepository implements PendingVipRepository {
                 while (result.next()) {
                     pendings.add(new PendingVIP(
                         playerName,
-                        result.get("vip_id"),
-                        VipType.fromId(result.get("vip_type")),
+                        result.get("vip_id", Byte.class),
+                        VipType.fromId(result.get("vip_type", Byte.class)),
                         result.get("vip_duration")
                     ));
                 }

@@ -69,8 +69,8 @@ public class SQLVipItemsRepository implements VipItemsRepository {
                     while (result.next()) {
                         items.add(new VipItems(
                             playerId,
-                            result.get("vip_id"),
-                            result.get("amount")
+                            result.get("vip_id", Byte.class),
+                            result.get("amount", Short.class)
                         ));
                     }
 

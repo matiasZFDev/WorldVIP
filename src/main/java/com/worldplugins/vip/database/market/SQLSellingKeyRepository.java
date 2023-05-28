@@ -41,6 +41,8 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
                 "vip_id TINYINT NOT NULL, " +
                 "vip_type TINYINT NOT NULL, " +
                 "vip_duration INT NOT NULL, " +
+                "vip_usages SMALLINT NOT NULL, " +
+                "post_timestamp BIGINT NOT NULL, " +
                 "PRIMARY KEY(code)" +
             ")"
         );
@@ -60,10 +62,10 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
                             result.get("code"),
                             UUIDs.toUUID(result.get("seller_id")),
                             result.get("price"),
-                            result.get("vip_id"),
-                            VipType.fromId(result.get("vip_type")),
+                            result.get("vip_id", Byte.class),
+                            VipType.fromId(result.get("vip_type", Byte.class)),
                             result.get("vip_duration"),
-                            result.get("vip_short"),
+                            result.get("vip_usages", Short.class),
                             result.get("post_timestamp")
                         ));
                     }

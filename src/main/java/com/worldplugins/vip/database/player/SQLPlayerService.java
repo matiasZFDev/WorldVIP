@@ -96,7 +96,8 @@ public class SQLPlayerService implements PlayerService {
                     final UUID playerId = UUIDs.toUUID(result.get("player_id"));
                     players.get(playerId).setActiveVip(
                         new VIP(
-                            result.get("vip_id"), VipType.fromId(result.get("vip_type")),
+                            result.get("vip_id", Byte.class),
+                            VipType.fromId(result.get("vip_type", Byte.class)),
                             result.get("vip_duration")
                         )
                     );
@@ -114,7 +115,8 @@ public class SQLPlayerService implements PlayerService {
                     final UUID playerId = UUIDs.toUUID(result.get("player_id"));
                     players.get(playerId).owningVips().add(
                         new VIP(
-                            result.get("vip_id"), VipType.fromId(result.get("vip_type")),
+                            result.get("vip_id", Byte.class),
+                            VipType.fromId(result.get("vip_type", Byte.class)),
                             result.get("vip_duration")
                         )
                     );
@@ -158,7 +160,7 @@ public class SQLPlayerService implements PlayerService {
             );
             players.set(playerId, vipPlayer);
             CompletableFuture.runAsync(() -> sqlExecutor.update(
-                "INSERT INTO " + PLAYER_TABLE + "(player_id, spent) VALUES(?,?)",
+                "INSERT INTO " + SPENT_TABLE + "(player_id, spent) VALUES(?,?)",
                 statement -> {
                     statement.set(1, UUIDs.getBytes(playerId));
                     statement.set(2, vipPlayer.spent());

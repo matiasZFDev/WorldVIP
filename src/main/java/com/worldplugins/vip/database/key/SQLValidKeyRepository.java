@@ -85,9 +85,11 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
 
                     while (result.next()) {
                         keys.add(new ValidVipKey(
-                            generatorName, result.get("code"), result.get("vip_id"),
-                            VipType.fromId(result.get("vip_type")), result.get("duration"),
-                            result.get("usages")
+                            generatorName, result.get("code"),
+                            result.get("vip_id", Byte.class),
+                            VipType.fromId(result.get("vip_type", Byte.class)),
+                            result.get("duration"),
+                            result.get("usages", Short.class)
                         ));
                     }
 
@@ -113,9 +115,11 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
                 statement -> statement.set(1, code),
                 result -> result.next()
                     ? new ValidVipKey(
-                        result.get("generator_name"), code, result.get("vip_id"),
-                        VipType.fromId(result.get("vip_type")), result.get("duration"),
-                        result.get("usages")
+                        result.get("generator_name"), code,
+                        result.get("vip_id", Byte.class),
+                        VipType.fromId(result.get("vip_type", Byte.class)),
+                        result.get("duration"),
+                        result.get("usages", Short.class)
                     )
                     : null
             ), executor)
