@@ -10,6 +10,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+import static java.util.Objects.requireNonNull;
+
 public class SQLPlayerService implements PlayerService {
     private final @NotNull Executor executor;
     private final @NotNull SQLExecutor sqlExecutor;
@@ -56,6 +58,13 @@ public class SQLPlayerService implements PlayerService {
                 "vip_duration INT NOT NULL" +
             ")"
         );
+        sqlExecutor.query(
+            "CREATE TABLE IF NOT EXISTS " + SPENT_TABLE + "(" +
+                "player_id BINARY(16) NOT NULL, " +
+                "spent INT NOT NULL, " +
+                "PRIMARY KEY(player_id)" +
+            ")"
+        );
     }
 
     private void loadPlayers() {
@@ -71,7 +80,7 @@ public class SQLPlayerService implements PlayerService {
                         playerId,
                         result.get("spent"),
                         null,
-                        new OwningVIPs(new ArrayList<>(3)
+                        new OwningVIPs(new ArrayList<>(2)
                     )));
                 }
 
@@ -191,7 +200,10 @@ public class SQLPlayerService implements PlayerService {
             "UPDATE " + PLAYER_TABLE + " SET vip_duration=? WHERE player_id=?",
             statement ->
                 players.forEach(vipPlayer -> {
-                    statement.set(1, vipPlayer.activeVip().duration());
+                    statement.set(
+                        1,
+                        requireNonNull(vipPlayer.activeVip()).duration()
+                    );
                     statement.set(2, vipPlayer);
                     statement.addBatch();
                 })
