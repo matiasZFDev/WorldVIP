@@ -152,6 +152,7 @@ Key-criada:
         Click:
           Sugerir-comando: '/usarkey @key'
 
+Remover-key-uso: '&cArgumentos invalidos. Digite /removerkey <key>.'
 Remover-key-inexistente: "&cA key '@key' não existe."
 Key-removida: "&aKey &f'@key' &aremovida com sucesso."
 
