@@ -100,6 +100,7 @@ public class OwningVipsView implements View {
                             to("@tipo", vip.type().getName().toUpperCase()),
                             to("@tempo", VipDuration.format(vip))
                         )
+                        .colorMeta()
                         .transform();
                 }
             )
