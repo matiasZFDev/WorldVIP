@@ -31,6 +31,10 @@ public class VIP {
         duration -= time;
     }
 
+    public void incrementDuration(int time) {
+        duration += time;
+    }
+
     public boolean updated() {
         return updated;
     }

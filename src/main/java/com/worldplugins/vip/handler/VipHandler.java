@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -60,13 +61,20 @@ public class VipHandler {
             return;
         }
 
-        if (vipPlayer.activeVip() == null) {
+        final VIP activeVip = vipPlayer.activeVip();
+
+        if (activeVip == null) {
             setVip(vipPlayer.id(), vip, announceAndBenefits);
             return;
         }
 
-        if (vip.type() == VipType.PERMANENT) {
+        if (vip.type() == VipType.PERMANENT || activeVip.type() == VipType.PERMANENT) {
             switchVips(vipPlayer, vip);
+            return;
+        }
+
+        if (activeVip.id() == vip.id() && activeVip.type() == vip.type()) {
+            mergeIntoPrimary(vipPlayer, vip);
             return;
         }
 
@@ -214,15 +222,28 @@ public class VipHandler {
         owningVipHandler.add(vipPlayer.id(), newOwningVip);
     }
 
+    private void mergeIntoPrimary(@NotNull VipPlayer vipPlayer, @NotNull VIP vip) {
+        final VIP activeVip = requireNonNull(vipPlayer.activeVip());
+        final Player player = Bukkit.getPlayer(vipPlayer.id());
+
+        activeVip.incrementDuration(vip.duration());
+        playerService.updatePrimaryVip(Collections.singletonList(vipPlayer));
+
+        if (player != null) {
+            announce(player, vip);
+            giveBenefits(player);
+        }
+    }
+
     private void mergeAndSwitchVips(
         @NotNull VipPlayer vipPlayer,
         @NotNull VIP primaryVip,
-        @NotNull OwningVIP matchingVip
+        @NotNull VIP matchingVip
     ) {
         final int newDuration = primaryVip.duration() + matchingVip.duration();
         final VIP mergedVip = new VIP(primaryVip.id(), primaryVip.type(), newDuration);
 
-        owningVipHandler.remove(vipPlayer, matchingVip);
+        owningVipHandler.remove(vipPlayer, VipTransition.toOwning(matchingVip));
         switchVips(vipPlayer, mergedVip);
     }
 }
