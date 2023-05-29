@@ -9,6 +9,7 @@ import com.worldplugins.vip.database.items.VipItemsRepository;
 import com.worldplugins.vip.database.player.PlayerService;
 import com.worldplugins.vip.database.player.model.*;
 import com.worldplugins.vip.manager.PermissionManager;
+import com.worldplugins.vip.util.VipTransition;
 import me.post.lib.config.model.ConfigModel;
 import me.post.lib.util.Players;
 import me.post.lib.util.Time;
@@ -91,7 +92,6 @@ public class VipHandler {
         final VipData.VIP configVip = vipConfig.data().getById(activeVip.id());
         final Player player = Bukkit.getPlayer(vipPlayer.id());
         final OwningVIP primaryReplace = pickPrimaryReplacement(vipPlayer);
-
 
         permissionManager.removeGroup(vipPlayer.id(), configVip.group());
         playerService.removeVip(vipPlayer.id());
@@ -206,14 +206,12 @@ public class VipHandler {
 
     private void switchVips(@NotNull VipPlayer vipPlayer, @NotNull VIP vip) {
         final VIP currentActiveVip = requireNonNull(vipPlayer.activeVip());
+        final OwningVIP newOwningVip = VipTransition.toOwning(currentActiveVip);
         final VipData.VIP owningConfigVip = vipConfig.data().getById(currentActiveVip.id());
 
         setVip(vipPlayer.id(), vip, true);
-        playerService.addOwningVip(vipPlayer.id(), currentActiveVip);
-
-        if (!mainConfig.data().stackVips()) {
-            permissionManager.removeGroup(vipPlayer.id(), owningConfigVip.group());
-        }
+        permissionManager.removeGroup(vipPlayer.id(), owningConfigVip.group());
+        owningVipHandler.add(vipPlayer.id(), newOwningVip);
     }
 
     private void mergeAndSwitchVips(

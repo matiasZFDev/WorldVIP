@@ -24,6 +24,7 @@ import com.worldplugins.vip.init.PointsInitializer;
 import com.worldplugins.vip.key.ConfigKeyGenerator;
 import com.worldplugins.vip.key.KeyGeneratorMatcher;
 import com.worldplugins.vip.key.VipKeyGenerator;
+import com.worldplugins.vip.listener.ActivePendingVipsListener;
 import com.worldplugins.vip.manager.PermissionManager;
 import com.worldplugins.vip.manager.PointsManager;
 import com.worldplugins.vip.manager.VipTopManager;
@@ -124,6 +125,7 @@ public class PluginExecutor {
 
         checkBasicVips();
         registerCommands();
+        registerListeners();
         registerViews();
         scheduleTasks();
 
@@ -210,6 +212,16 @@ public class PluginExecutor {
             new SetVipItems(vipConfig)
         );
         registry.registerAll();
+    }
+
+    private void registerListeners() {
+        Arrays
+            .asList(new ActivePendingVipsListener(
+                databaseAccessor.pendingVipRepository(),
+                scheduler,
+                vipHandler
+            ))
+            .forEach(listener -> plugin.getServer().getPluginManager().registerEvents(listener, plugin));
     }
 
     private void registerViews() {

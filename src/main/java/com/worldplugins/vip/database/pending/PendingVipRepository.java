@@ -7,6 +7,8 @@ import java.util.concurrent.CompletableFuture;
 
 public interface PendingVipRepository {
     @NotNull CompletableFuture<Collection<PendingVIP>> getPendingVips(@NotNull String playerName);
+
     void addPending(@NotNull PendingVIP vip);
+
     void removePendings(@NotNull String playerName);
 }

@@ -35,10 +35,10 @@ public class SQLPendingVipRepository implements PendingVipRepository {
     @Override
     public @NotNull CompletableFuture<Collection<PendingVIP>> getPendingVips(@NotNull String playerName) {
         return CompletableFuture.supplyAsync(() -> sqlExecutor.executeQuery(
-            "SELECT vip_id, vip_type, duration FROM " + PENDINGS_TABLE + " WHERE player_name=?",
+            "SELECT vip_id, vip_type, vip_duration FROM " + PENDINGS_TABLE + " WHERE player_name=?",
             statement -> statement.set(1, playerName),
             result -> {
-                final Collection<PendingVIP> pendings = new ArrayList<>();
+                final Collection<PendingVIP> pendings = new ArrayList<>(0);
 
                 while (result.next()) {
                     pendings.add(new PendingVIP(

@@ -9,6 +9,8 @@ import com.worldplugins.vip.manager.PermissionManager;
 import me.post.lib.config.model.ConfigModel;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
+
 public class OwningVipHandler {
     private final @NotNull PlayerService playerService;
     private final @NotNull PermissionManager permissionManager;
@@ -25,6 +27,21 @@ public class OwningVipHandler {
         this.permissionManager = permissionManager;
         this.vipConfig = vipConfig;
         this.mainConfig = mainConfig;
+    }
+
+    public void add(@NotNull UUID playerId, @NotNull OwningVIP owningVip) {
+        final VipPlayer vipPlayer = playerService.getById(playerId);
+
+        if (vipPlayer == null) {
+            return;
+        }
+
+        final VipData.VIP configVip = vipConfig.data().getById(owningVip.id());
+        playerService.addOwningVip(vipPlayer.id(), owningVip);
+
+        if (mainConfig.data().stackVips()) {
+            permissionManager.addGroup(vipPlayer.id(), configVip.group());
+        }
     }
 
     public void remove(@NotNull VipPlayer vipPlayer, @NotNull OwningVIP owningVip) {

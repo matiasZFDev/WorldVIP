@@ -1,5 +1,6 @@
 package com.worldplugins.vip.database.player.model;
 
+import com.worldplugins.vip.util.VipTransition;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public class OwningVIPs {
     }
 
     public @NotNull OwningVIP add(@NotNull VIP vip) {
-        final OwningVIP owningVip  = new OwningVIP(vip.id(), vip.type(), vip.duration());
+        final OwningVIP owningVip = VipTransition.toOwning(vip);
         vips.add(owningVip);
         return owningVip;
     }
