@@ -27,6 +27,7 @@ import com.worldplugins.vip.key.VipKeyGenerator;
 import com.worldplugins.vip.manager.PermissionManager;
 import com.worldplugins.vip.manager.PointsManager;
 import com.worldplugins.vip.manager.VipTopManager;
+import com.worldplugins.vip.task.VipDatabaseUpdate;
 import com.worldplugins.vip.task.VipTimeConsumeTask;
 import com.worldplugins.vip.view.*;
 import me.post.lib.command.process.CommandRegistry;
@@ -61,6 +62,8 @@ public class PluginExecutor {
     private final @NotNull OwningVipHandler owningVipHandler;
     private final @NotNull VipTopManager topManager;
 
+    private final @NotNull VipDatabaseUpdate vipDatabaseUpdate;
+
     public PluginExecutor(@NotNull JavaPlugin plugin) {
         this.plugin = plugin;
         scheduler = new Scheduler(plugin);
@@ -93,6 +96,11 @@ public class PluginExecutor {
             vipItemsConfig
         );
         topManager = new VipTopManager(databaseAccessor.playerCache());
+        vipDatabaseUpdate = new VipDatabaseUpdate(
+            databaseAccessor.playerCache(),
+            databaseAccessor.playerService(),
+            mainConfig
+        );
     }
 
     private void loadConfiguration() {
@@ -120,7 +128,9 @@ public class PluginExecutor {
         scheduleTasks();
 
         updatables.update();
-        return () -> {};
+        return () -> {
+            vipDatabaseUpdate.run();
+        };
     }
 
     private void checkBasicVips() {
@@ -291,6 +301,7 @@ public class PluginExecutor {
             mainConfig
         );
 
+
         scheduler.runTimer(20, 20, false, () ->
             Configurations.update(serverConfig, config ->
                 config.set("Ultimo-instante-online", System.nanoTime())
@@ -298,5 +309,6 @@ public class PluginExecutor {
         );
         scheduler.runTimer(20, 20 * 60 * 5, false, topManager::update);
         scheduler.runTimer(20, 20, false, vipTimeConsumeTask);
+        scheduler.runTimer(20 * 10, 20 * 20, false, vipDatabaseUpdate);
     }
 }

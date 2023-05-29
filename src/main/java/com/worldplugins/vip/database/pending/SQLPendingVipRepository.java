@@ -62,7 +62,7 @@ public class SQLPendingVipRepository implements PendingVipRepository {
             statement -> {
                 statement.set(1, vip.playerName());
                 statement.set(2, vip.id());
-                statement.set(3, vip.type());
+                statement.set(3, vip.type().id());
                 statement.set(4, vip.duration());
             }
         ), executor);

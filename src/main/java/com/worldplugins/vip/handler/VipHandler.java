@@ -21,6 +21,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static com.worldplugins.vip.Response.respond;
+import static java.util.Objects.requireNonNull;
 import static me.post.lib.util.Pairs.to;
 
 public class VipHandler {
@@ -50,11 +51,7 @@ public class VipHandler {
         this.vipItemsConfig = vipItemsConfig;
     }
 
-    public void activate(
-        @NotNull UUID playerId,
-        @NotNull VIP vip,
-        boolean announceAndBenefits
-    ) {
+    public void activate(@NotNull UUID playerId, @NotNull VIP vip, boolean announceAndBenefits) {
         final VipPlayer vipPlayer = playerService.getById(playerId);
 
         if (vipPlayer == null) {
@@ -92,11 +89,16 @@ public class VipHandler {
         }
 
         final VipData.VIP configVip = vipConfig.data().getById(activeVip.id());
+        final Player player = Bukkit.getPlayer(vipPlayer.id());
+        final OwningVIP primaryReplace = pickPrimaryReplacement(vipPlayer);
+
 
         permissionManager.removeGroup(vipPlayer.id(), configVip.group());
         playerService.removeVip(vipPlayer.id());
 
-        final OwningVIP primaryReplace = pickPrimaryReplacement(vipPlayer);
+        if (player != null) {
+            respond(player, "Vip-primario-consumido");
+        }
 
         if (primaryReplace == null) {
             return;
@@ -104,6 +106,10 @@ public class VipHandler {
 
         activate(vipPlayer.id(), primaryReplace, false);
         playerService.removeOwningVip(vipPlayer.id(), primaryReplace);
+
+        if (player != null) {
+            respond(player, "Vip-primario-restabelecido");
+        }
     }
 
     private OwningVIP pickPrimaryReplacement(@NotNull VipPlayer vipPlayer) {
@@ -199,12 +205,7 @@ public class VipHandler {
     }
 
     private void switchVips(@NotNull VipPlayer vipPlayer, @NotNull VIP vip) {
-        final VIP currentActiveVip = vipPlayer.activeVip();
-
-        if (currentActiveVip == null) {
-            return;
-        }
-
+        final VIP currentActiveVip = requireNonNull(vipPlayer.activeVip());
         final VipData.VIP owningConfigVip = vipConfig.data().getById(currentActiveVip.id());
 
         setVip(vipPlayer.id(), vip, true);

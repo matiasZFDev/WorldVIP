@@ -13,7 +13,8 @@ public class WorldVIP extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (onDisable != null)
+        if (onDisable != null) {
             onDisable.run();
+        }
     }
 }

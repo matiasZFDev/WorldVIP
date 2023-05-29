@@ -169,11 +169,12 @@ public class SQLPlayerService implements PlayerService {
         }
 
         CompletableFuture.runAsync(() -> sqlExecutor.update(
-            "INSERT INTO " + PLAYER_TABLE + "(player_id, vip_id, vip_type, vip_duration) VALUES(?,?,?,?)",
+            "REPLACE INTO " + PLAYER_TABLE + "(player_id, vip_id, vip_type, vip_duration) " +
+                "VALUES(?,?,?,?)",
             statement -> {
                 statement.set(1, UUIDs.getBytes(playerId));
                 statement.set(2, vip.id());
-                statement.set(3, vip.type());
+                statement.set(3, vip.type().id());
                 statement.set(4, vip.duration());
             }
         ), executor);
@@ -202,11 +203,8 @@ public class SQLPlayerService implements PlayerService {
             "UPDATE " + PLAYER_TABLE + " SET vip_duration=? WHERE player_id=?",
             statement ->
                 players.forEach(vipPlayer -> {
-                    statement.set(
-                        1,
-                        requireNonNull(vipPlayer.activeVip()).duration()
-                    );
-                    statement.set(2, vipPlayer);
+                    statement.set(1, requireNonNull(vipPlayer.activeVip()).duration());
+                    statement.set(2, UUIDs.getBytes(vipPlayer.id()));
                     statement.addBatch();
                 })
         ), executor);
@@ -220,7 +218,7 @@ public class SQLPlayerService implements PlayerService {
             statement -> {
                 statement.set(1, UUIDs.getBytes(playerId));
                 statement.set(2, newVip.id());
-                statement.set(3, newVip.type());
+                statement.set(3, newVip.type().id());
                 statement.set(4, newVip.duration());
             }
         ), executor);
@@ -232,7 +230,7 @@ public class SQLPlayerService implements PlayerService {
         CompletableFuture.runAsync(() -> sqlExecutor.update(
             "DELETE FROM " + OWNING_TABLE + " WHERE player_id=? AND vip_id=? AND vip_type=?",
             statement -> {
-                statement.set(1, playerId);
+                statement.set(1, UUIDs.getBytes(playerId));
                 statement.set(2, owningVip.id());
                 statement.set(3, owningVip.type().id());
             }
