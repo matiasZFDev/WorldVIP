@@ -139,6 +139,7 @@ public class KeysView implements View {
                             to("@tempo", VipDuration.format(key)),
                             to("@usos", String.valueOf(key.usages()))
                         )
+                        .colorMeta()
                         .addNBT(KEY_CODE_TAG, key.code())
                         .transform();
                 },

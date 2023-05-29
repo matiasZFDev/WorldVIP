@@ -183,14 +183,8 @@ public class SQLPlayerService implements PlayerService {
     @Override
     public void removeVip(@NotNull UUID playerId) {
         final VipPlayer playerCache = players.get(playerId);
+
         playerCache.setActiveVip(null);
-
-        final boolean uncache = playerCache.owningVips().vips().isEmpty();
-
-        if (uncache) {
-            players.remove(playerId);
-        }
-
         CompletableFuture.runAsync(() -> sqlExecutor.update(
             "DELETE FROM " + PLAYER_TABLE + " WHERE player_id=?",
             statement -> statement.set(1, UUIDs.getBytes(playerId))
