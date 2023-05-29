@@ -88,7 +88,7 @@ public class GiveVip implements CommandModule {
             ? Integer.valueOf(-1)
             : TimeParser.parseTime(args[3]);
 
-        final String durationFormat = duration == null || duration != 1
+        final String durationFormat = duration == null || duration != -1
             ? args[3]
             : GlobalValues.PERMANENT_DURATION;
 

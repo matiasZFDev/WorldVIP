@@ -9,7 +9,7 @@ Conteudo:
     Context-skull: true # Caveça do jogador
     Nome: '&6&lP&6erfil'
     Lore:
-      - '&fVIP: @estado-vip'
+      - '&fPlano: @estado-vip'
       - '&fGasto: &b@gasto'
   Coletar-itens: # Apagar seção caso a coleta de itens não estiver habilitada
     Slot: 25
