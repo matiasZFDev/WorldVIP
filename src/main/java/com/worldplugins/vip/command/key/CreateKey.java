@@ -60,7 +60,7 @@ public class CreateKey implements CommandModule {
             return;
         }
 
-        final String keyCode = !args[0].equals("GERAR")
+        final String keyCode = !args[0].equalsIgnoreCase("GERAR")
             ? args[0]
             : keyGenerator.generate();
 
