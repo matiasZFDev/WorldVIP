@@ -69,7 +69,7 @@ public class VipHandler {
         }
 
         if (vip.type() == VipType.PERMANENT || activeVip.type() == VipType.PERMANENT) {
-            switchVips(vipPlayer, vip);
+            switchVips(vipPlayer, vip, announceAndBenefits);
             return;
         }
 
@@ -84,7 +84,7 @@ public class VipHandler {
             .orElse(null);
 
         if (matchingVip == null) {
-            switchVips(vipPlayer, vip);
+            switchVips(vipPlayer, vip, announceAndBenefits);
         } else {
             mergeAndSwitchVips(vipPlayer, vip, matchingVip);
         }
@@ -212,12 +212,16 @@ public class VipHandler {
         playerService.addSpent(player.getUniqueId(), vipPrice);
     }
 
-    private void switchVips(@NotNull VipPlayer vipPlayer, @NotNull VIP vip) {
+    private void switchVips(
+        @NotNull VipPlayer vipPlayer,
+        @NotNull VIP vip,
+        boolean announceAndBenefits
+    ) {
         final VIP currentActiveVip = requireNonNull(vipPlayer.activeVip());
         final OwningVIP newOwningVip = VipTransition.toOwning(currentActiveVip);
         final VipData.VIP owningConfigVip = vipConfig.data().getById(currentActiveVip.id());
 
-        setVip(vipPlayer.id(), vip, true);
+        setVip(vipPlayer.id(), vip, announceAndBenefits);
         permissionManager.removeGroup(vipPlayer.id(), owningConfigVip.group());
         owningVipHandler.add(vipPlayer.id(), newOwningVip);
     }
@@ -244,6 +248,6 @@ public class VipHandler {
         final VIP mergedVip = new VIP(primaryVip.id(), primaryVip.type(), newDuration);
 
         owningVipHandler.remove(vipPlayer, VipTransition.toOwning(matchingVip));
-        switchVips(vipPlayer, mergedVip);
+        switchVips(vipPlayer, mergedVip, true);
     }
 }
