@@ -77,14 +77,15 @@ public class SwitchVip implements CommandModule {
             onDelay.remove(player.getUniqueId());
         }
 
-        final VipData.VIP configVip = vipConfig.data().getByName(args[0]);
+        final String vipName = args[0];
+        final VipData.VIP configVip = vipConfig.data().getByName(vipName);
 
         if (configVip == null) {
             final Collection<String> vipList = vipConfig.data().all().stream()
                 .map(VipData.VIP::name)
                 .collect(Collectors.toList());
             respond(sender, "Vip-inexistente", message -> message.replace(
-                to("@nome", args[1]),
+                to("@nome", vipName),
                 to("@vips", vipList.toString())
             ));
             return;
