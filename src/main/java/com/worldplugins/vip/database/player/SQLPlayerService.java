@@ -29,6 +29,7 @@ public class SQLPlayerService implements PlayerService {
         this.executor = executor;
         this.sqlExecutor = sqlExecutor;
         this.players = players;
+
         createTables();
         loadPlayers();
     }
@@ -67,24 +68,38 @@ public class SQLPlayerService implements PlayerService {
         );
     }
 
+    private @NotNull VipPlayer getPlayerOrDefault(@NotNull UUID playerId) {
+        if (players.containsKey(playerId)) {
+            return players.get(playerId);
+        }
+
+        final VipPlayer newPlayer = new VipPlayer(
+                playerId,
+                0,
+                null,
+                new OwningVIPs(new ArrayList<>(0))
+            );
+
+        players.set(playerId, newPlayer);
+        return newPlayer;
+    }
+
     private void loadPlayers() {
         sqlExecutor.executeQuery(
             "SELECT * FROM " + SPENT_TABLE,
             statement -> {},
             result -> {
-                final Map<UUID, VipPlayer> data = new HashMap<>();
-
                 while (result.next()) {
                     final UUID playerId = UUIDs.toUUID(result.get("player_id"));
                     players.set(playerId, new VipPlayer(
                         playerId,
                         result.get("spent"),
                         null,
-                        new OwningVIPs(new ArrayList<>(2)
+                        new OwningVIPs(new ArrayList<>(0)
                     )));
                 }
 
-                return data;
+                return null;
             }
         );
 
@@ -94,7 +109,8 @@ public class SQLPlayerService implements PlayerService {
             result -> {
                 while (result.next()) {
                     final UUID playerId = UUIDs.toUUID(result.get("player_id"));
-                    players.get(playerId).setActiveVip(
+
+                    getPlayerOrDefault(playerId).setActiveVip(
                         new VIP(
                             result.get("vip_id", Byte.class),
                             VipType.fromId(result.get("vip_type", Byte.class)),
@@ -113,7 +129,8 @@ public class SQLPlayerService implements PlayerService {
             result -> {
                 while (result.next()) {
                     final UUID playerId = UUIDs.toUUID(result.get("player_id"));
-                    players.get(playerId).owningVips().add(
+
+                    getPlayerOrDefault(playerId).owningVips().add(
                         new VIP(
                             result.get("vip_id", Byte.class),
                             VipType.fromId(result.get("vip_type", Byte.class)),
