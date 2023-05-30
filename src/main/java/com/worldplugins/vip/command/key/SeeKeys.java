@@ -113,7 +113,7 @@ public class SeeKeys implements CommandModule {
                     to("@duracao", durationFormat),
                     to("@usos", String.valueOf(key.usages()))
                 );
-                return new ComponentBuilder(Colors.color(line))
+                return new ComponentBuilder(Colors.color("\n" + line))
                     .event(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,
                         new BaseComponent[] {

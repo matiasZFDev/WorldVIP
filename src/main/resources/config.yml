@@ -33,10 +33,10 @@ Ver-keys:
     - '@@keys'
     - ''
   Mensagem-pessoal:
-    - '&fLista de keys que &6você &fpossui:'
+    - '  &fLista de keys que &6você &fpossui:'
     - '@@keys'
     - ''
-  Formato-key: ' &7- &e@key &7: @vip&f @tipo &7@duracao &f&n@usos&r'
+  Formato-key: '  &7- &e@key &8▶ @vip&f @tipo &7@duracao &f&n@usos&r'
   Mensagem-hover: '&7Clique para preparar ativação'
 
 # Stackar (true) ou não (false) os grupos dos vips quando serem ativados.
