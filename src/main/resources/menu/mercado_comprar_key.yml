@@ -12,7 +12,7 @@ Conteudo:
       - '&fUsos: &7@usos'
       - '&fVendedor: &b@vendedor'
       - ''
-      - ' &6b* &fPreço: &6$@preco'
+      - ' &6* &fPreço: &6$@preco'
   Confirmar:
     Slot: 29
     Material: INK_SACK

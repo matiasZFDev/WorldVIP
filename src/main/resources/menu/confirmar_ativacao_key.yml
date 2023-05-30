@@ -4,7 +4,7 @@ Conteudo:
   Key:
     Slot: 13
     Id: 1 # Iten do vip
-    Nome: '&bKey VIP'
+    Nome: '&fKey VIP'
     Lore:
       - '&fVIP: @vip'
       - '&fTipo: &e@tipo'

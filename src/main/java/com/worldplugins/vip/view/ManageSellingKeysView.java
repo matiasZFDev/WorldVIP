@@ -6,9 +6,11 @@ import com.worldplugins.lib.util.ItemTransformer;
 import com.worldplugins.lib.util.Strings;
 import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.lib.view.PageConfigContextBuilder;
+import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.market.SellingKey;
 import com.worldplugins.vip.database.market.SellingKeyRepository;
+import com.worldplugins.vip.database.player.model.VipType;
 import me.post.deps.nbt_api.nbtapi.NBTCompound;
 import me.post.lib.config.model.ConfigModel;
 import me.post.lib.util.NBTs;
@@ -135,15 +137,20 @@ public class ManageSellingKeysView implements View {
                 keys,
                 key -> {
                     final VipData.VIP configVip = vipConfig.data().getById(key.vipId());
+                    final String keyDuration = key.vipType() == VipType.PERMANENT
+                        ? GlobalValues.PERMANENT_DURATION
+                        : Time.toFormat(key.vipDuration());
+
                     return ItemTransformer.of(configVip.item())
                         .display(keyDisplay)
-                        .nameFormat(to("@nome", configVip.display()))
+                        .nameFormat(to("@vip", configVip.display()))
                         .loreFormat(
-                            to("@tipo", key.vipType().toString().toUpperCase()),
-                            to("@tempo", Time.toFormat(key.vipDuration())),
+                            to("@tipo", key.vipType().getName().toUpperCase()),
+                            to("@tempo", keyDuration),
                             to("@usos", String.valueOf(key.vipUsages())),
                             to("@preco", NumberFormats.comma(key.price()))
                         )
+                        .colorMeta()
                         .addNBT(nbtItem -> nbtItem.setString(SELLING_KEY_TAG, key.code()))
                         .transform();
                 },

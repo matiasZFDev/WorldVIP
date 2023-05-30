@@ -1,7 +1,7 @@
 package com.worldplugins.vip.view;
 
 import com.worldplugins.lib.config.model.MenuModel;
-import com.worldplugins.lib.util.ItemBuilding;
+import com.worldplugins.lib.util.ItemTransformer;
 import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
@@ -80,16 +80,19 @@ public class KeyMarketPurchaseView implements View {
         final VipData.VIP configVip = vipConfig.data().getById(key.vipId());
 
         ConfigContextBuilder.withModel(menuModel)
-            .editMenuItem("Key", item ->
-                ItemBuilding.loreFormat(
-                    item,
-                    to("@vip", configVip.display()),
-                    to("@tempo", VipDuration.format(key)),
-                    to("@tipo", key.vipType().getName().toUpperCase()),
-                    to("@vendedor", BukkitUtils.getPlayerName(key.sellerId())),
-                    to("@usos", String.valueOf(key.vipUsages())),
-                    to("@preco", NumberFormats.suffixed(key.price()))
-                )
+            .replaceMenuItem("Key", item ->
+                ItemTransformer.of(configVip.item())
+                    .display(item.getItemMeta())
+                    .loreFormat(
+                        to("@vip", configVip.display()),
+                        to("@tempo", VipDuration.format(key)),
+                        to("@tipo", key.vipType().getName().toUpperCase()),
+                        to("@vendedor", BukkitUtils.getPlayerName(key.sellerId())),
+                        to("@usos", String.valueOf(key.vipUsages())),
+                        to("@preco", NumberFormats.suffixed(key.price()))
+                    )
+                    .colorMeta()
+                    .transform()
             )
             .handleMenuItemClick(
                 "Cancelar",

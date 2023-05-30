@@ -3,7 +3,7 @@ Linhas: 6
 Data:
   Slots: [10,11,12,13,14,15,16, 19,20,21,22,23,24,25, 28,29,30,31,32,33,34]
   Display-key:
-    Nome: '&bKey @vip'
+    Nome: '&fKey @vip'
     Lore:
       - '&fTipo: &e@tipo'
       - '&fTempo: &7@tempo'

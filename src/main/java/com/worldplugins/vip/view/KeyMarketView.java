@@ -185,6 +185,7 @@ public class KeyMarketView implements View {
                             to("@usos", String.valueOf(key.vipUsages())),
                             to("@data-postagem", Time.toFormat(postTimeElapsed))
                         )
+                        .colorMeta()
                         .addNBT(nbtItem -> nbtItem.setString(SELLING_KEY_TAG, key.code()))
                         .transform();
                 },

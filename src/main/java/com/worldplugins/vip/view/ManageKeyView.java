@@ -85,14 +85,17 @@ public class ManageKeyView implements View {
         final VipData.VIP configVip = vipConfig.data().getById(key.vipId());
 
         ConfigContextBuilder.withModel(menuModel)
-            .editMenuItem("Info", item ->
-                ItemTransformer.of(item)
+            .replaceMenuItem("Info", item ->
+                ItemTransformer.of(configVip.item())
+                    .display(item.getItemMeta())
                     .nameFormat(to("@vip", configVip.display()))
                     .loreFormat(
                         to("@tipo", key.vipType().getName().toUpperCase()),
                         to("@tempo", VipDuration.format(key)),
                         to("@usos", String.valueOf(key.usages()))
                     )
+                    .colorMeta()
+                    .transform()
             )
             .handleMenuItemClick(
                 "Voltar",
@@ -108,26 +111,29 @@ public class ManageKeyView implements View {
                     player,
                     key.code(),
                     context.keysViewPage,
-                    $ -> Views.get().open(player, ConfirmKeyActivationView.class)
+                    $ -> Views.get().open(player, ConfirmKeyActivationView.class, context)
                 )
             )
             .handleMenuItemClick(
                 "Vender",
-                click -> conversationProvider.create()
-                    .withFirstPrompt(new KeyPostPriceConversation(
-                        context,
-                        keyGeneratorMatcher,
-                        conversationProvider,
-                        scheduler,
-                        sellingKeyRepository,
-                        validKeyRepository,
-                        vipConfig,
-                        mainConfig
-                    ))
-                    .withTimeout(20)
-                    .withLocalEcho(false)
-                    .buildConversation(player)
-                    .begin()
+                click -> {
+                    player.closeInventory();
+                    conversationProvider.create()
+                        .withFirstPrompt(new KeyPostPriceConversation(
+                            context,
+                            keyGeneratorMatcher,
+                            conversationProvider,
+                            scheduler,
+                            sellingKeyRepository,
+                            validKeyRepository,
+                            vipConfig,
+                            mainConfig
+                        ))
+                        .withTimeout(20)
+                        .withLocalEcho(false)
+                        .buildConversation(player)
+                        .begin();
+                }
             )
             .build(viewContext, player, data);
     }

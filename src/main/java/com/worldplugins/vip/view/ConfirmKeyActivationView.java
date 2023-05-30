@@ -2,6 +2,7 @@ package com.worldplugins.vip.view;
 
 import com.worldplugins.lib.config.model.MenuModel;
 import com.worldplugins.lib.util.ItemBuilding;
+import com.worldplugins.lib.util.ItemTransformer;
 import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.key.ValidKeyRepository;
@@ -56,13 +57,15 @@ public class ConfirmKeyActivationView implements View {
 
         ConfigContextBuilder.withModel(menuModel)
             .editMenuItem("Key", item ->
-                ItemBuilding.loreFormat(
-                    item,
-                    to("@vip", configVip.display()),
-                    to("@tipo", key.vipType().getName().toUpperCase()),
-                    to("@tempo", VipDuration.format(key)),
-                    to("@usos", String.valueOf(key.usages()))
-                )
+                ItemTransformer.of(configVip.item())
+                    .loreFormat(
+                        to("@vip", configVip.display()),
+                        to("@tipo", key.vipType().getName().toUpperCase()),
+                        to("@tempo", VipDuration.format(key)),
+                        to("@usos", String.valueOf(key.usages()))
+                    )
+                    .colorMeta()
+                    .transform()
             )
             .handleMenuItemClick(
                 "Cancelar",
