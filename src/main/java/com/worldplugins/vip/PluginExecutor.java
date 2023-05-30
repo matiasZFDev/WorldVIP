@@ -43,6 +43,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 public class PluginExecutor {
     private final @NotNull JavaPlugin plugin;
@@ -144,7 +145,9 @@ public class PluginExecutor {
             return;
         }
 
-        final int elapsedSeconds = (int) ((System.nanoTime() - lastOnlineInstant) / 1000);
+        final int elapsedSeconds = (int) TimeUnit
+            .NANOSECONDS
+            .toSeconds(System.nanoTime() - lastOnlineInstant);
 
         databaseAccessor.playerCache().getValues().forEach(vipPlayer -> {
             vipPlayer.owningVips().vips().forEach(owningVip -> {
