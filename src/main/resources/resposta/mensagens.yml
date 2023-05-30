@@ -128,12 +128,12 @@ Vip-duracao-invalida:
 Key-usos-invalidos: "&cO formato de usos '@valor' não é válido. Utilize valores numéricos"
 Key-tamanho-maximo: '&cA key não pode ultrapassar o @maximo de largura.'
 Key-gerada-duplicada: '&cHouve uma duplicação no momento da geração. Tente novamente.'
-Key-duplicada: '&cA key @key ja existe.'
+Key-duplicada: "&cA key '@key' ja existe."
 Key-gerada:
   Json:
     Mensagem:
       - "&6Key &f'@key' &6: @vip &e&n@tipo&f @tempo &7(@usos usos) &6foi gerada com sucesso!"
-      - '&6Clique @Json(var)&f para preparar a ativação!'
+      - '&6Clique @Json(var)&f &6para preparar a ativação!'
     Variaveis:
       var:
         Display: '&f&nAQUI'
@@ -143,8 +143,8 @@ Key-gerada:
 Key-criada:
   Json:
     Mensagem:
-      - "&6Key &f'@key' &6: @vip &e&n@tipo&f @tempo &7(@usos usos) &6foi criada com sucesso!"
-      - '&6Clique @Json(var)&f para preparar a ativação!'
+      - "  &6Key &f'@key' &7▶ @vip &e&n@tipo&f @tempo &7(@usos usos) &6foi criada com sucesso!"
+      - '  &6Clique @Json(var)&f &6para preparar a ativação!'
     Variaveis:
       var:
         Display: '&f&nAQUI'
@@ -215,16 +215,16 @@ Vip-itens-colhidos: '&aItens foram coletados!'
 Usar-key-uso: '&cArgumentos invalidos. Digite /usarkey <key>'
 
 Mercado-key-inexistente: '&cKey retirada. Atualizando produtos...'
+Comprar-key-mesmo-vendedor: '&cVocê não pode comprar a sua propria key!'
 Comprar-key-cash-insuficiente: '&cCash insuficiente.'
 Key-comprada:
   _@Lista:
     m1:
       - ''
       - '  &6Você comprou uma key @vip &f@tipo &7(@tempo) &6de &f@usos &6usos por &e$@preco &6de cash!'
-      - ''
     m2:
       Json:
-        Mensagem: '&6Clique @Json(var)&6 para preparar ativação!'
+        Mensagem: '  &6Clique @Json(var)&6 para preparar ativação!'
         Variaveis:
           var:
             Display: '&f&nAQUI'
@@ -235,9 +235,9 @@ Key-comprada:
       Server-actionbar: '&6&lVIP &fUma key @vip &ffoi vendida no mercado.'
 Key-vendida:
   - ''
-  - '  &6Você vendeu uma key @vip &ftipo &7(@tempo) &6de &f@usos &6usos por &e$@preco &6de cash!'
+  - '  &6Você vendeu uma key @vip &f@tipo &7(@tempo) &6de &f@usos &6usos por &e$@preco &6de cash!'
   - '  &fComprador: &a@comprador'
-  - '  &fDuração da postagem: &7@tempo-postagem'
+  - '  &fDuração da postagem: &7@duracao-postagem'
   - ''
 Vender-key-preco:
   - ''

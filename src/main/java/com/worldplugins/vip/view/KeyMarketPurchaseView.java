@@ -170,8 +170,9 @@ public class KeyMarketPurchaseView implements View {
 
                     if (seller != null) {
                         final int postTimeElapsed = (int) TimeUnit
-                            .MILLISECONDS
+                            .NANOSECONDS
                             .toSeconds(System.nanoTime() - key.postTimestamp());
+                        System.out.println(postTimeElapsed);
                         respond(seller, "Key-vendida", message -> message.replace(
                             to("@vip", configVip.display()),
                             to("@tempo", VipDuration.format(key)),
@@ -179,7 +180,7 @@ public class KeyMarketPurchaseView implements View {
                             to("@comprador", player.getName()),
                             to("@usos", String.valueOf(key.vipUsages())),
                             to("@preco", NumberFormats.suffixed(points)),
-                            to("@tempo-postagem", Time.toFormat(postTimeElapsed))
+                            to("@duracao-postagem", Time.toFormat(postTimeElapsed))
                         ));
                     }
             }));

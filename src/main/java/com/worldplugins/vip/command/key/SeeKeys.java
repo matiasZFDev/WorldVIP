@@ -103,8 +103,8 @@ public class SeeKeys implements CommandModule {
             .map(key -> {
                 final VipData.VIP configVip = vipConfig.data().getById(key.vipId());
                 final String durationFormat = key.vipDuration() == -1
-                    ? Time.toFormat(key.vipDuration())
-                    : GlobalValues.PERMANENT_DURATION;
+                    ? GlobalValues.PERMANENT_DURATION
+                    : Time.toFormat(key.vipDuration());
                 final String line = Strings.replace(
                     mainConfig.data().keyListing().keyFormat(),
                     to("@key", key.code()),
