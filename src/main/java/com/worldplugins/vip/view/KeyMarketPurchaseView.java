@@ -121,6 +121,12 @@ public class KeyMarketPurchaseView implements View {
                 return;
             }
 
+            if (key.sellerId().equals(player.getUniqueId())) {
+                respond(player, "Comprar-key-mesmo-vendedor");
+                player.closeInventory();
+                return;
+            }
+
             if (!pointsManager.has(player.getUniqueId(), key.price())) {
                 respond(player, "Comprar-key-cash-insuficiente");
                 return;
