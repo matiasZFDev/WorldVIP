@@ -140,7 +140,7 @@ public class KeysView implements View {
                             to("@usos", String.valueOf(key.usages()))
                         )
                         .colorMeta()
-                        .addNBT(KEY_CODE_TAG, key.code())
+                        .addNBT(nbtItem -> nbtItem.setString(KEY_CODE_TAG, key.code())                        )
                         .transform();
                 },
                 click -> {

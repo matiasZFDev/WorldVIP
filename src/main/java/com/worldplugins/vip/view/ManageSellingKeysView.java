@@ -144,7 +144,7 @@ public class ManageSellingKeysView implements View {
                             to("@usos", String.valueOf(key.vipUsages())),
                             to("@preco", NumberFormats.comma(key.price()))
                         )
-                        .addNBT(SELLING_KEY_TAG, key.code())
+                        .addNBT(nbtItem -> nbtItem.setString(SELLING_KEY_TAG, key.code()))
                         .transform();
                 },
                 click -> {

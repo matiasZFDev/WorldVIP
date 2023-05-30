@@ -31,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.worldplugins.vip.Response.respond;
@@ -120,7 +119,7 @@ public class VipItemsView implements View {
                         .nameFormat(to("@vip", configVip.display()))
                         .loreFormat(to("@quantia", String.valueOf(itemsPair.first().amount())))
                         .colorMeta()
-                        .addNBT(ITEMS_TAG, configVip.id())
+                        .addNBT(nbtItem -> nbtItem.setByte(ITEMS_TAG, configVip.id()))
                         .transform();
                     builder.item(itemsPair.second(), item, this::handleVipItemsClick);
                 });
