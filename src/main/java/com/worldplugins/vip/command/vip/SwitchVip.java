@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.worldplugins.vip.Response.respond;
@@ -66,8 +67,9 @@ public class SwitchVip implements CommandModule {
         final Player player = (Player) sender;
 
         if (onDelay.containsKey(player.getUniqueId())) {
-            final long now = System.nanoTime();
-            final int secondsElapsed = (int) ((now - onDelay.get(player.getUniqueId())) / 1000);
+            final int secondsElapsed = (int) TimeUnit
+                .NANOSECONDS
+                .toSeconds(System.nanoTime() - onDelay.get(player.getUniqueId()));
 
             if (secondsElapsed < mainConfig.data().switchVipDelay()) {
                 respond(player, "Trocar-vip-delay");
@@ -137,6 +139,7 @@ public class SwitchVip implements CommandModule {
             vipHandler.activate(player.getUniqueId(), newPrimaryVip, false);
         }
 
+        onDelay.put(player.getUniqueId(), System.nanoTime());
         respond(player, "Vip-trocado", message -> message.replace(
             to("@atual-vip", oldConfigVip.display()),
             to("@atual-tipo", activeVip.type().getName().toUpperCase()),
