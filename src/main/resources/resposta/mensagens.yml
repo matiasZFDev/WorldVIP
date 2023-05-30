@@ -261,7 +261,7 @@ Vender-key-confirmar:
   - ''
   - '  &fDigite &a&nCONFIRMAR&f ou &c&nCANCELAR&f:'
 Maximo-de-keys-a-venda: '&cVocê atingiu o máximo de keys á venta! Retire alguma caso quiser continuar.'
-Key-postada: '&aKey postada com sucesso! Confira em /vip &e▶ &aMercado &lVIP &7▶ &aSuas keys.'
+Key-postada: '&aKey postada com sucesso! Confira em /vip &e▶ &aMercado &lVIP &e▶ &aSuas keys.'
 
 Retirar-key-mercado-inexistente: '&cKey inexistente. Atualizando dados...'
 Key-mercado-retirada: '&aKey retirada com sucesso.'

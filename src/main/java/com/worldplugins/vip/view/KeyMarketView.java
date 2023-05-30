@@ -172,7 +172,7 @@ public class KeyMarketView implements View {
                 key -> {
                     final VipData.VIP configVip = vipConfig.data().getById(key.vipId());
                     final int postTimeElapsed = (int) TimeUnit
-                        .MILLISECONDS
+                        .NANOSECONDS
                         .toSeconds(System.nanoTime() - key.postTimestamp());
                     return ItemTransformer.of(configVip.item().clone())
                         .display(keyDisplay)

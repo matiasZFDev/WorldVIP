@@ -56,7 +56,7 @@ public class ConfirmKeyActivationView implements View {
         final VipData.VIP configVip = vipConfig.data().getById(key.vipId());
 
         ConfigContextBuilder.withModel(menuModel)
-            .editMenuItem("Key", item ->
+            .replaceMenuItem("Key", item ->
                 ItemTransformer.of(configVip.item())
                     .loreFormat(
                         to("@vip", configVip.display()),
