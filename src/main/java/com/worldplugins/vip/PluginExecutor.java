@@ -299,6 +299,7 @@ public class PluginExecutor {
             new ManageSellingKeysView(
                 updatables.include(new ManageSellingKeysMenuModel(configManager.getWrapper("menu/mercado_gerenciar_keys"))),
                 databaseAccessor.sellingKeyRepository(),
+                databaseAccessor.validKeyRepository(),
                 scheduler,
                 vipConfig
             )

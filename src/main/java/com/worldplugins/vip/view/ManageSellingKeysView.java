@@ -8,6 +8,8 @@ import com.worldplugins.lib.view.ConfigContextBuilder;
 import com.worldplugins.lib.view.PageConfigContextBuilder;
 import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.config.data.VipData;
+import com.worldplugins.vip.database.key.ValidKeyRepository;
+import com.worldplugins.vip.database.key.ValidVipKey;
 import com.worldplugins.vip.database.market.SellingKey;
 import com.worldplugins.vip.database.market.SellingKeyRepository;
 import com.worldplugins.vip.database.player.model.VipType;
@@ -44,26 +46,30 @@ public class ManageSellingKeysView implements View {
         }
     }
 
+    private final @NotNull ViewContext viewContext;
+    private final @NotNull MenuModel menuModel;
+    private final @NotNull SellingKeyRepository sellingKeyRepository;
+    private final @NotNull ValidKeyRepository validKeyRepository;
+    private final @NotNull Scheduler scheduler;
+    private final @NotNull ConfigModel<VipData> vipConfig;
+
+    private static final @NotNull String SELLING_KEY_TAG = "wvip_manage_selling_key_code";
+
     public ManageSellingKeysView(
         @NotNull MenuModel menuModel,
         @NotNull SellingKeyRepository sellingKeyRepository,
+        @NotNull ValidKeyRepository validKeyRepository,
         @NotNull Scheduler scheduler,
         @NotNull ConfigModel<VipData> vipConfig
     ) {
         this.viewContext = new MapViewContext();
         this.menuModel = menuModel;
         this.sellingKeyRepository = sellingKeyRepository;
+        this.validKeyRepository = validKeyRepository;
         this.scheduler = scheduler;
         this.vipConfig = vipConfig;
     }
 
-    private final @NotNull ViewContext viewContext;
-    private final @NotNull MenuModel menuModel;
-    private final @NotNull SellingKeyRepository sellingKeyRepository;
-    private final @NotNull Scheduler scheduler;
-    private final @NotNull ConfigModel<VipData> vipConfig;
-
-    private static final @NotNull String SELLING_KEY_TAG = "wvip_manage_selling_key_code";
 
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
@@ -171,7 +177,17 @@ public class ManageSellingKeysView implements View {
                         return;
                     }
 
+                    final ValidVipKey returnedKey = new ValidVipKey(
+                        player.getName(),
+                        matchingCodeKey.code(),
+                        matchingCodeKey.vipId(),
+                        matchingCodeKey.vipType(),
+                        matchingCodeKey.vipDuration(),
+                        matchingCodeKey.vipUsages()
+                    );
+
                     sellingKeyRepository.removeKey(matchingCodeKey);
+                    validKeyRepository.addKey(returnedKey);
                     Views.get().open(player, ManageSellingKeysView.class, context);
                     respond(player, "Key-mercado-retirada");
                 }
