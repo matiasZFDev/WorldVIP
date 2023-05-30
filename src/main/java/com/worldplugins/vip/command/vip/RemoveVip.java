@@ -2,6 +2,7 @@ package com.worldplugins.vip.command.vip;
 
 import com.worldplugins.vip.config.data.VipData;
 import com.worldplugins.vip.database.player.PlayerService;
+import com.worldplugins.vip.database.player.model.OwningVIP;
 import com.worldplugins.vip.database.player.model.VIP;
 import com.worldplugins.vip.database.player.model.VipPlayer;
 import com.worldplugins.vip.database.player.model.VipType;
@@ -15,6 +16,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -123,12 +125,10 @@ public class RemoveVip implements CommandModule {
         }
 
         final AtomicInteger owningVipRemoveCount = new AtomicInteger(0);
+        final Collection<OwningVIP> owningVips = new ArrayList<>(vipPlayer.owningVips().vips());
 
-        vipPlayer.owningVips().vips().forEach(owningVip -> {
-            if (
-                owningVip.id() == configVip.id() &&
-                (type == null || owningVip.type() == type)
-            ) {
+        owningVips.forEach(owningVip -> {
+            if (owningVip.id() == configVip.id() && (type == null || owningVip.type() == type)) {
                 owningVipHandler.remove(vipPlayer, owningVip);
                 owningVipRemoveCount.incrementAndGet();
             }
@@ -145,10 +145,13 @@ public class RemoveVip implements CommandModule {
 
         if (removePrimaryVip) {
             vipHandler.remove(vipPlayer);
-            respond(sender, "Vip-primario-removido");
+            respond(sender, "Vip-primario-removido", message -> message.replace(
+                to("@jogador", player.getName())
+            ));
 
             if (owningVipRemoveCount.get() > 0) {
                 respond(sender, "Vip-secundarios-removidos", message -> message.replace(
+                    to("@jogador", player.getName()),
                     to("@removidos", String.valueOf(owningVipRemoveCount.get())),
                     to("@vip", configVip.display()),
                     to("@tipo", typeFormat)
@@ -157,6 +160,7 @@ public class RemoveVip implements CommandModule {
         } else {
             if (owningVipRemoveCount.get() == 0) {
                 respond(sender, "Vip-removidos-nenhum", message -> message.replace(
+                    to("@jogador", player.getName()),
                     to("@vip", configVip.display()),
                     to("@tipo", typeFormat)
                 ));
@@ -164,6 +168,7 @@ public class RemoveVip implements CommandModule {
             }
 
             respond(sender, "Vip-secundarios-removidos", message -> message.replace(
+                to("@jogador", player.getName()),
                 to("@removidos", String.valueOf(owningVipRemoveCount.get())),
                 to("@vip", configVip.display()),
                 to("@tipo", typeFormat)

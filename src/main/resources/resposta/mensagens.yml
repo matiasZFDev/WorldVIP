@@ -143,8 +143,10 @@ Key-gerada:
 Key-criada:
   Json:
     Mensagem:
+      - ''
       - "  &6Key &f'@key' &7▶ @vip &e&n@tipo&f @tempo &7(@usos usos) &6foi criada com sucesso!"
       - '  &6Clique @Json(var)&f &6para preparar a ativação!'
+      - ''
     Variaveis:
       var:
         Display: '&f&nAQUI'

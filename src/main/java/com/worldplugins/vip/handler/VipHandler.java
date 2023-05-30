@@ -162,7 +162,7 @@ public class VipHandler {
         respond(player, "Vip-ativado", message -> message.replace(
             to("@jogador", player.getName()),
             to("@vip", configVip.display()),
-            to("@tipo", vip.type().name().toUpperCase()),
+            to("@tipo", vip.type().getName().toUpperCase()),
             to("@tempo", durationDisplay)
         ));
     }
