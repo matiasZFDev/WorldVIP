@@ -77,7 +77,9 @@ public class RemoveVip implements CommandModule {
             }
 
             vipHandler.remove(vipPlayer);
-            respond(sender, "Vip-primario-removido");
+            respond(sender, "Vip-primario-removido", message -> message.replace(
+                to("@jogador", player.getName())
+            ));
             return;
         }
 

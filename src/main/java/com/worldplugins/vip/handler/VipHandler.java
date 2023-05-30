@@ -74,7 +74,7 @@ public class VipHandler {
         }
 
         if (activeVip.id() == vip.id() && activeVip.type() == vip.type()) {
-            mergeIntoPrimary(vipPlayer, vip);
+            mergeIntoPrimary(vipPlayer, vip, announceAndBenefits);
             return;
         }
 
@@ -86,7 +86,7 @@ public class VipHandler {
         if (matchingVip == null) {
             switchVips(vipPlayer, vip, announceAndBenefits);
         } else {
-            mergeAndSwitchVips(vipPlayer, vip, matchingVip);
+            mergeWithOwningToPrimary(vipPlayer, vip, matchingVip, announceAndBenefits);
         }
     }
 
@@ -226,28 +226,36 @@ public class VipHandler {
         owningVipHandler.add(vipPlayer.id(), newOwningVip);
     }
 
-    private void mergeIntoPrimary(@NotNull VipPlayer vipPlayer, @NotNull VIP vip) {
+    private void mergeIntoPrimary(
+        @NotNull VipPlayer vipPlayer,
+        @NotNull VIP vip,
+        boolean anounceAndBenefits
+    ) {
         final VIP activeVip = requireNonNull(vipPlayer.activeVip());
         final Player player = Bukkit.getPlayer(vipPlayer.id());
 
         activeVip.incrementDuration(vip.duration());
         playerService.updatePrimaryVip(Collections.singletonList(vipPlayer));
 
-        if (player != null) {
+        if (player != null && anounceAndBenefits) {
             announce(player, vip);
             giveBenefits(player);
         }
     }
 
-    private void mergeAndSwitchVips(
+    private void mergeWithOwningToPrimary(
         @NotNull VipPlayer vipPlayer,
-        @NotNull VIP primaryVip,
-        @NotNull VIP matchingVip
+        @NotNull VIP vip,
+        @NotNull OwningVIP owningVip,
+        boolean anounceAndBenefits
     ) {
-        final int newDuration = primaryVip.duration() + matchingVip.duration();
-        final VIP mergedVip = new VIP(primaryVip.id(), primaryVip.type(), newDuration);
+        final VIP mergedVip = new VIP(
+            vip.id(),
+            vip.type(),
+            vip.duration() + owningVip.duration()
+        );
 
-        owningVipHandler.remove(vipPlayer, VipTransition.toOwning(matchingVip));
-        switchVips(vipPlayer, mergedVip, true);
+        owningVipHandler.remove(vipPlayer, owningVip);
+        switchVips(vipPlayer, mergedVip, anounceAndBenefits);
     }
 }
