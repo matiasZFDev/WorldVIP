@@ -42,7 +42,7 @@ import me.post.lib.view.Views;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class PluginExecutor {
@@ -64,6 +64,7 @@ public class PluginExecutor {
     private final @NotNull OwningVipHandler owningVipHandler;
     private final @NotNull VipTopManager topManager;
 
+    private final @NotNull VipTimeConsumeTask vipTimeConsumeTask;
     private final @NotNull VipDatabaseUpdate vipDatabaseUpdate;
 
     public PluginExecutor(@NotNull JavaPlugin plugin) {
@@ -98,6 +99,13 @@ public class PluginExecutor {
             vipItemsConfig
         );
         topManager = new VipTopManager(databaseAccessor.playerCache());
+
+        vipTimeConsumeTask = new VipTimeConsumeTask(
+            databaseAccessor.playerCache(),
+            vipHandler,
+            owningVipHandler,
+            mainConfig
+        );
         vipDatabaseUpdate = new VipDatabaseUpdate(
             databaseAccessor.playerCache(),
             databaseAccessor.playerService(),
@@ -137,6 +145,7 @@ public class PluginExecutor {
     }
 
     private void checkBasicVips() {
+        mainConfig.update();
         serverConfig.update();
 
         final long lastOnlineInstant = serverConfig.data().lastOnlineInstant();
@@ -150,19 +159,15 @@ public class PluginExecutor {
             .toSeconds(System.nanoTime() - lastOnlineInstant);
 
         databaseAccessor.playerCache().getValues().forEach(vipPlayer -> {
-            vipPlayer.owningVips().vips().forEach(owningVip -> {
-                if (owningVip.type() != VipType.BASIC) {
-                    return;
-                }
+            if (mainConfig.data().simultaneousReduction()) {
+                vipPlayer.owningVips().vips().forEach(owningVip -> {
+                    if (owningVip.type() != VipType.BASIC) {
+                        return;
+                    }
 
-                owningVip.decrementDuration(elapsedSeconds);
-
-                if (owningVip.duration() > -1) {
-                    return;
-                }
-
-                owningVipHandler.remove(vipPlayer, owningVip);
-            });
+                    owningVip.decrementDuration(elapsedSeconds);
+                });
+            }
 
             final VIP activeVip = vipPlayer.activeVip();
 
@@ -172,14 +177,10 @@ public class PluginExecutor {
                 }
 
                 activeVip.decrementDuration(elapsedSeconds);
-
-                if (activeVip.duration() > -1) {
-                    return;
-                }
-
-                vipHandler.remove(vipPlayer);
             }
         });
+
+        vipTimeConsumeTask.run();
     }
 
     private void registerCommands() {
@@ -310,14 +311,6 @@ public class PluginExecutor {
     }
 
     private void scheduleTasks() {
-        final VipTimeConsumeTask vipTimeConsumeTask = new VipTimeConsumeTask(
-            databaseAccessor.playerCache(),
-            vipHandler,
-            owningVipHandler,
-            mainConfig
-        );
-
-
         scheduler.runTimer(20, 20, false, () ->
             Configurations.update(serverConfig, config ->
                 config.set("Ultimo-instante-online", System.nanoTime())

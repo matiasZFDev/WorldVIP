@@ -46,7 +46,7 @@ public class VipTimeConsumeTask implements Runnable {
                 if (!(activeVip.type() == VipType.ONLINE && Bukkit.getPlayer(vipPlayer.id()) == null)) {
                     activeVip.decrementDuration(1);
 
-                    if (activeVip.duration() == -1) {
+                    if (activeVip.duration() <= -1) {
                         updatePlayers.add(vipPlayer);
                     }
                 }
@@ -64,7 +64,7 @@ public class VipTimeConsumeTask implements Runnable {
                 if (!(owningVip.type() == VipType.ONLINE && Bukkit.getPlayer(vipPlayer.id()) == null)) {
                     owningVip.decrementDuration(1);
 
-                    if (owningVip.duration() == -1) {
+                    if (owningVip.duration() <= -1) {
                         updateOwningVips
                             .computeIfAbsent(vipPlayer.id(), $ -> new ArrayList<>(1))
                             .add(owningVip);
