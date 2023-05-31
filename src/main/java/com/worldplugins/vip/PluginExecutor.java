@@ -79,7 +79,7 @@ public class PluginExecutor {
         vipConfig = updatables.include(new VipConfig(configManager.getWrapper("vip")));
         vipItemsConfig = updatables.include(new VipItemsConfig(configManager.getWrapper("itens_data")));
 
-        databaseAccessor = new DatabaseInitializer(configManager, plugin, scheduler).init();
+        databaseAccessor = new DatabaseInitializer(configManager.getWrapper("config"), plugin, scheduler).init();
         keyGenerator = new ConfigKeyGenerator(mainConfig);
         permissionManager = new PermissionManagerInitializer().init();
         pointsManager = new PointsInitializer(plugin).init();

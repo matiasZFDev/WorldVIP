@@ -15,6 +15,7 @@ import com.worldplugins.vip.database.player.SQLPlayerService;
 import com.worldplugins.vip.database.player.model.VipPlayer;
 import me.post.lib.common.Factory;
 import me.post.lib.config.wrapper.ConfigManager;
+import me.post.lib.config.wrapper.ConfigWrapper;
 import me.post.lib.database.cache.Cache;
 import me.post.lib.database.cache.SimpleCache;
 import me.post.lib.util.Scheduler;
@@ -28,12 +29,12 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class DatabaseInitializer {
-    private final @NotNull ConfigManager configManager;
+    private final @NotNull ConfigWrapper configWrapper;
     private final @NotNull Plugin plugin;
     private final @NotNull Scheduler scheduler;
 
-    public DatabaseInitializer(@NotNull ConfigManager configManager, @NotNull Plugin plugin, @NotNull Scheduler scheduler) {
-        this.configManager = configManager;
+    public DatabaseInitializer(@NotNull ConfigWrapper configWrapper, @NotNull Plugin plugin, @NotNull Scheduler scheduler) {
+        this.configWrapper = configWrapper;
         this.plugin = plugin;
         this.scheduler = scheduler;
     }
@@ -59,7 +60,7 @@ public class DatabaseInitializer {
     }
 
     private @NotNull Factory<SQLDatabase> databaseFactory() {
-        final ConfigurationSection dataSection = configManager.getWrapper("config").unwrap().getConfigurationSection("Database");
+        final ConfigurationSection dataSection = configWrapper.unwrap().getConfigurationSection("Database");
         final String databaseType = dataSection.getString("Tipo");
         final Factory<SQLDatabase> sqlFactory = new SQLDatabaseFactoryProducer(databaseType, dataSection, plugin).create();
 
