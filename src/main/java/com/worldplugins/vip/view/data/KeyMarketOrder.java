@@ -111,7 +111,11 @@ public enum KeyMarketOrder {
     },
     LONGER_DURATION(
         "Ordenar-maior-duração",
-        (a, b) -> a.vipType() == VipType.PERMANENT ? 1 : a.vipDuration() - b.vipDuration()
+        (a, b) -> a.vipType() == VipType.PERMANENT
+            ? -1
+            : b.vipType() == VipType.PERMANENT
+                ? 1
+                : b.vipDuration() - a.vipDuration()
     ) {
         @Override
         public @NotNull KeyMarketOrder next() {
@@ -125,7 +129,11 @@ public enum KeyMarketOrder {
     },
     SHORTER_DURATION(
         "Ordenar-menor-duração",
-        (a, b) -> a.vipType() == VipType.PERMANENT ? 0 : b.vipDuration() - a.vipDuration()
+        (a, b) -> b.vipType() == VipType.PERMANENT
+            ? -1
+            : a.vipType() == VipType.PERMANENT
+                ? 1
+                : a.vipDuration() - b.vipDuration()
     ) {
         @Override
         public @NotNull KeyMarketOrder next() {

@@ -25,16 +25,19 @@ dependencies {
     compileOnly(files("/home/post/dev/bukkit-libs/PlayerPoints-LATEST.jar"))
     compileOnly(files("/home/post/dev/bukkit-libs/yPoints-LATEST.jar"))
     compileOnly("net.luckperms:api:5.4")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2");
 }
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
+    testLogging {
+        events("passed")
+    }
 }
 
 tasks.withType<ShadowJar> {
     archiveFileName.set(projectFullName);
 }
-
 
 task("shadowAndCopy") {
     group = "Build"
