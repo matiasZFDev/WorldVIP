@@ -213,7 +213,8 @@ public class PluginExecutor {
             new RemovePendingVips(databaseAccessor.pendingVipRepository()),
             new VipTop(),
             new VipMenu(),
-            new SetVipItems(vipConfig)
+            new SetVipItems(vipConfig),
+            new Reload(configManager, updatables)
         );
         registry.registerAll();
     }
