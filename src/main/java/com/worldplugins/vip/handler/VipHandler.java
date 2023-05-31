@@ -19,8 +19,10 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static com.worldplugins.vip.Response.respond;
 import static java.util.Objects.requireNonNull;
@@ -197,7 +199,10 @@ public class VipHandler {
             final VipItemsData.VipItems configItems = vipItemsConfig.data().getByName(configVip.name());
             final ItemStack[] itemsContent = configItems == null
                 ? new ItemStack[0]
-                : configItems.data();
+                : Stream.of(configItems.data())
+                    .filter(Objects::nonNull)
+                    .map(ItemStack::clone)
+                    .toArray(ItemStack[]::new);
 
             Players.giveItems(player, itemsContent);
         }
