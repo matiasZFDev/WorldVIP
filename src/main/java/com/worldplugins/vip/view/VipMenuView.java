@@ -111,8 +111,8 @@ public class VipMenuView implements View {
             to("@vip", configVip.display()),
             to("@tipo", activeVip.type().getName().toUpperCase()),
             to("@tempo", activeVip.type() == VipType.PERMANENT
-                ? Time.toFormat(activeVip.duration())
-                : GlobalValues.PERMANENT_DURATION
+                ? GlobalValues.PERMANENT_DURATION
+                : Time.toFormat(activeVip.duration())
             )
         );
     }
