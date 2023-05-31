@@ -74,7 +74,6 @@ public class ManageSellingKeysView implements View {
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
         ConfigContextBuilder.withModel(menuModel)
-            .asViewState()
             .editTitle(title ->
                 Strings.replace(
                     title,
@@ -116,7 +115,6 @@ public class ManageSellingKeysView implements View {
                 page -> Views.get().open(player, ManageSellingKeysView.class, context),
                 context.page
             )
-            .asViewState()
             .editTitle((pageInfo, title) ->
                 Strings.replace(
                     title,

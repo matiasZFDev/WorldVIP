@@ -24,7 +24,6 @@ import me.post.lib.view.action.ViewClick;
 import me.post.lib.view.action.ViewClose;
 import me.post.lib.view.context.ClickHandler;
 import me.post.lib.view.context.ViewContext;
-import me.post.lib.view.context.Viewer;
 import me.post.lib.view.context.impl.MapViewContext;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -75,7 +74,6 @@ public class KeyMarketView implements View {
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
         ConfigContextBuilder.withModel(menuModel)
-            .asViewState()
             .editTitle(title ->
                 Strings.replace(
                     title,
@@ -116,7 +114,6 @@ public class KeyMarketView implements View {
                 page -> open(player, new Context(page, context.order)),
                 context.page
             )
-            .asViewState()
             .editTitle((pageInfo, title) ->
                 Strings.replace(
                     title,

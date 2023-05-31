@@ -68,7 +68,6 @@ public class VipItemsView implements View {
     @Override
     public void open(@NotNull Player player, @Nullable Object data) {
         ConfigContextBuilder.withModel(menuModel)
-            .asViewState()
             .editTitle(title ->
                 Strings.replace(
                     title,
@@ -99,7 +98,6 @@ public class VipItemsView implements View {
         final ItemDisplay itemsDisplay = menuModel.data().getData("Display-itens");
 
         ConfigContextBuilder.withModel(menuModel)
-            .asViewState()
             .removeMenuItem("Carregando")
             .handleMenuItemClick(
                 "Voltar",
