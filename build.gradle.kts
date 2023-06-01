@@ -20,6 +20,7 @@ repositories {
 val projectFullName = "${project.name}-LATEST.jar";
 
 dependencies {
+    compileOnly("org.jetbrains:annotations:24.0.0")
     compileOnly("org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT")
     compileOnly("com.worldplugins:WorldLib:LATEST")
     compileOnly(files("/home/post/dev/bukkit-libs/PlayerPoints-LATEST.jar"))
