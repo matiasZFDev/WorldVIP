@@ -3,9 +3,8 @@ package com.worldplugins.vip.database.market;
 import com.worldplugins.lib.database.sql.SQLExecutor;
 import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.database.player.model.VipType;
-import me.post.lib.database.cache.ExpiringRunner;
 import me.post.lib.database.cache.sync.SyncExpiringList;
-import me.post.lib.database.cache.sync.SyncExpiringListImpl;
+import me.post.lib.database.cache.sync.impl.SyncExpiringListImpl;
 import me.post.lib.util.Scheduler;
 import me.post.lib.util.UUIDs;
 import org.jetbrains.annotations.NotNull;
@@ -79,12 +78,12 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
                     }
 
                     cache.addAll(data);
-                    return cache.getAll();
+                    return cache.get();
                 }
             ), executor);
         }
 
-        return CompletableFuture.completedFuture(cache.getAll());
+        return CompletableFuture.completedFuture(cache.get());
     }
 
     @Override
