@@ -3,9 +3,7 @@ package com.worldplugins.vip.database.key;
 import com.worldplugins.lib.database.sql.SQLExecutor;
 import com.worldplugins.vip.database.player.model.VipType;
 import me.post.lib.database.cache.Cache;
-import me.post.lib.database.cache.ExpiringMap;
-import me.post.lib.database.cache.SynchronizedExpiringCache;
-import me.post.lib.database.cache.implementor.BukkitExpiringCacheImplementor;
+import me.post.lib.database.cache.SynchronizedExpiringMap;
 import me.post.lib.util.Scheduler;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,27 +28,17 @@ public class SQLValidKeyRepository implements ValidKeyRepository {
     ) {
         this.executor = executor;
         this.sqlExecutor = sqlExecutor;
-        this.globalCache = new BukkitExpiringCacheImplementor<>(
-            new SynchronizedExpiringCache<>(
-                new ExpiringMap<>(
-                    new HashMap<>(),
-                    120,
-                    120
-                )
-            ),
-            scheduler,
-            true
+        this.globalCache = new SynchronizedExpiringMap<>(
+            new HashMap<>(),
+            120,
+            120,
+            checker -> scheduler.runTimer(20L, 20L, true, checker)
         );
-        this.generatorCache = new BukkitExpiringCacheImplementor<>(
-            new SynchronizedExpiringCache<>(
-                new ExpiringMap<>(
-                    new HashMap<>(),
-                    120,
-                    120
-                )
-            ),
-            scheduler,
-            true
+        this.generatorCache = new SynchronizedExpiringMap<>(
+            new HashMap<>(),
+            120,
+            120,
+            checker -> scheduler.runTimer(20L, 20L, true, checker)
         );
         createTables();
     }

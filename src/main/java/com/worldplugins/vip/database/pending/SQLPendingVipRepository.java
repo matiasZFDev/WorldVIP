@@ -3,9 +3,7 @@ package com.worldplugins.vip.database.pending;
 import com.worldplugins.lib.database.sql.SQLExecutor;
 import com.worldplugins.vip.database.player.model.VipType;
 import me.post.lib.database.cache.Cache;
-import me.post.lib.database.cache.ExpiringMap;
-import me.post.lib.database.cache.SynchronizedExpiringCache;
-import me.post.lib.database.cache.implementor.BukkitExpiringCacheImplementor;
+import me.post.lib.database.cache.SynchronizedExpiringMap;
 import me.post.lib.util.Scheduler;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,16 +28,11 @@ public class SQLPendingVipRepository implements PendingVipRepository {
     ) {
         this.executor = executor;
         this.sqlExecutor = sqlExecutor;
-        this.cache = new BukkitExpiringCacheImplementor<>(
-            new SynchronizedExpiringCache<>(
-                new ExpiringMap<>(
-                    new HashMap<>(0),
-                    (int) TimeUnit.MINUTES.toSeconds(10),
-                    (int) TimeUnit.MINUTES.toSeconds(15)
-                )
-            ),
-            scheduler,
-            false
+        this.cache = new SynchronizedExpiringMap<>(
+            new HashMap<>(0),
+            (int) TimeUnit.MINUTES.toSeconds(10),
+            (int) TimeUnit.MINUTES.toSeconds(15),
+            checker -> scheduler.runTimer(20L, 20L, true, checker)
         );
         createTables();
     }

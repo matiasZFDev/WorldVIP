@@ -51,7 +51,7 @@ public class DatabaseInitializer {
 
         return new DatabaseAccessor(
             new SQLPlayerService(executor, sqlExecutor, playerCache),
-            new SQLPendingVipRepository(executor, sqlExecutor),
+            new SQLPendingVipRepository(executor, sqlExecutor, scheduler),
             validKeyRepository,
             vipItemsRepository,
             sellingKeyRepository,

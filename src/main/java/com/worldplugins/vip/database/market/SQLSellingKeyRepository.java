@@ -3,7 +3,9 @@ package com.worldplugins.vip.database.market;
 import com.worldplugins.lib.database.sql.SQLExecutor;
 import com.worldplugins.vip.GlobalValues;
 import com.worldplugins.vip.database.player.model.VipType;
-import com.worldplugins.vip.util.ExpiringList;
+import me.post.lib.database.cache.ExpiringRunner;
+import me.post.lib.database.cache.sync.SyncExpiringList;
+import me.post.lib.database.cache.sync.SyncExpiringListImpl;
 import me.post.lib.util.Scheduler;
 import me.post.lib.util.UUIDs;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +19,7 @@ import java.util.concurrent.Executor;
 public class SQLSellingKeyRepository implements SellingKeyRepository {
     private final @NotNull Executor executor;
     private final @NotNull SQLExecutor sqlExecutor;
-    private final @NotNull ExpiringList<SellingKey> cache;
+    private final @NotNull SyncExpiringList<SellingKey> cache;
 
     private static final @NotNull String MARKET_TABLE = "worldvip_loja";
 
@@ -28,7 +30,12 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
     ) {
         this.executor = executor;
         this.sqlExecutor = sqlExecutor;
-        this.cache = new ExpiringList<>(scheduler, 60 * 10, 60 * 5, true);
+        this.cache = new SyncExpiringListImpl<>(
+            new ArrayList<>(0),
+            60 * 10,
+            60 * 5,
+            checker -> scheduler.runTimer(20L, 20L, true, checker)
+        );
         createTable();
     }
 
@@ -50,8 +57,9 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
 
     @Override
     public @NotNull CompletableFuture<List<SellingKey>> getAllKeys() {
-        return cache.expired()
-            ? CompletableFuture.supplyAsync(() -> sqlExecutor.executeQuery(
+        if (cache.expired()) {
+            cache.refresh();
+            return CompletableFuture.supplyAsync(() -> sqlExecutor.executeQuery(
                 "SELECT * FROM " + MARKET_TABLE,
                 statement -> {},
                 result -> {
@@ -70,12 +78,13 @@ public class SQLSellingKeyRepository implements SellingKeyRepository {
                         ));
                     }
 
-                    cache.clear();
                     cache.addAll(data);
                     return cache.getAll();
                 }
-            ), executor)
-            : CompletableFuture.completedFuture(cache.getAll());
+            ), executor);
+        }
+
+        return CompletableFuture.completedFuture(cache.getAll());
     }
 
     @Override

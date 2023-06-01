@@ -2,8 +2,7 @@ package com.worldplugins.vip.database.items;
 
 import com.worldplugins.lib.database.sql.SQLExecutor;
 import me.post.lib.database.cache.Cache;
-import me.post.lib.database.cache.SynchronizedExpiringCache;
-import me.post.lib.database.cache.implementor.BukkitExpiringCacheImplementor;
+import me.post.lib.database.cache.SynchronizedExpiringMap;
 import me.post.lib.util.Scheduler;
 import me.post.lib.util.UUIDs;
 import org.jetbrains.annotations.NotNull;
@@ -29,16 +28,11 @@ public class SQLVipItemsRepository implements VipItemsRepository {
     ) {
         this.executor = executor;
         this.sqlExecutor = sqlExecutor;
-        this.cache = new BukkitExpiringCacheImplementor<>(
-            new SynchronizedExpiringCache<>(
-                new me.post.lib.database.cache.ExpiringMap<>(
-                    new HashMap<>(),
-                    120,
-                    120
-                )
-            ),
-            scheduler,
-            true
+        this.cache = new SynchronizedExpiringMap<>(
+            new HashMap<>(),
+            120,
+            120,
+            checker -> scheduler.runTimer(20L, 20L, true, checker)
         );
         createTable();
     }
