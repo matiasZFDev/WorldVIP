@@ -21,7 +21,7 @@ val projectFullName = "${project.name}-LATEST.jar";
 
 dependencies {
     compileOnly("org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT")
-    compileOnly(files("/home/post/dev/bukkit-libs/WorldLib-LATEST.jar"))
+    compileOnly("com.worldplugins:WorldLib:LATEST")
     compileOnly(files("/home/post/dev/bukkit-libs/PlayerPoints-LATEST.jar"))
     compileOnly(files("/home/post/dev/bukkit-libs/yPoints-LATEST.jar"))
     compileOnly("net.luckperms:api:5.4")
