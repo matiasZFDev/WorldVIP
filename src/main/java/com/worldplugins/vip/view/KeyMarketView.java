@@ -111,7 +111,7 @@ public class KeyMarketView implements View {
 
         PageConfigContextBuilder.of(
                 menuModel,
-                page -> open(player, new Context(page, context.order)),
+                page -> Views.get().open(player, KeyMarketView.class, new Context(page, context.order)),
                 context.page
             )
             .editTitle((pageInfo, title) ->
@@ -143,16 +143,18 @@ public class KeyMarketView implements View {
                     context.order.configItemId(),
                     click -> {
                         if (click.clickType().isLeftClick()) {
-                            open(
+                            Views.get().open(
                                 player.getPlayer(),
+                                KeyMarketView.class,
                                 new Context(context.page, context.order.next())
                             );
                             return;
                         }
 
                         if (click.clickType().isRightClick()) {
-                            open(
+                            Views.get().open(
                                 player.getPlayer(),
+                                KeyMarketView.class,
                                 new Context(context.page, context.order.alternate())
                             );
                         }
