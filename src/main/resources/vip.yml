@@ -9,6 +9,7 @@ vip1:
     Permanente: 75
   Iten:
     Material: COAL
+  Comandos-ativacao: []
 vip2:
   Id: 1
   Nome: 'vip2'
@@ -20,6 +21,7 @@ vip2:
     Permanente: 100
   Iten:
     Material: IRON_INGOT
+  Comandos-ativacao: []
 vip3:
   Id: 2
   Nome: 'vip3'
@@ -31,6 +33,7 @@ vip3:
     Permanente: 187.5
   Iten:
     Material: GOLD_INGOT
+  Comandos-ativacao: []
 vip4:
   Id: 3
   Nome: 'vip4'
@@ -42,6 +45,7 @@ vip4:
     Permanente: 300
   Iten:
     Material: DIAMOND
+  Comandos-ativacao: []
 vip5:
   Id: 4
   Nome: 'vip5'
@@ -53,3 +57,4 @@ vip5:
     Permanente: 530
   Iten:
     Material: EMERALD
+  Comandos-ativacao: []
