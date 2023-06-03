@@ -41,6 +41,10 @@ public class VipPlayerholder extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player player, String params) {
+        if (!params.equals("vip")) {
+            return null;
+        }
+
         final VipPlayer vipPlayer = playerService.getById(player.getUniqueId());
 
         if (vipPlayer == null || vipPlayer.activeVip() == null) {
