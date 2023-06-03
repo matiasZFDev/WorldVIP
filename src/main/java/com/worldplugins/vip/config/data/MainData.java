@@ -85,6 +85,7 @@ public class MainData {
     private final int switchVipDelay;
     private final boolean simultaneousReduction;
     private final int maxSellingKeysPerPlayer;
+    private final @NotNull String noPrimaryVipReplacement;
 
     public MainData(
         @NotNull KeyGenOptions keyGen,
@@ -93,7 +94,8 @@ public class MainData {
         boolean storeItems,
         int switchVipDelay,
         boolean simultaneousReduction,
-        int maxSellingKeysPerPlayer
+        int maxSellingKeysPerPlayer,
+        @NotNull String noPrimaryVipReplacement
     ) {
         this.keyGen = keyGen;
         this.keyListing = keyListing;
@@ -102,6 +104,7 @@ public class MainData {
         this.switchVipDelay = switchVipDelay;
         this.simultaneousReduction = simultaneousReduction;
         this.maxSellingKeysPerPlayer = maxSellingKeysPerPlayer;
+        this.noPrimaryVipReplacement = noPrimaryVipReplacement;
     }
 
     public @NotNull KeyGenOptions keyGen() {
@@ -130,5 +133,9 @@ public class MainData {
 
     public int maxSellingKeysPerPlayer() {
         return maxSellingKeysPerPlayer;
+    }
+
+    public @NotNull String noPrimaryVipReplacement() {
+        return noPrimaryVipReplacement;
     }
 }

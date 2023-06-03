@@ -36,7 +36,8 @@ public class MainConfig implements ConfigModel<MainData> {
             config.getBoolean("Coleta-de-itens"),
             config.getInt("Delay-trocar-vip"),
             config.getBoolean("Reducao-simultanea"),
-            config.getInt("Limite-de-keys-na-venda-por-jogador")
+            config.getInt("Limite-de-keys-na-venda-por-jogador"),
+            color(config.getString("Placeholder-sem-vip"))
         );
     }
 

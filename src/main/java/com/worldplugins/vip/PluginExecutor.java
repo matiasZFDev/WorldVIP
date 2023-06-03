@@ -25,6 +25,7 @@ import com.worldplugins.vip.key.ConfigKeyGenerator;
 import com.worldplugins.vip.key.KeyGeneratorMatcher;
 import com.worldplugins.vip.key.VipKeyGenerator;
 import com.worldplugins.vip.listener.ActivePendingVipsListener;
+import com.worldplugins.vip.listener.PlayerVipTagChatListener;
 import com.worldplugins.vip.manager.PermissionManager;
 import com.worldplugins.vip.manager.PointsManager;
 import com.worldplugins.vip.manager.VipTopManager;
@@ -136,6 +137,7 @@ public class PluginExecutor {
         registerCommands();
         registerListeners();
         registerViews();
+        registerPlaceholders();
         scheduleTasks();
 
         updatables.update();
@@ -221,11 +223,14 @@ public class PluginExecutor {
 
     private void registerListeners() {
         Arrays
-            .asList(new ActivePendingVipsListener(
-                databaseAccessor.pendingVipRepository(),
-                scheduler,
-                vipHandler
-            ))
+            .asList(
+                new ActivePendingVipsListener(
+                    databaseAccessor.pendingVipRepository(),
+                    scheduler,
+                    vipHandler
+                ),
+                new PlayerVipTagChatListener(databaseAccessor.playerService(), vipConfig)
+            )
             .forEach(listener -> plugin.getServer().getPluginManager().registerEvents(listener, plugin));
     }
 
@@ -309,6 +314,10 @@ public class PluginExecutor {
                 vipConfig
             )
         );
+    }
+
+    private void registerPlaceholders() {
+        new VipPlayerholder(databaseAccessor.playerService(), mainConfig, vipConfig).register();
     }
 
     private void scheduleTasks() {

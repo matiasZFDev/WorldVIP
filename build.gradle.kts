@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "org.example"
-version = "1.0.0-SNAPSHOT"
+version = "1.1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -15,6 +15,7 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven("https://oss.sonatype.org/content/repositories/central")
     maven("https://repo.codemc.io/repository/maven-public/")
+    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
 }
 
 val projectFullName = "${project.name}-LATEST.jar";
@@ -26,7 +27,9 @@ dependencies {
     compileOnly(files("/home/post/dev/bukkit-libs/PlayerPoints-LATEST.jar"))
     compileOnly(files("/home/post/dev/bukkit-libs/yPoints-LATEST.jar"))
     compileOnly("net.luckperms:api:5.4")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2");
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.2")
+    compileOnly(files("/home/post/dev/bukkit-libs/LegendChat.jar"))
+    compileOnly("me.clip:placeholderapi:2.10.4")
 }
 
 tasks.getByName<Test>("test") {

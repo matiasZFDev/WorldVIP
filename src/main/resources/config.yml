@@ -65,3 +65,6 @@ Reducao-simultanea: false
 # O limite de keys que podem estar na venda de forma
 # simultânea por um jogador.
 Limite-de-keys-na-venda-por-jogador: 50
+
+# Valor de placeholder VIP quando o jogador não possui nenhum vip ativo.
+Placeholder-sem-vip: '&cNenhum'
