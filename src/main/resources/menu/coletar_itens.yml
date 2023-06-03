@@ -1,7 +1,9 @@
 Nome: 'Coletar itens VIP'
 Linhas: 4
 Data:
+  # Slots dos itens a serem coletados.
   Slots: [11,12,13,14,15]
+  # Display setado pro iten do vip.
   Display-itens:
     Nome: '@vip'
     Lore:

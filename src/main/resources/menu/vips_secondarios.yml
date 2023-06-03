@@ -1,7 +1,9 @@
 Nome: 'Seus VIPs secondarios (@atual/@totais)'
 Linhas: 4
 Data:
+  # Slots dos vips (inclui paginação.
   Slots: [10,11,12,13,14,15,16,19,20,21,22,23,24,25]
+  # Display setado ao iten do vip.
   Display-vip:
     Nome: '@vip'
     Lore:

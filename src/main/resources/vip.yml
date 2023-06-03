@@ -1,3 +1,13 @@
+# Definição de vips.
+# Estrutura:
+#   Id: <id_numerico_unico> - Id de uso interno.
+#   Nome: <nome_id> - Identificação do vip dentro das configurações.
+#   Display: <display_vip> - Valor mostrado em tags, placeholders e mais.
+#   Precos: <mapping_de_precos> - Lista de preços (gasto) segundo os dias ou de forma permanente.
+#   OBS: Os dias são *exatos*, um segundo mais ou um segundo menos não ira contabilizar o gasto.
+#   Iten: <iten_menus> - Iten (material e data) mostrado nos menus.
+#   Comandos-ativacao: <lista-comandos> - Lista de comandos de ativação relacionados ao jogador. Placeholder: @jogador.
+
 vip1:
   Id: 0
   Nome: 'vip1'

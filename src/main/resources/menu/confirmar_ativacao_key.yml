@@ -3,7 +3,8 @@ Linhas: 5
 Conteudo:
   Key:
     Slot: 13
-    Id: 1 # Iten do vip
+    # Iten (material + data) do vip. Deixar como está.
+    Id: 1
     Nome: '&fKey VIP'
     Lore:
       - '&fVIP: @vip'

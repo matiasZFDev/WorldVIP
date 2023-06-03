@@ -1,7 +1,9 @@
 Nome: 'Top VIP'
 Linhas: 4
 Data:
+  # Slots dos jogadores no top.
   Slots: [10,11,12,13,14,15,16,21,22,23]
+  # Nome e lore setados á caveça do jogador.
   Display-top:
     Nome: '&f#@posicao &6@jogador'
     Lore:

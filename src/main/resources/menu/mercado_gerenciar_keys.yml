@@ -1,7 +1,9 @@
 Nome: 'Suas keys á venda (@atual/@totais)'
 Linhas: 6
 Data:
+  # Slots das keys (inclui paginação)
   Slots: [10,11,12,13,14,15,16, 19,20,21,22,23,24,25, 28,29,30,31,32,33,34]
+  # Diplsy setado ao iten do vip da key.
   Display-key:
     Nome: '&fKey @vip'
     Lore:

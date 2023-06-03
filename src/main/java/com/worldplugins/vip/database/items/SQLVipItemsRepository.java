@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 public class SQLVipItemsRepository implements VipItemsRepository {
     private final @NotNull Executor executor;
@@ -78,18 +79,66 @@ public class SQLVipItemsRepository implements VipItemsRepository {
 
     @Override
     public void addItems(@NotNull VipItems items) {
-        if (!cache.containsKey(items.playerId())) {
-            cache.set(items.playerId(), new ArrayList<>(1));
+        final Collection<VipItems> cachedItems = cache.get(items.playerId());
+
+        if (cachedItems == null) {
+            getItems(items.playerId()).thenAccept(playerItems -> {
+                final VipItems matchingItems = playerItems.stream()
+                    .filter(it -> it.vipId() == items.vipId())
+                    .findFirst()
+                    .orElse(null);
+
+                if (matchingItems == null) {
+                    insertItems(items);
+                    return;
+                }
+
+                final Collection<VipItems> addedItems = playerItems.stream()
+                    .map(it ->
+                        it.vipId() != items.vipId()
+                            ? it
+                            : new VipItems(it.playerId(), it.vipId(), (short) (it.amount() + items.amount()))
+                    )
+                    .collect(Collectors.toList());
+                cache.set(items.playerId(), addedItems);
+                updateItems(items);
+            });
+            return;
         }
 
-        cache.get(items.playerId()).add(items);
+        final VipItems matchingItems = cachedItems.stream()
+            .filter(it -> it.vipId() == items.vipId())
+            .findFirst()
+            .orElse(null);
 
+        if (matchingItems == null) {
+            cache.get(items.playerId()).add(items);
+            insertItems(items);
+            return;
+        }
+
+        matchingItems.setAmount((short) (matchingItems.amount() + items.amount()));
+        updateItems(items);
+    }
+
+    private void insertItems(@NotNull VipItems items) {
         CompletableFuture.runAsync(() -> sqlExecutor.update(
-            "INSERT INTO " + ITEMS_TABLE + "(player_id, vip_id, amount) VALUES(?,?,?)",
+            "INSERT INTO " + ITEMS_TABLE + "(player_id, vip_id, amount) VALUES(?, ?, ?)",
             statement -> {
                 statement.set(1, UUIDs.getBytes(items.playerId()));
                 statement.set(2, items.vipId());
                 statement.set(3, items.amount());
+            }
+        ), executor);
+    }
+
+    private void updateItems(@NotNull VipItems items) {
+        CompletableFuture.runAsync(() -> sqlExecutor.update(
+            "UPDATE " + ITEMS_TABLE + " SET amount = ? WHERE player_id = ? AND vip_id = ?",
+            statement -> {
+                statement.set(1, items.amount());
+                statement.set(2, UUIDs.getBytes(items.playerId()));
+                statement.set(3, items.vipId());
             }
         ), executor);
     }

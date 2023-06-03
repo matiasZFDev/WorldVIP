@@ -30,7 +30,7 @@ public class VipConfig implements ConfigModel<VipData> {
                 section.getConfigurationSection("Precos").getKeys(false).stream()
                     .map(key ->
                         new VipData.VIP.Pricing.PricePair(
-                            key.equals("Permanente")
+                            key.equalsIgnoreCase("Permanente")
                                 ? -1
                                 : Integer.parseInt(key.split("-")[0]),
                             section.getDouble("Precos." + key)
